@@ -1,23 +1,23 @@
 import { Stack, ThemeProvider } from "expo-router";
 import { StyleSheet } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import {
+  SafeAreaProvider,
+  useSafeAreaInsets,
+} from "react-native-safe-area-context";
 
 import { ThemedView } from "@/components/themed-view";
 import { SplashScreenController } from "@/components/ui/splash-screen-controller";
-import {
-  BottomTabInset,
-  MaxContentWidth,
-  NavigationTheme,
-  Spacing,
-} from "@/constants/theme";
+import { MaxContentWidth, NavigationTheme, Spacing } from "@/constants/theme";
 import { SessionProvider, useSession } from "@/context/auth/auth-context";
 
 export default function RootLayout() {
   return (
     <SessionProvider>
       <ThemeProvider value={NavigationTheme}>
-        <SplashScreenController />
-        <RootNavigator />
+        <SafeAreaProvider>
+          <SplashScreenController />
+          <RootNavigator />
+        </SafeAreaProvider>
       </ThemeProvider>
     </SessionProvider>
   );
@@ -25,19 +25,30 @@ export default function RootLayout() {
 
 function RootNavigator() {
   const { session } = useSession();
-  return (
-    <ThemedView style={styles.container}>
-      <SafeAreaView style={styles.safeArea}>
-        <Stack>
-          <Stack.Protected guard={!!session}>
-            <Stack.Screen name="(app)" />
-          </Stack.Protected>
+  const insets = useSafeAreaInsets();
 
-          <Stack.Protected guard={!session}>
-            <Stack.Screen name="sign-in" />
-          </Stack.Protected>
-        </Stack>
-      </SafeAreaView>
+  return (
+    <ThemedView
+      style={{
+        ...styles.container,
+        paddingBottom: insets.bottom,
+        paddingTop: insets.top,
+      }}
+    >
+      <Stack
+        screenOptions={{
+          headerShown: false,
+        }}
+      >
+        <Stack.Protected guard={!!session}>
+          <Stack.Screen name="(app)" />
+        </Stack.Protected>
+
+        <Stack.Protected guard={!session}>
+          <Stack.Screen name="index" />
+          <Stack.Screen name="(login)" />
+        </Stack.Protected>
+      </Stack>
     </ThemedView>
   );
 }
@@ -47,13 +58,8 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     flexDirection: "row",
-  },
-  safeArea: {
-    flex: 1,
     paddingHorizontal: Spacing["space-lg"],
-    alignItems: "center",
     gap: Spacing.gutter,
-    paddingBottom: BottomTabInset + Spacing.gutter,
     maxWidth: MaxContentWidth,
   },
 });
