@@ -1,69 +1,46 @@
 import * as SecureStore from "expo-secure-store";
-import { useCallback, useEffect, useReducer } from "react";
-import { Platform } from "react-native";
+import { useCallback, useEffect, useState } from "react";
 
-type UseStateHook<T> = [[boolean, T | null], (value: T | null) => void];
+type StorageValue<T> = T | null;
+type StorageState<T> = [boolean, StorageValue<T>];
+type UseStateHook<T> = [StorageState<T>, (value: StorageValue<T>) => void];
 
 function useAsyncState<T>(
-  initialValue: [boolean, T | null] = [true, null],
+  initialValue: StorageState<T> = [true, null],
 ): UseStateHook<T> {
-  return useReducer(
-    (
-      state: [boolean, T | null],
-      action: T | null = null,
-    ): [boolean, T | null] => [false, action],
-    initialValue,
-  ) as UseStateHook<T>;
+  const [state, setState] = useState<StorageState<T>>(initialValue);
+  const setValue = useCallback((value: StorageValue<T>) => {
+    setState([false, value]);
+  }, []);
+  return [state, setValue];
 }
 
-export async function setStorageItemAsync(key: string, value: string | null) {
-  if (Platform.OS === "web") {
-    try {
-      if (value === null) {
-        localStorage.removeItem(key);
-      } else {
-        localStorage.setItem(key, value);
-      }
-    } catch (e) {
-      console.error("Local storage is unavailable:", e);
-    }
+export async function setStorageItemAsync(
+  key: string,
+  value: StorageValue<string>,
+) {
+  if (value == null) {
+    await SecureStore.deleteItemAsync(key);
   } else {
-    if (value == null) {
-      await SecureStore.deleteItemAsync(key);
-    } else {
-      await SecureStore.setItemAsync(key, value);
-    }
+    await SecureStore.setItemAsync(key, value);
   }
 }
 
 export function useStorageState(key: string): UseStateHook<string> {
-  // Public
   const [state, setState] = useAsyncState<string>();
 
-  // Get
   useEffect(() => {
-    if (Platform.OS === "web") {
-      try {
-        if (typeof localStorage !== "undefined") {
-          setState(localStorage.getItem(key));
-        }
-      } catch (e) {
-        console.error("Local storage is unavailable:", e);
-      }
-    } else {
-      SecureStore.getItemAsync(key).then((value: string | null) => {
-        setState(value);
-      });
-    }
-  }, [key]);
-
-  // Set
-  const setValue = useCallback(
-    (value: string | null) => {
+    void SecureStore.getItemAsync(key).then((value: StorageValue<string>) => {
       setState(value);
-      setStorageItemAsync(key, value);
+    });
+  }, [key, setState]);
+
+  const setValue = useCallback(
+    (value: StorageValue<string>) => {
+      setState(value);
+      void setStorageItemAsync(key, value);
     },
-    [key],
+    [key, setState],
   );
 
   return [state, setValue];

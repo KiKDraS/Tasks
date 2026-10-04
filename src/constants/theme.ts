@@ -131,12 +131,6 @@ export const Spacing = {
   "space-xl": 32,
 } as const;
 
-export const MaxContentWidth = 800;
-
-/**
- * React Navigation theme derived from the app's design tokens, so navigator
- * chrome (headers, backgrounds, tab bars) matches the rest of the UI.
- */
 export const NavigationTheme: Theme = {
   dark: false,
   colors: {

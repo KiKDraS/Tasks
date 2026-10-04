@@ -1,20 +1,22 @@
-import { View, type ViewProps } from "react-native";
+import { StyleSheet, View, type ViewProps } from "react-native";
 
-import { useTheme } from "@/hooks/use-theme";
+import { Colors } from "@/constants/theme";
 
 export function ThemedView({
   style,
   children,
   ...otherProps
 }: Readonly<ViewProps>) {
-  const { Colors } = useTheme();
-
   return (
-    <View
-      style={[{ backgroundColor: Colors.background }, style]}
-      {...otherProps}
-    >
+    <View style={[styles.container, style]} {...otherProps}>
       {children}
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: Colors.background,
+  },
+});
