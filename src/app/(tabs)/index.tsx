@@ -1,15 +1,15 @@
-import ClockIcon from "@/components/icons/ClockIcon";
-import HomeIcon from "@/components/icons/HomeIcon";
-import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
-import { Colors } from "@/constants/theme";
+import { HomeButton } from "@/components/ui/home/home-button";
+import { router } from "expo-router";
 
 export default function HomeScreen() {
+  const navigateToCreateTask = () => {
+    router.push("/(tabs)/create-task");
+  };
+
   return (
     <ThemedView>
-      <ThemedText>Welcome to the app!</ThemedText>
-      <HomeIcon color={Colors.error} />
-      <ClockIcon color={Colors.secondary} />
+      <HomeButton onPress={navigateToCreateTask} />
     </ThemedView>
   );
 }
