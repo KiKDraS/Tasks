@@ -1,4 +1,4 @@
-import { Colors } from "@/constants/theme";
+import { Colors, setShadow } from "@/constants/theme";
 import { useTheme } from "@/hooks/use-theme";
 import { Image } from "expo-image";
 import { BottomTabHeaderProps } from "expo-router/build/react-navigation/bottom-tabs/types";
@@ -42,6 +42,7 @@ export const Header = (props: BottomTabHeaderProps) => {
 const styles = StyleSheet.create({
   container: {
     width: "100%",
+    ...setShadow("on-primary-container"),
   },
   content: {
     height: 56,

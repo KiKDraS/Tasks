@@ -1,5 +1,5 @@
 import AddIcon from "@/components/icons/AddIcon";
-import { Colors } from "@/constants/theme";
+import { Colors, setShadow } from "@/constants/theme";
 import { Pressable, StyleSheet } from "react-native";
 
 interface HomeButtonProps {
@@ -25,9 +25,6 @@ const styles = StyleSheet.create({
     right: 24,
     zIndex: 1000,
     elevation: 5,
-    shadowColor: Colors["primary-container"],
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
+    ...setShadow("primary-container"),
   },
 });

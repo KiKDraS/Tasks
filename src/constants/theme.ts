@@ -148,3 +148,12 @@ export const NavigationTheme: Theme = {
     heavy: { fontFamily: Fonts.bold, fontWeight: "800" },
   },
 };
+
+export const setShadow = (color: keyof typeof Colors) => {
+  return {
+    shadowColor: Colors[color],
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+  };
+};
