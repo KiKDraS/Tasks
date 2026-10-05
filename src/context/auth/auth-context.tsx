@@ -12,8 +12,8 @@ import { useDB } from "../../hooks/use-db";
 import { USERS_DB } from "./data/users-seed";
 
 type AuthContextValue = {
-  registerUser: (session: Session) => Promise<void>;
-  logIn: (session: Session) => Promise<boolean>;
+  registerUser: (session: Session) => Promise<boolean>;
+  signIn: (session: Session) => Promise<boolean>;
   signOut: () => void;
   session?: Session | null;
   isLoading: boolean;
@@ -35,17 +35,25 @@ export function SessionProvider({ children }: Readonly<PropsWithChildren>) {
 
   const registerUser = useCallback(
     async (session: Session) => {
+      const isUserTaken = await itemExists(
+        (item) => item.user === session.user,
+      );
+      if (isUserTaken) {
+        return false;
+      }
+
       await createUser(session);
       setSession(JSON.stringify(session));
+      return true;
     },
-    [createUser, setSession],
+    [createUser, itemExists, setSession],
   );
 
   const signOut = useCallback(() => {
     setSession(null);
   }, [setSession]);
 
-  const logIn = useCallback(
+  const signIn = useCallback(
     async (session: Session) => {
       const isValidSession = await itemExists((item) =>
         hasValidCredentials(item, session),
@@ -65,11 +73,11 @@ export function SessionProvider({ children }: Readonly<PropsWithChildren>) {
     () => ({
       registerUser,
       signOut,
-      logIn,
+      signIn,
       session: session ? JSON.parse(session) : null,
       isLoading,
     }),
-    [registerUser, signOut, logIn, session, isLoading],
+    [registerUser, signOut, signIn, session, isLoading],
   );
 
   return <AuthContext.Provider value={data}>{children}</AuthContext.Provider>;

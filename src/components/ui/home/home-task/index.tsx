@@ -1,5 +1,5 @@
 import { Task } from "@/context/tasks/types/Task";
-import { useTaskItem } from "@/hooks/tasks/use-task-item";
+import { useTaskActions } from "@/hooks/tasks/use-task-actions";
 import { TaskBody } from "./task-body";
 import { TaskCard } from "./task-card";
 import { TaskHeader } from "./task-header";
@@ -10,8 +10,8 @@ interface HomeTaskProps {
 }
 
 export function HomeTask({ task, now }: Readonly<HomeTaskProps>) {
-  const { isComplete, toggleCompletion, handleDelete, openEdit } =
-    useTaskItem(task);
+  const { toggleCompletion, handleDelete, openEdit } = useTaskActions(task);
+  const isComplete = !!task.isComplete;
 
   return (
     <TaskCard isComplete={isComplete}>
@@ -22,12 +22,7 @@ export function HomeTask({ task, now }: Readonly<HomeTaskProps>) {
         onDelete={handleDelete}
         onEdit={openEdit}
       />
-      <TaskBody
-        description={task.description}
-        isComplete={isComplete}
-        notification={task.notification}
-        now={now}
-      />
+      <TaskBody task={task} isComplete={isComplete} now={now} />
     </TaskCard>
   );
 }

@@ -1,34 +1,29 @@
 import ReminderNotificationIcon from "@/components/icons/ReminderNotificationIcon";
 import { ThemedText } from "@/components/themed-text";
 import { Colors, Spacing } from "@/constants/theme";
-import { TaskNotification } from "@/context/tasks/types/Task";
+import { Task } from "@/context/tasks/types/Task";
 import { getNotificationBadgeLabel } from "@/context/tasks/utils/notification-badge";
 import { StyleSheet, View } from "react-native";
 import { HomeBadge } from "../home-badge";
+import { taskTextStyles } from "./task-text-styles";
 
 interface TaskBodyProps {
-  description: string;
+  task: Task;
   isComplete: boolean;
-  notification: TaskNotification | null;
   now: Date;
 }
 
-export function TaskBody({
-  description,
-  isComplete,
-  notification,
-  now,
-}: Readonly<TaskBodyProps>) {
-  const notificationLabel = getNotificationBadgeLabel(notification, now);
+export function TaskBody({ task, isComplete, now }: Readonly<TaskBodyProps>) {
+  const notificationLabel = getNotificationBadgeLabel(task.notification, now);
   const hasNotificationBadge = !isComplete && !!notificationLabel;
 
   return (
     <View style={styles.body}>
       <ThemedText
         type="body-md"
-        style={isComplete ? styles.completeText : null}
+        style={isComplete ? taskTextStyles.completeText : null}
       >
-        {description}
+        {task.description}
       </ThemedText>
       {hasNotificationBadge && (
         <HomeBadge>
@@ -43,9 +38,5 @@ export function TaskBody({
 const styles = StyleSheet.create({
   body: {
     gap: Spacing["space-md"],
-  },
-  completeText: {
-    color: Colors["on-surface-variant"],
-    textDecorationLine: "line-through",
   },
 });

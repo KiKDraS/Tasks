@@ -1,12 +1,9 @@
-import DeleteIcon from "@/components/icons/DeleteIcon";
-import EditIcon from "@/components/icons/EditIcon";
 import { ThemedText } from "@/components/themed-text";
-import { PressableOpacity } from "@/components/ui/pressable-opacity";
-import { Colors, Spacing } from "@/constants/theme";
+import { Spacing } from "@/constants/theme";
 import { StyleSheet, View } from "react-native";
+import { TaskActions } from "./task-actions";
 import { TaskCheckbox } from "./task-checkbox";
-
-const ACTION_ICON_SIZE = 22;
+import { taskTextStyles } from "./task-text-styles";
 
 interface TaskHeaderProps {
   title: string;
@@ -28,18 +25,11 @@ export function TaskHeader({
       <TaskCheckbox isComplete={isComplete} onToggle={onToggle} />
       <ThemedText
         type="headline-md"
-        style={[styles.title, isComplete && styles.completeText]}
+        style={[styles.title, isComplete && taskTextStyles.completeText]}
       >
         {title}
       </ThemedText>
-      <View style={styles.actions}>
-        <PressableOpacity onPress={onEdit}>
-          <EditIcon size={ACTION_ICON_SIZE} color={Colors["on-surface-variant"]} />
-        </PressableOpacity>
-        <PressableOpacity onPress={onDelete}>
-          <DeleteIcon size={ACTION_ICON_SIZE} color={Colors.error} />
-        </PressableOpacity>
-      </View>
+      <TaskActions onEdit={onEdit} onDelete={onDelete} />
     </View>
   );
 }
@@ -53,14 +43,5 @@ const styles = StyleSheet.create({
   },
   title: {
     flex: 1,
-  },
-  actions: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: Spacing["space-md"],
-  },
-  completeText: {
-    color: Colors["on-surface-variant"],
-    textDecorationLine: "line-through",
   },
 });

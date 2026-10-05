@@ -4,13 +4,12 @@ import { Task } from "@/context/tasks/types/Task";
 import { router } from "expo-router";
 import { useCallback } from "react";
 
-export function useTaskItem(task: Task) {
+export function useTaskActions(task: Task) {
   const { updateTask, removeTask } = useTasks();
-  const isComplete = !!task.isComplete;
 
   const toggleCompletion = useCallback(() => {
-    updateTask({ ...task, isComplete: !isComplete });
-  }, [isComplete, task, updateTask]);
+    updateTask({ ...task, isComplete: !task.isComplete });
+  }, [task, updateTask]);
 
   const handleDelete = useCallback(() => {
     if (task.id) {
@@ -25,5 +24,5 @@ export function useTaskItem(task: Task) {
     router.push({ pathname: ROUTES.taskForm, params: { id: task.id } });
   }, [task.id]);
 
-  return { isComplete, toggleCompletion, handleDelete, openEdit };
+  return { toggleCompletion, handleDelete, openEdit };
 }

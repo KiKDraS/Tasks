@@ -16,19 +16,16 @@ interface TaskFormContentProps {
 export function TaskFormContent({ task }: Readonly<TaskFormContentProps>) {
   const { state, dispatch, handleSubmit, reminderLabel, isEditing } =
     useTaskForm(task);
-  const showReminderError =
-    state.reminderEnabled && !!state.reminderError;
+
+  const showReminderError = state.reminderEnabled && !!state.reminderError;
   const isSubmitDisabled = showReminderError || !!state.titleError;
 
-  const handleTitleChange = (title: string) => {
-    dispatch({ type: TASK_FORM_ACTION_TYPES.SET_TITLE, payload: title });
-  };
-
-  const handleDescriptionChange = (description: string) => {
-    dispatch({
-      type: TASK_FORM_ACTION_TYPES.SET_DESCRIPTION,
-      payload: description,
-    });
+  const setField = (field: "title" | "description", value: string) => {
+    dispatch(
+      field === "title"
+        ? { type: TASK_FORM_ACTION_TYPES.SET_TITLE, payload: value }
+        : { type: TASK_FORM_ACTION_TYPES.SET_DESCRIPTION, payload: value },
+    );
   };
 
   const handleReminderToggle = () => {
@@ -48,14 +45,14 @@ export function TaskFormContent({ task }: Readonly<TaskFormContentProps>) {
       <TextField
         label="Título"
         value={state.title}
-        onChangeText={handleTitleChange}
+        onChangeText={(value) => setField("title", value)}
         placeholder="Ej: Comprar leche"
         error={state.titleError}
       />
       <TextField
         label="Descripción"
         value={state.description}
-        onChangeText={handleDescriptionChange}
+        onChangeText={(value) => setField("description", value)}
         placeholder="Detalles de la tarea"
         multiline
       />

@@ -1,24 +1,27 @@
-import { ThemedText } from "@/components/themed-text";
-import { ThemedView } from "@/components/themed-view";
+import { AuthRedirect } from "@/components/ui/auth/auth-redirect";
+import { AuthScreen } from "@/components/ui/auth/auth-screen";
+import { SignInForm } from "@/components/ui/sign-in/sign-in-form";
 import { ROUTES } from "@/constants/routes";
 import { router } from "expo-router";
-import { useEffect } from "react";
 
 export default function SignInScreen() {
-  useEffect(() => {
-    router.replace(ROUTES.tabs);
-  }, []);
+  const navigateToSignUp = () => {
+    router.push(ROUTES.signUp);
+  };
 
   return (
-    <ThemedView>
-      <ThemedText
-        type="headline-md"
-        onPress={() => {
-          router.replace(ROUTES.login);
-        }}
-      >
-        Ya tienes una cuenta? Inicia sesión
-      </ThemedText>
-    </ThemedView>
+    <AuthScreen
+      title="Tasks"
+      subtitle="Ingresar a tu lista de tareas"
+      footer={
+        <AuthRedirect
+          question="¿No tenés cuenta?"
+          linkLabel="Registrate"
+          onPress={navigateToSignUp}
+        />
+      }
+    >
+      <SignInForm />
+    </AuthScreen>
   );
 }

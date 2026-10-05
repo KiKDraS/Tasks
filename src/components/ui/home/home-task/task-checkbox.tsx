@@ -1,6 +1,6 @@
+import { AppIcon } from "@/components/icons/AppIcon";
 import { PressableOpacity } from "@/components/ui/pressable-opacity";
 import { Colors, Rounded } from "@/constants/theme";
-import { Image } from "expo-image";
 import { StyleSheet, View } from "react-native";
 
 const CHECKBOX_SIZE = 24;
@@ -17,11 +17,7 @@ export function TaskCheckbox({
   return (
     <PressableOpacity onPress={onToggle}>
       {isComplete ? (
-        <Image
-          source={require("@/assets/images/icon.png")}
-          style={styles.completeCheckTask}
-          contentFit="contain"
-        />
+        <AppIcon style={styles.completeCheckTask} />
       ) : (
         <View style={styles.incompleteCheckTask} />
       )}

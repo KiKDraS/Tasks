@@ -30,7 +30,7 @@ export default function TabLayout() {
   };
 
   const screenOptions: TabScreenOptions = {
-    header: (props) => <Header {...props} />,
+    header: () => <Header />,
     tabBarShowLabel: false,
     tabBarActiveTintColor: Colors["secondary"],
     tabBarStyle,

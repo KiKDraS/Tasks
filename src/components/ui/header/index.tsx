@@ -1,18 +1,15 @@
-import { Colors, Rounded, setShadow, Spacing } from "@/constants/theme";
+import { AppIcon } from "@/components/icons/AppIcon";
+import { ThemedText } from "@/components/themed-text";
+import { setShadow, Spacing } from "@/constants/theme";
 import { useTheme } from "@/hooks/use-theme";
-import { Image } from "expo-image";
-import { BottomTabHeaderProps } from "expo-router/build/react-navigation/bottom-tabs/types";
 import { StyleSheet, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import UserIcon from "../icons/UserIcon";
-import { ThemedText } from "../themed-text";
+import { UserMenu } from "./user-menu";
 
 const HEADER_HEIGHT = 56;
 const LOGO_SIZE = 32;
-const USER_BADGE_SIZE = 36;
-const USER_ICON_SIZE = 24;
 
-export const Header = (props: BottomTabHeaderProps) => {
+export const Header = () => {
   const insets = useSafeAreaInsets();
   const { Colors } = useTheme();
 
@@ -27,18 +24,12 @@ export const Header = (props: BottomTabHeaderProps) => {
       ]}
     >
       <View style={styles.content}>
-        <View style={styles.iconContainer}>
-          <Image
-            source={require("@/assets/images/icon.png")}
-            style={styles.image}
-            contentFit="contain"
-          />
+        <View style={styles.brand}>
+          <AppIcon style={styles.image} />
           <ThemedText type="headline-md">Tasks</ThemedText>
         </View>
 
-        <View style={styles.userIconContainer}>
-          <UserIcon size={USER_ICON_SIZE} color={Colors["on-primary"]} />
-        </View>
+        <UserMenu />
       </View>
     </View>
   );
@@ -56,7 +47,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
   },
-  iconContainer: {
+  brand: {
     flexDirection: "row",
     alignItems: "center",
     gap: Spacing["space-sm"],
@@ -64,13 +55,5 @@ const styles = StyleSheet.create({
   image: {
     width: LOGO_SIZE,
     height: LOGO_SIZE,
-  },
-  userIconContainer: {
-    backgroundColor: Colors["primary-container"],
-    width: USER_BADGE_SIZE,
-    height: USER_BADGE_SIZE,
-    borderRadius: Rounded.lg,
-    alignItems: "center",
-    justifyContent: "center",
   },
 });
