@@ -8,8 +8,7 @@ import {
   type PropsWithChildren,
 } from "react";
 import { useDB } from "../../hooks/use-db";
-
-const USERS_DB: Session[] = [{ user: "pepe", password: "1234" }];
+import { USERS_DB } from "./data/users-seed";
 
 const AuthContext = createContext<{
   signIn: (session: Session) => Promise<void>;

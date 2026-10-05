@@ -1,22 +1,9 @@
-import { ThemedText } from "@/components/themed-text";
 import { Colors, Rounded, Spacing } from "@/constants/theme";
 import { PropsWithChildren } from "react";
 import { StyleSheet, View } from "react-native";
 
-interface HomeBadgeProps extends PropsWithChildren {
-  isComplete?: boolean;
-}
-
-export function HomeBadge({ children, isComplete }: Readonly<HomeBadgeProps>) {
-  return (
-    <View style={styles.container}>
-      {isComplete ? (
-        <ThemedText type="label-sm">Completed</ThemedText>
-      ) : (
-        children
-      )}
-    </View>
-  );
+export function HomeBadge({ children }: Readonly<PropsWithChildren>) {
+  return <View style={styles.container}>{children}</View>;
 }
 
 const styles = StyleSheet.create({
@@ -29,6 +16,5 @@ const styles = StyleSheet.create({
     padding: Spacing["space-xs"],
     borderRadius: Rounded.md,
     backgroundColor: Colors["secondary-container"],
-    color: Colors["on-secondary-container"],
   },
 });

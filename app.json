@@ -34,6 +34,13 @@
             "node_modules/@expo-google-fonts/geist/700Bold/Geist_700Bold.ttf"
           ]
         }
+      ],
+      [
+        "expo-notifications",
+        {
+          "color": "#091426",
+          "defaultChannel": "default"
+        }
       ]
     ],
     "experiments": {

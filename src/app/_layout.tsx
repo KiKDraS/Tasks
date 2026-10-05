@@ -3,7 +3,7 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 
 import { SplashScreenController } from "@/components/splash-screen-controller";
 import { NavigationTheme } from "@/constants/theme";
-import { SessionProvider, useSession } from "@/context/auth/auth-context";
+import { SessionProvider } from "@/context/auth/auth-context";
 
 export default function RootLayout() {
   return (
@@ -19,22 +19,9 @@ export default function RootLayout() {
 }
 
 function RootNavigator() {
-  const { session } = useSession();
-
   return (
-    <Stack
-      screenOptions={{
-        headerShown: false,
-      }}
-    >
-      {/* <Stack.Protected guard={!!session}> */}
+    <Stack screenOptions={{ headerShown: false }}>
       <Stack.Screen name="(tabs)" />
-      {/* </Stack.Protected> */}
-
-      {/* <Stack.Protected guard={!session}>
-          <Stack.Screen name="index" />
-          <Stack.Screen name="login" />
-        </Stack.Protected> */}
     </Stack>
   );
 }

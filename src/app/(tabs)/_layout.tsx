@@ -2,7 +2,7 @@ import HomeIcon from "@/components/icons/HomeIcon";
 import SchedulingIcon from "@/components/icons/SchedulingIcon";
 import { Header } from "@/components/ui/header";
 import { setShadow } from "@/constants/theme";
-import { TasksProvider } from "@/context/users/tasks-context";
+import { TasksProvider } from "@/context/tasks/tasks-context";
 import { useTheme } from "@/hooks/use-theme";
 import { Tabs } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";

@@ -1,6 +1,6 @@
 import { useStorageState } from "@/hooks/use-storage-state";
+import { delay } from "@/utils/delay";
 import { useCallback, useEffect, useMemo } from "react";
-import { delay } from "../context/auth/utils/delay";
 
 const NETWORK_DELAY_MS = 800;
 

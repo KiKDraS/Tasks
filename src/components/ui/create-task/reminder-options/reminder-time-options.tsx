@@ -1,0 +1,63 @@
+import { ThemedText } from "@/components/themed-text";
+import { Spacing } from "@/constants/theme";
+import { REMINDER_TIME_PRESETS } from "@/hooks/create-task/constants";
+import {
+  ReminderSelection,
+  TimeReminder,
+} from "@/hooks/create-task/types/Reminder";
+import { StyleSheet, View } from "react-native";
+import { OptionChip } from "./option-chip";
+import { ReminderCustomTime } from "./reminder-custom-time";
+
+interface ReminderTimeOptionsProps {
+  reminder: TimeReminder;
+  onSelect: (reminder: ReminderSelection) => void;
+}
+
+export function ReminderTimeOptions({
+  reminder,
+  onSelect,
+}: Readonly<ReminderTimeOptionsProps>) {
+  return (
+    <View style={styles.container}>
+      <View style={styles.presets}>
+        {REMINDER_TIME_PRESETS.map((option) => {
+          const selected = option.seconds === reminder.seconds;
+          return (
+            <OptionChip
+              key={option.seconds}
+              selected={selected}
+              onPress={() =>
+                onSelect({ type: "time", seconds: option.seconds })
+              }
+            >
+              <ThemedText
+                type="label-md"
+                color={
+                  selected ? "on-secondary-container" : "on-surface-variant"
+                }
+              >
+                {option.label}
+              </ThemedText>
+            </OptionChip>
+          );
+        })}
+      </View>
+      <ReminderCustomTime
+        seconds={reminder.seconds}
+        onChange={(seconds) => onSelect({ type: "time", seconds })}
+      />
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    gap: Spacing["space-md"],
+  },
+  presets: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: Spacing["space-sm"],
+  },
+});
