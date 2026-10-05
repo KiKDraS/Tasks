@@ -1,3 +1,8 @@
+export const DATE_LABELS = {
+  today: "Hoy",
+  tomorrow: "Mañana",
+} as const;
+
 export const MONTHS = [
   "ene",
   "feb",
@@ -18,6 +23,17 @@ export const DAY_MS = 86400000;
 export const startOfDay = (date: Date) =>
   new Date(date.getFullYear(), date.getMonth(), date.getDate());
 
+export const getDayDiff = (date: Date, base: Date = new Date()) =>
+  Math.round(
+    (startOfDay(date).getTime() - startOfDay(base).getTime()) / DAY_MS,
+  );
+
+export const isToday = (date: Date, base: Date = new Date()) =>
+  getDayDiff(date, base) === 0;
+
+export const isTomorrow = (date: Date, base: Date = new Date()) =>
+  getDayDiff(date, base) === 1;
+
 export const formatTime = (date: Date) => {
   const hours = date.getHours();
   const minutes = date.getMinutes().toString().padStart(2, "0");
@@ -25,14 +41,11 @@ export const formatTime = (date: Date) => {
 };
 
 export const formatDate = (date: Date) => {
-  const diffDays = Math.round(
-    (startOfDay(date).getTime() - startOfDay(new Date()).getTime()) / DAY_MS,
-  );
-  if (diffDays === 0) {
-    return "Hoy";
+  if (isToday(date)) {
+    return DATE_LABELS.today;
   }
-  if (diffDays === 1) {
-    return "Mañana";
+  if (isTomorrow(date)) {
+    return DATE_LABELS.tomorrow;
   }
   return `${date.getDate()} ${MONTHS[date.getMonth()]}`;
 };

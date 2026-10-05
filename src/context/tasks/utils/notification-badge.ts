@@ -1,7 +1,8 @@
-import { formatDate, formatTime } from "@/utils/date";
+import { formatDate, formatTime, isToday } from "@/utils/date";
 import { TaskNotification } from "../types/Task";
 
 const SUB_MINUTE_MS = 60000;
+const ACTIVE_REMINDER_LABEL = "Recordatorio activo";
 
 export function getNotificationBadgeLabel(
   notification: TaskNotification | null,
@@ -13,18 +14,20 @@ export function getNotificationBadgeLabel(
 
   const scheduledAt = new Date(notification.scheduledAt);
   const diffMs = scheduledAt.getTime() - now.getTime();
-  if (diffMs <= 0) {
+  const hasBeenSent = diffMs <= 0;
+  if (hasBeenSent) {
     return null;
   }
-  if (diffMs < SUB_MINUTE_MS) {
-    return "Recordatorio activo";
+
+  const isImminent = diffMs < SUB_MINUTE_MS;
+  if (isImminent) {
+    return ACTIVE_REMINDER_LABEL;
   }
 
-  const dateLabel = formatDate(scheduledAt);
   const time = formatTime(scheduledAt);
-  if (dateLabel === "Hoy") {
+  if (isToday(scheduledAt, now)) {
     return time;
   }
 
-  return `${dateLabel}, ${time}`;
+  return `${formatDate(scheduledAt)}, ${time}`;
 }

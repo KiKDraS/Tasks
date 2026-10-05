@@ -1,14 +1,15 @@
-import { TYPES } from "./constants";
+import { CREATE_TASK_MESSAGES, REMINDER_TIME_PRESETS, TYPES } from "./constants";
 import {
   CreateTaskFormAction,
   CreateTaskFormState,
 } from "./types/CreateTaskForm";
+import { REMINDER_TYPES } from "./types/Reminder";
 
 export const initialCreateTaskFormState: CreateTaskFormState = {
   title: "",
   description: "",
   reminderEnabled: true,
-  reminder: { type: "time", seconds: 900 },
+  reminder: { type: REMINDER_TYPES.TIME, seconds: REMINDER_TIME_PRESETS[0].seconds },
   titleError: null,
   reminderError: null,
   isSubmitting: false,
@@ -26,10 +27,12 @@ export function createTaskFormReducer(
     case TYPES.TOGGLE_REMINDER:
       return { ...state, reminderEnabled: !state.reminderEnabled };
     case TYPES.SET_REMINDER: {
-      const reminderError =
-        action.payload.type === "time" && action.payload.seconds <= 0
-          ? "Ingresá un tiempo válido"
-          : null;
+      const isInvalidTimeReminder =
+        action.payload.type === REMINDER_TYPES.TIME &&
+        action.payload.seconds <= 0;
+      const reminderError = isInvalidTimeReminder
+        ? CREATE_TASK_MESSAGES.invalidReminderTime
+        : null;
       return { ...state, reminder: action.payload, reminderError };
     }
     case TYPES.SET_TITLE_ERROR:

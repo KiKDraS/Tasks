@@ -21,14 +21,16 @@ export function FormButton({
   loading,
   ...rest
 }: Readonly<FormButtonProps>) {
+  const isDisabled = Boolean(disabled || loading);
+
   return (
     <Pressable
       {...rest}
       onPress={onPress}
-      disabled={disabled || loading}
+      disabled={isDisabled}
       style={({ pressed }) => [
         styles.button,
-        (disabled || loading) && styles.disabled,
+        isDisabled && styles.disabled,
         pressed && styles.pressed,
       ]}
     >

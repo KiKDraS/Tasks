@@ -1,5 +1,8 @@
 import { Spacing } from "@/constants/theme";
-import { ReminderSelection } from "@/hooks/create-task/types/Reminder";
+import {
+  REMINDER_TYPES,
+  ReminderSelection,
+} from "@/hooks/create-task/types/Reminder";
 import { useReminderOptions } from "@/hooks/create-task/use-reminder-options";
 import { StyleSheet, View } from "react-native";
 import { ReminderDateOptions } from "./reminder-date-options";
@@ -38,7 +41,7 @@ export function ReminderOptions({
             selectedDate={selectedDate}
             onSelect={onSelect}
           />
-          {reminder.type === "time" ? (
+          {reminder.type === REMINDER_TYPES.TIME ? (
             <ReminderTimeOptions reminder={reminder} onSelect={onSelect} />
           ) : (
             <ReminderDateOptions

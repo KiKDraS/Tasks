@@ -1,5 +1,5 @@
-import { DAY_MS, MONTHS, formatTime, startOfDay } from "@/utils/date";
-import { ReminderSelection } from "../types/Reminder";
+import { DATE_LABELS, MONTHS, formatTime, isToday, isTomorrow } from "@/utils/date";
+import { REMINDER_TYPES, ReminderSelection } from "../types/Reminder";
 
 const SECONDS_PER_MINUTE = 60;
 const SECONDS_PER_HOUR = 3600;
@@ -24,20 +24,16 @@ const formatDuration = (totalSeconds: number) => {
 };
 
 export const formatReminderLabel = (reminder: ReminderSelection) => {
-  if (reminder.type === "time") {
+  if (reminder.type === REMINDER_TYPES.TIME) {
     return `En ${formatDuration(reminder.seconds)}`;
   }
 
-  const diffDays = Math.round(
-    (startOfDay(reminder.date).getTime() - startOfDay(new Date()).getTime()) /
-      DAY_MS,
-  );
   const time = formatTime(reminder.date);
-  if (diffDays === 0) {
-    return `Hoy, ${time}`;
+  if (isToday(reminder.date)) {
+    return `${DATE_LABELS.today}, ${time}`;
   }
-  if (diffDays === 1) {
-    return `Mañana, ${time}`;
+  if (isTomorrow(reminder.date)) {
+    return `${DATE_LABELS.tomorrow}, ${time}`;
   }
   return `El ${reminder.date.getDate()} ${MONTHS[reminder.date.getMonth()]}, ${time}`;
 };

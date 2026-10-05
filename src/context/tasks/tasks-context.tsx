@@ -1,3 +1,4 @@
+import { STORAGE_KEYS } from "@/constants/storage-keys";
 import { cancelTaskReminder } from "@/hooks/create-task/utils/notifications";
 import { useDB } from "@/hooks/use-db";
 import { generateId } from "@/utils/id";
@@ -27,7 +28,7 @@ export function TasksProvider({ children }: Readonly<PropsWithChildren>) {
     createItem: createTaskDB,
     updateItem: updateTaskDB,
     deleteItem: deleteTaskDB,
-  } = useDB<Task>("tasks", TASKS_DB);
+  } = useDB<Task>(STORAGE_KEYS.tasks, TASKS_DB);
 
   const tasks = useMemo(
     () => storedTasks.map((task) => normalizeTask(task)),
@@ -57,9 +58,11 @@ export function TasksProvider({ children }: Readonly<PropsWithChildren>) {
 
   const removeTask = useCallback(
     async (id: string) => {
-      const task = tasks.find((item) => item.id === id);
-      if (task?.notification) {
-        await cancelTaskReminder(task.notification.id);
+      const pendingNotification = tasks.find(
+        (item) => item.id === id,
+      )?.notification;
+      if (pendingNotification) {
+        await cancelTaskReminder(pendingNotification.id);
       }
 
       await deleteTaskDB((item) => item.id === id);
@@ -70,10 +73,12 @@ export function TasksProvider({ children }: Readonly<PropsWithChildren>) {
   const updateTask = useCallback(
     async (updatedTask: Task) => {
       const currentTask = tasks.find((task) => task.id === updatedTask.id);
+      const pendingNotification = currentTask?.notification;
+      const isCompletingTask = Boolean(updatedTask.isComplete);
       let nextTask = updatedTask;
 
-      if (updatedTask.isComplete && currentTask?.notification) {
-        await cancelTaskReminder(currentTask.notification.id);
+      if (isCompletingTask && pendingNotification) {
+        await cancelTaskReminder(pendingNotification.id);
         nextTask = { ...updatedTask, notification: null };
       }
 

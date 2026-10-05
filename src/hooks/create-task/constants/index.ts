@@ -18,3 +18,20 @@ export const REMINDER_TIME_PRESETS = [
   { seconds: 3600, label: "1h" },
   { seconds: 7200, label: "2h" },
 ] as const;
+
+export const CREATE_TASK_MESSAGES = {
+  titleRequired: "El título es obligatorio",
+  invalidReminderTime: "Ingresá un tiempo válido",
+} as const;
+
+export const NOTIFICATION_COPY = {
+  channelName: "Recordatorios",
+  defaultBody: "Recordatorio de tu tarea",
+  permissionAlertTitle: "Permiso denegado",
+  permissionAlertMessage:
+    "No se pudo programar la notificación. Activá los permisos de notificaciones en los ajustes.",
+} as const;
+
+export const NOTIFICATION_DATA_KEYS = {
+  taskTitle: "taskTitle",
+} as const;

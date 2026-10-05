@@ -9,6 +9,9 @@ import { ReminderOptions } from "./reminder-options";
 
 export function CreateTaskForm() {
   const { state, dispatch, handleCreate, reminderLabel } = useCreateTask();
+  const showReminderError =
+    state.reminderEnabled && Boolean(state.reminderError);
+  const showReminderHint = state.reminderEnabled && !showReminderError;
 
   return (
     <>
@@ -40,23 +43,23 @@ export function CreateTaskForm() {
             dispatch({ type: TYPES.SET_REMINDER, payload: reminder })
           }
         />
-        {state.reminderEnabled &&
-          (state.reminderError ? (
+          {showReminderError && (
             <ThemedText type="label-sm" color="error">
               {state.reminderError}
             </ThemedText>
-          ) : (
+          )}
+          {showReminderHint && (
             <ThemedText type="label-sm" color="on-surface-variant">
               La notificación se enviará {reminderLabel.toLowerCase()}
             </ThemedText>
-          ))}
+          )}
       </View>
 
       <FormButton
         label="Crear tarea"
         onPress={handleCreate}
         loading={state.isSubmitting}
-        disabled={state.reminderEnabled && Boolean(state.reminderError)}
+        disabled={showReminderError}
       />
     </>
   );

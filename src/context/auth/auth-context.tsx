@@ -1,3 +1,4 @@
+import { STORAGE_KEYS } from "@/constants/storage-keys";
 import { Session } from "@/context/auth/types/Session";
 import { useStorageState } from "@/hooks/use-storage-state";
 import {
@@ -19,9 +20,11 @@ const AuthContext = createContext<{
 } | null>(null);
 
 export function SessionProvider({ children }: Readonly<PropsWithChildren>) {
-  const [[isLoading, session], setSession] = useStorageState("session");
+  const [[isLoading, session], setSession] = useStorageState(
+    STORAGE_KEYS.session,
+  );
   const { createItem: createUser, itemExists } = useDB<Session>(
-    "users",
+    STORAGE_KEYS.users,
     USERS_DB,
   );
 
@@ -39,10 +42,11 @@ export function SessionProvider({ children }: Readonly<PropsWithChildren>) {
 
   const logIn = useCallback(
     async (session: Session) => {
-      const isValidSession = await itemExists(
-        (item) =>
-          item.user === session.user && item.password === session.password,
-      );
+      const isValidSession = await itemExists((item) => {
+        const isValidCredentials =
+          item.user === session.user && item.password === session.password;
+        return isValidCredentials;
+      });
 
       if (!isValidSession) {
         return false;

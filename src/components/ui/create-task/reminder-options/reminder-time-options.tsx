@@ -2,6 +2,7 @@ import { ThemedText } from "@/components/themed-text";
 import { Spacing } from "@/constants/theme";
 import { REMINDER_TIME_PRESETS } from "@/hooks/create-task/constants";
 import {
+  REMINDER_TYPES,
   ReminderSelection,
   TimeReminder,
 } from "@/hooks/create-task/types/Reminder";
@@ -28,7 +29,7 @@ export function ReminderTimeOptions({
               key={option.seconds}
               selected={selected}
               onPress={() =>
-                onSelect({ type: "time", seconds: option.seconds })
+                onSelect({ type: REMINDER_TYPES.TIME, seconds: option.seconds })
               }
             >
               <ThemedText
@@ -45,7 +46,9 @@ export function ReminderTimeOptions({
       </View>
       <ReminderCustomTime
         seconds={reminder.seconds}
-        onChange={(seconds) => onSelect({ type: "time", seconds })}
+        onChange={(seconds) =>
+          onSelect({ type: REMINDER_TYPES.TIME, seconds })
+        }
       />
     </View>
   );

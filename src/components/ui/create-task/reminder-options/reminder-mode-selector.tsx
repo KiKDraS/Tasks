@@ -1,6 +1,9 @@
 import { ThemedText } from "@/components/themed-text";
 import { Spacing } from "@/constants/theme";
-import { ReminderSelection } from "@/hooks/create-task/types/Reminder";
+import {
+  REMINDER_TYPES,
+  ReminderSelection,
+} from "@/hooks/create-task/types/Reminder";
 import { StyleSheet, View } from "react-native";
 import { OptionChip } from "./option-chip";
 
@@ -15,7 +18,7 @@ export function ReminderModeSelector({
   selectedDate,
   onSelect,
 }: Readonly<ReminderModeSelectorProps>) {
-  const timeSelected = reminder.type === "time";
+  const timeSelected = reminder.type === REMINDER_TYPES.TIME;
 
   return (
     <View style={styles.modeSelector}>
@@ -23,8 +26,9 @@ export function ReminderModeSelector({
         selected={timeSelected}
         onPress={() =>
           onSelect({
-            type: "time",
-            seconds: reminder.type === "time" ? reminder.seconds : 5,
+            type: REMINDER_TYPES.TIME,
+            seconds:
+              reminder.type === REMINDER_TYPES.TIME ? reminder.seconds : 5,
           })
         }
         style={styles.modeChip}
@@ -38,7 +42,7 @@ export function ReminderModeSelector({
       </OptionChip>
       <OptionChip
         selected={!timeSelected}
-        onPress={() => onSelect({ type: "date", date: selectedDate })}
+        onPress={() => onSelect({ type: REMINDER_TYPES.DATE, date: selectedDate })}
         style={styles.modeChip}
       >
         <ThemedText

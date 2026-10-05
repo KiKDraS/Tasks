@@ -7,8 +7,10 @@ const NETWORK_DELAY_MS = 800;
 export function useDB<T>(dbName: string, initialData: T[] = []) {
   const [[isLoading, rawItems], setItems] = useStorageState(dbName);
 
+  const hasStoredItems = rawItems !== null && rawItems !== "";
+
   const items = useMemo<T[]>(() => {
-    if (!rawItems) {
+    if (!hasStoredItems) {
       return [];
     }
     try {
@@ -16,13 +18,13 @@ export function useDB<T>(dbName: string, initialData: T[] = []) {
     } catch {
       return [];
     }
-  }, [rawItems]);
+  }, [hasStoredItems, rawItems]);
 
   useEffect(() => {
-    if (!rawItems) {
+    if (!hasStoredItems) {
       setItems(JSON.stringify(initialData));
     }
-  }, [rawItems, setItems, initialData]);
+  }, [hasStoredItems, setItems, initialData]);
 
   const createItem = useCallback(
     async (item: T) => {

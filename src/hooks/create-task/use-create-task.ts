@@ -2,7 +2,11 @@ import {
   createTaskFormReducer,
   initialCreateTaskFormState,
 } from "@/hooks/create-task/create-task-reducer";
-import { TYPES } from "@/hooks/create-task/constants";
+import {
+  CREATE_TASK_MESSAGES,
+  NOTIFICATION_COPY,
+  TYPES,
+} from "@/hooks/create-task/constants";
 import { formatReminderLabel } from "@/hooks/create-task/utils/reminder";
 import { useTasks } from "@/context/tasks/tasks-context";
 import { TaskNotification } from "@/context/tasks/types/Task";
@@ -19,15 +23,18 @@ export function useCreateTask() {
   );
 
   const handleCreate = useCallback(async () => {
-    if (!state.title.trim()) {
+    const isTitleEmpty = !state.title.trim();
+    if (isTitleEmpty) {
       dispatch({
         type: TYPES.SET_TITLE_ERROR,
-        payload: "El título es obligatorio",
+        payload: CREATE_TASK_MESSAGES.titleRequired,
       });
       return;
     }
     dispatch({ type: TYPES.SET_TITLE_ERROR, payload: null });
-    if (state.reminderEnabled && state.reminderError) {
+    const hasInvalidReminder =
+      state.reminderEnabled && Boolean(state.reminderError);
+    if (hasInvalidReminder) {
       return;
     }
     dispatch({ type: TYPES.SET_SUBMITTING, payload: true });
@@ -36,15 +43,15 @@ export function useCreateTask() {
     if (state.reminderEnabled) {
       const scheduled = await scheduleTaskReminder({
         title: state.title.trim(),
-        body: state.description.trim() || "Recordatorio de tu tarea",
+        body: state.description.trim() || NOTIFICATION_COPY.defaultBody,
         reminder: state.reminder,
       });
       if (scheduled) {
         notification = scheduled;
       } else {
         Alert.alert(
-          "Permiso denegado",
-          "No se pudo programar la notificación. Activá los permisos de notificaciones en los ajustes.",
+          NOTIFICATION_COPY.permissionAlertTitle,
+          NOTIFICATION_COPY.permissionAlertMessage,
         );
       }
     }

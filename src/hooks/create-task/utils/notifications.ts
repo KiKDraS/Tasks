@@ -1,7 +1,11 @@
 import * as Notifications from "expo-notifications";
 import { Platform } from "react-native";
 import { TaskNotification } from "@/context/tasks/types/Task";
-import { ReminderSelection } from "../types/Reminder";
+import {
+  NOTIFICATION_COPY,
+  NOTIFICATION_DATA_KEYS,
+} from "@/hooks/create-task/constants";
+import { REMINDER_TYPES, ReminderSelection } from "../types/Reminder";
 
 const DEFAULT_CHANNEL_ID = "default";
 
@@ -17,7 +21,7 @@ Notifications.setNotificationHandler({
 export async function getPermissions(): Promise<boolean> {
   if (Platform.OS === "android") {
     await Notifications.setNotificationChannelAsync(DEFAULT_CHANNEL_ID, {
-      name: "Recordatorios",
+      name: NOTIFICATION_COPY.channelName,
       importance: Notifications.AndroidImportance.HIGH,
     });
   }
@@ -44,20 +48,21 @@ export async function scheduleTaskReminder(options: {
     return null;
   }
 
-  const scheduledAt =
-    options.reminder.type === "date"
-      ? options.reminder.date
-      : new Date(Date.now() + options.reminder.seconds * 1000);
+  const reminder = options.reminder;
+  const isDateReminder = reminder.type === REMINDER_TYPES.DATE;
+  const scheduledAt = isDateReminder
+    ? reminder.date
+    : new Date(Date.now() + reminder.seconds * 1000);
 
   const trigger: Notifications.SchedulableNotificationTriggerInput =
-    options.reminder.type === "date"
+    isDateReminder
       ? {
           type: Notifications.SchedulableTriggerInputTypes.DATE,
           date: scheduledAt,
         }
       : {
           type: Notifications.SchedulableTriggerInputTypes.TIME_INTERVAL,
-          seconds: options.reminder.seconds,
+          seconds: reminder.seconds,
         };
 
   const id = await Notifications.scheduleNotificationAsync({
@@ -65,7 +70,7 @@ export async function scheduleTaskReminder(options: {
       title: options.title,
       body: options.body,
       sound: "default",
-      data: { taskTitle: options.title },
+      data: { [NOTIFICATION_DATA_KEYS.taskTitle]: options.title },
     },
     trigger,
   });
