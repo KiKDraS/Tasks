@@ -10,8 +10,8 @@ import {
 import { type ReactNode } from "react";
 import {
   ActivityIndicator,
-  type PressableProps,
   StyleSheet,
+  type TouchableOpacityProps,
   type ViewStyle,
 } from "react-native";
 
@@ -41,7 +41,7 @@ const VARIANTS: Record<FormButtonVariant, VariantConfig> = {
   },
 };
 
-interface FormButtonProps extends PressableProps {
+interface FormButtonProps extends TouchableOpacityProps {
   variant?: FormButtonVariant;
   loading?: boolean;
   children: ReactNode;
@@ -62,12 +62,7 @@ export function FormButton({
     <PressableOpacity
       {...rest}
       disabled={isDisabled}
-      style={(state) => [
-        styles.base,
-        container,
-        isDisabled && styles.disabled,
-        typeof style === "function" ? style(state) : style,
-      ]}
+      style={[styles.base, container, isDisabled && styles.disabled, style]}
     >
       {loading ? (
         <ActivityIndicator color={indicatorColor} />

@@ -1,56 +1,58 @@
-# Welcome to your Expo app 👋
+# Tasks — Gestor de tareas
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+## ¿Por qué existe este repositorio?
 
-## Get started
+Proyecto desarrollado para el **Parcial 1 – Aplicaciones Móviles (ISTEA)**. Es
+una app móvil en **React Native + Expo** que aplica los conceptos vistos en
+clase: componentes y estilos, navegación con stack, almacenamiento local,
+autenticación básica y notificaciones locales.
 
-1. Install dependencies
+## Opción elegida
 
-   ```bash
-   npm install
-   ```
+✅ **Gestor de tareas** — permite crear tareas con título, descripción y
+recordatorio (15m, 30m, 1h, 2h o un tiempo personalizado).
 
-2. Start the app
+## Cómo ejecutar la app
 
-   ```bash
-   npx expo start
-   ```
-
-In the output, you'll find options to open the app in a
-
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
-
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
+Requisitos: Node.js y pnpm.
 
 ```bash
-npm run reset-project
+pnpm install
+pnpm start
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+Escaneá el QR con **Expo Go** o abrí un emulador (también podés usar
+`pnpm android`, `pnpm ios` o `pnpm web`). Si algún componente nativo no se
+renderiza, usá un development build (`npx expo run:ios` /
+`npx expo run:android`).
 
-### Other setup steps
+Usuario de prueba (seed): `Ana` / `1234`, o creá una cuenta desde la pantalla de
+registro.
 
-- To set up ESLint for linting, run `npx expo lint`, or follow our guide on ["Using ESLint and Prettier"](https://docs.expo.dev/guides/using-eslint/)
-- If you'd like to set up unit testing, follow our guide on ["Unit Testing with Jest"](https://docs.expo.dev/develop/unit-testing/)
-- Learn more about the TypeScript setup in this template in our guide on ["Using TypeScript"](https://docs.expo.dev/guides/typescript/)
+```bash
+pnpm test   # Jest + React Native Testing Library
+pnpm lint
+```
 
-## Learn more
+## Funcionalidades implementadas
 
-To learn more about developing your project with Expo, look at the following resources:
+- **Autenticación local**: registro de usuario, login validado contra los datos
+  guardados y rutas protegidas.
+- **Tareas**: crear, listar, editar y eliminar.
+- **Recordatorios**: notificación local programada por tiempo o fecha, con badge
+  en la tarea y cancelación al completarla o eliminarla.
+- **Persistencia con AsyncStorage**: usuarios, sesión y tareas se mantienen al
+  cerrar la app.
+- **Navegación**: Expo Router (Stack + Tabs).
+- **Tests**: 4 suites / 12 tests con Jest + React Native Testing Library.
+- **UI**: componentes reutilizables (`FormButton`, `TextField`, `OptionChip`,
+  `TaskCheckbox`) y tema centralizado de colores, tipografía y espaciado.
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+## Video DEMO
 
-## Join the community
+🎥 [Ver demo en YouTube](https://youtu.be/REEMPLAZAR).
 
-Join our community of developers creating universal apps.
+## Tecnologías
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+React Native · Expo SDK 57 · Expo Router · AsyncStorage · expo-notifications ·
+TypeScript · Jest + React Native Testing Library

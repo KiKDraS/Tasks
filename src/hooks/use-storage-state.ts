@@ -1,4 +1,4 @@
-import * as SecureStore from "expo-secure-store";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useCallback, useEffect, useState } from "react";
 
 type StorageValue<T> = T | null;
@@ -18,7 +18,7 @@ function useAsyncState<T>(
 async function readStorageItemAsync(
   key: string,
 ): Promise<StorageValue<string>> {
-  return SecureStore.getItemAsync(key);
+  return AsyncStorage.getItem(key);
 }
 
 export async function setStorageItemAsync(
@@ -26,9 +26,9 @@ export async function setStorageItemAsync(
   value: StorageValue<string>,
 ) {
   if (value == null) {
-    await SecureStore.deleteItemAsync(key);
+    await AsyncStorage.removeItem(key);
   } else {
-    await SecureStore.setItemAsync(key, value);
+    await AsyncStorage.setItem(key, value);
   }
 }
 
