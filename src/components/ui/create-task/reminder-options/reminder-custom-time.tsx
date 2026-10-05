@@ -1,11 +1,10 @@
 import { ThemedText } from "@/components/themed-text";
 import { TextField } from "@/components/ui/form/text-field";
+import { SECONDS_PER_HOUR, SECONDS_PER_MINUTE } from "@/constants/time";
 import { Spacing } from "@/constants/theme";
 import { useEffect, useRef, useState } from "react";
 import { StyleSheet, View } from "react-native";
 
-const SECONDS_PER_MINUTE = 60;
-const SECONDS_PER_HOUR = 3600;
 const MAX_HOURS = 99;
 const MAX_MINUTES = 59;
 const MAX_SECONDS = 59;

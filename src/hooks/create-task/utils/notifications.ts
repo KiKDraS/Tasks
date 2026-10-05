@@ -1,5 +1,6 @@
 import * as Notifications from "expo-notifications";
 import { Platform } from "react-native";
+import { SECOND_MS } from "@/constants/time";
 import { TaskNotification } from "@/context/tasks/types/Task";
 import {
   NOTIFICATION_COPY,
@@ -52,7 +53,7 @@ export async function scheduleTaskReminder(options: {
   const isDateReminder = reminder.type === REMINDER_TYPES.DATE;
   const scheduledAt = isDateReminder
     ? reminder.date
-    : new Date(Date.now() + reminder.seconds * 1000);
+    : new Date(Date.now() + reminder.seconds * SECOND_MS);
 
   const trigger: Notifications.SchedulableNotificationTriggerInput =
     isDateReminder

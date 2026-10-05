@@ -1,6 +1,7 @@
+import { CLOCK_TICK_MS } from "@/constants/time";
 import { useEffect, useState } from "react";
 
-export function useCurrentTime(intervalMs = 30000) {
+export function useCurrentTime(intervalMs = CLOCK_TICK_MS) {
   const [now, setNow] = useState(() => new Date());
 
   useEffect(() => {

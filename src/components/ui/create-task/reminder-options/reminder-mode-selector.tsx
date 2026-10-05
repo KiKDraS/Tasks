@@ -1,5 +1,6 @@
 import { ThemedText } from "@/components/themed-text";
 import { Spacing } from "@/constants/theme";
+import { REMINDER_TIME_PRESETS } from "@/hooks/create-task/constants";
 import {
   REMINDER_TYPES,
   ReminderSelection,
@@ -28,7 +29,9 @@ export function ReminderModeSelector({
           onSelect({
             type: REMINDER_TYPES.TIME,
             seconds:
-              reminder.type === REMINDER_TYPES.TIME ? reminder.seconds : 5,
+              reminder.type === REMINDER_TYPES.TIME
+                ? reminder.seconds
+                : REMINDER_TIME_PRESETS[0].seconds,
           })
         }
         style={styles.modeChip}

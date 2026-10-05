@@ -13,6 +13,7 @@ export function useReminderOptions(
   onSelect: (reminder: ReminderSelection) => void,
 ) {
   const [androidPicker, setAndroidPicker] = useState<AndroidPicker>(null);
+
   const selectedDate = useMemo(() => {
     const isDateReminder = reminder.type === REMINDER_TYPES.DATE;
     return isDateReminder ? reminder.date : new Date();

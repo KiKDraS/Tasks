@@ -1,8 +1,6 @@
+import { SECONDS_PER_HOUR, SECONDS_PER_MINUTE } from "@/constants/time";
 import { DATE_LABELS, MONTHS, formatTime, isToday, isTomorrow } from "@/utils/date";
 import { REMINDER_TYPES, ReminderSelection } from "../types/Reminder";
-
-const SECONDS_PER_MINUTE = 60;
-const SECONDS_PER_HOUR = 3600;
 
 const formatDuration = (totalSeconds: number) => {
   const hours = Math.floor(totalSeconds / SECONDS_PER_HOUR);

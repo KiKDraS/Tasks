@@ -1,7 +1,7 @@
+import { MINUTE_MS } from "@/constants/time";
 import { formatDate, formatTime, isToday } from "@/utils/date";
 import { TaskNotification } from "../types/Task";
 
-const SUB_MINUTE_MS = 60000;
 const ACTIVE_REMINDER_LABEL = "Recordatorio activo";
 
 export function getNotificationBadgeLabel(
@@ -19,7 +19,7 @@ export function getNotificationBadgeLabel(
     return null;
   }
 
-  const isImminent = diffMs < SUB_MINUTE_MS;
+  const isImminent = diffMs < MINUTE_MS;
   if (isImminent) {
     return ACTIVE_REMINDER_LABEL;
   }

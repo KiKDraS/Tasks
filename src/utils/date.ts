@@ -1,3 +1,5 @@
+import { DAY_MS } from "@/constants/time";
+
 export const DATE_LABELS = {
   today: "Hoy",
   tomorrow: "Mañana",
@@ -17,8 +19,6 @@ export const MONTHS = [
   "nov",
   "dic",
 ];
-
-export const DAY_MS = 86400000;
 
 export const startOfDay = (date: Date) =>
   new Date(date.getFullYear(), date.getMonth(), date.getDate());

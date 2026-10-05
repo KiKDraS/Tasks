@@ -1,3 +1,4 @@
+import { SECONDS_PER_HOUR, SECONDS_PER_MINUTE } from "@/constants/time";
 import type { CreateTaskFormAction } from "@/hooks/create-task/types/CreateTaskForm";
 
 export const TYPES = {
@@ -13,10 +14,10 @@ export const TYPES = {
 >;
 
 export const REMINDER_TIME_PRESETS = [
-  { seconds: 900, label: "15m" },
-  { seconds: 1800, label: "30m" },
-  { seconds: 3600, label: "1h" },
-  { seconds: 7200, label: "2h" },
+  { seconds: 15 * SECONDS_PER_MINUTE, label: "15m" },
+  { seconds: 30 * SECONDS_PER_MINUTE, label: "30m" },
+  { seconds: SECONDS_PER_HOUR, label: "1h" },
+  { seconds: 2 * SECONDS_PER_HOUR, label: "2h" },
 ] as const;
 
 export const CREATE_TASK_MESSAGES = {
