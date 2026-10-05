@@ -1,8 +1,9 @@
 import DeleteIcon from "@/components/icons/DeleteIcon";
 import { ThemedText } from "@/components/themed-text";
+import { PressableOpacity } from "@/components/ui/pressable-opacity";
 import { Colors, Rounded, Spacing } from "@/constants/theme";
 import { Image } from "expo-image";
-import { Pressable, StyleSheet, View } from "react-native";
+import { StyleSheet, View } from "react-native";
 
 interface TaskHeaderProps {
   title: string;
@@ -19,7 +20,7 @@ export function TaskHeader({
 }: Readonly<TaskHeaderProps>) {
   return (
     <View style={styles.header}>
-      <Pressable onPress={onToggle}>
+      <PressableOpacity onPress={onToggle}>
         {isComplete ? (
           <Image
             source={require("@/assets/images/icon.png")}
@@ -29,16 +30,16 @@ export function TaskHeader({
         ) : (
           <View style={styles.incompleteCheckTask} />
         )}
-      </Pressable>
+      </PressableOpacity>
       <ThemedText
         type="headline-md"
         style={[styles.title, isComplete && styles.completeText]}
       >
         {title}
       </ThemedText>
-      <Pressable onPress={onDelete}>
+      <PressableOpacity onPress={onDelete}>
         <DeleteIcon size={22} color={Colors.error} />
-      </Pressable>
+      </PressableOpacity>
     </View>
   );
 }

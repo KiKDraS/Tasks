@@ -4,6 +4,7 @@ import { TextField } from "@/components/ui/form/text-field";
 import { Colors, Rounded, Spacing } from "@/constants/theme";
 import { TYPES } from "@/hooks/create-task/constants";
 import { useCreateTask } from "@/hooks/create-task/use-create-task";
+import { router } from "expo-router";
 import { StyleSheet, View } from "react-native";
 import { ReminderOptions } from "./reminder-options";
 
@@ -12,6 +13,10 @@ export function CreateTaskForm() {
   const showReminderError =
     state.reminderEnabled && Boolean(state.reminderError);
   const showReminderHint = state.reminderEnabled && !showReminderError;
+
+  const handleCancel = () => {
+    router.back();
+  };
 
   return (
     <>
@@ -43,24 +48,36 @@ export function CreateTaskForm() {
             dispatch({ type: TYPES.SET_REMINDER, payload: reminder })
           }
         />
-          {showReminderError && (
-            <ThemedText type="label-sm" color="error">
-              {state.reminderError}
-            </ThemedText>
-          )}
-          {showReminderHint && (
-            <ThemedText type="label-sm" color="on-surface-variant">
-              La notificación se enviará {reminderLabel.toLowerCase()}
-            </ThemedText>
-          )}
+        {showReminderError && (
+          <ThemedText type="label-sm" color="error">
+            {state.reminderError}
+          </ThemedText>
+        )}
+        {showReminderHint && (
+          <ThemedText type="label-sm" color="on-surface-variant">
+            La notificación se enviará {reminderLabel.toLowerCase()}
+          </ThemedText>
+        )}
       </View>
 
-      <FormButton
-        label="Crear tarea"
-        onPress={handleCreate}
-        loading={state.isSubmitting}
-        disabled={showReminderError}
-      />
+      <View style={styles.actions}>
+        <FormButton
+          variant="surface"
+          onPress={handleCancel}
+          disabled={state.isSubmitting}
+          style={styles.action}
+        >
+          Cancelar
+        </FormButton>
+        <FormButton
+          onPress={handleCreate}
+          loading={state.isSubmitting}
+          disabled={showReminderError}
+          style={styles.action}
+        >
+          Crear tarea
+        </FormButton>
+      </View>
     </>
   );
 }
@@ -71,5 +88,12 @@ const styles = StyleSheet.create({
     borderRadius: Rounded.lg,
     padding: Spacing.gutter,
     gap: Spacing["space-md"],
+  },
+  actions: {
+    flexDirection: "row",
+    gap: Spacing["space-md"],
+  },
+  action: {
+    flex: 1,
   },
 });

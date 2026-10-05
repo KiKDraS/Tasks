@@ -1,6 +1,7 @@
 import AddIcon from "@/components/icons/AddIcon";
+import { PressableOpacity } from "@/components/ui/pressable-opacity";
 import { Colors, Rounded, setShadow } from "@/constants/theme";
-import { Pressable, StyleSheet } from "react-native";
+import { StyleSheet } from "react-native";
 
 interface HomeButtonProps {
   onPress: () => void;
@@ -8,9 +9,9 @@ interface HomeButtonProps {
 
 export function HomeButton({ onPress }: Readonly<HomeButtonProps>) {
   return (
-    <Pressable onPress={onPress} style={styles.button}>
+    <PressableOpacity onPress={onPress} style={styles.button}>
       <AddIcon size={42} color={Colors["on-primary"]} />
-    </Pressable>
+    </PressableOpacity>
   );
 }
 

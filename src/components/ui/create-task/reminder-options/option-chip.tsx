@@ -1,11 +1,12 @@
+import { PressableOpacity } from "@/components/ui/pressable-opacity";
 import { Colors, Rounded, Spacing } from "@/constants/theme";
 import { PropsWithChildren } from "react";
-import { Pressable, StyleSheet, type StyleProp, type ViewStyle } from "react-native";
+import { StyleSheet, type PressableProps } from "react-native";
 
 interface OptionChipProps extends PropsWithChildren {
   selected: boolean;
   onPress: () => void;
-  style?: StyleProp<ViewStyle>;
+  style?: PressableProps["style"];
 }
 
 export function OptionChip({
@@ -15,12 +16,16 @@ export function OptionChip({
   children,
 }: Readonly<OptionChipProps>) {
   return (
-    <Pressable
+    <PressableOpacity
       onPress={onPress}
-      style={[styles.chip, selected && styles.chipSelected, style]}
+      style={(state) => [
+        styles.chip,
+        selected && styles.chipSelected,
+        typeof style === "function" ? style(state) : style,
+      ]}
     >
       {children}
-    </Pressable>
+    </PressableOpacity>
   );
 }
 

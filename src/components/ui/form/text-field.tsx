@@ -21,6 +21,7 @@ export function TextField({
   placeholder,
   multiline,
   error,
+  style,
   ...rest
 }: Readonly<TextFieldProps>) {
   return (
@@ -30,7 +31,12 @@ export function TextField({
       </ThemedText>
       <TextInput
         {...rest}
-        style={[styles.input, Typography["body-lg"], multiline && styles.multiline]}
+        style={[
+          styles.input,
+          Typography["body-lg"],
+          multiline && styles.multiline,
+          style,
+        ]}
         value={value}
         onChangeText={onChangeText}
         placeholder={placeholder}
