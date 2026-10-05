@@ -1,4 +1,4 @@
-import { PressableOpacity } from "@/components/ui/pressable-opacity";
+import { AppTouchableOpacity } from "@/components/ui/app-touchable-opacity";
 import { Colors, Rounded, Spacing } from "@/constants/theme";
 import { PropsWithChildren } from "react";
 import { StyleSheet, type TouchableOpacityProps } from "react-native";
@@ -16,12 +16,12 @@ export function OptionChip({
   children,
 }: Readonly<OptionChipProps>) {
   return (
-    <PressableOpacity
+    <AppTouchableOpacity
       onPress={onPress}
       style={[styles.chip, selected && styles.chipSelected, style]}
     >
       {children}
-    </PressableOpacity>
+    </AppTouchableOpacity>
   );
 }
 

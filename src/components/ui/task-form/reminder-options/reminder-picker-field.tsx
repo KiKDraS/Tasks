@@ -1,5 +1,5 @@
 import { ThemedText } from "@/components/themed-text";
-import { PressableOpacity } from "@/components/ui/pressable-opacity";
+import { AppTouchableOpacity } from "@/components/ui/app-touchable-opacity";
 import { Colors, Rounded, Spacing } from "@/constants/theme";
 import { PropsWithChildren } from "react";
 import { StyleSheet } from "react-native";
@@ -17,13 +17,13 @@ export function ReminderPickerField({
   children,
 }: Readonly<ReminderPickerFieldProps>) {
   return (
-    <PressableOpacity style={styles.field} onPress={onPress}>
+    <AppTouchableOpacity style={styles.field} onPress={onPress}>
       <ThemedText type="label-sm" color="on-surface-variant">
         {label}
       </ThemedText>
       <ThemedText type="label-md">{value}</ThemedText>
       {children}
-    </PressableOpacity>
+    </AppTouchableOpacity>
   );
 }
 

@@ -1,7 +1,6 @@
 import { AppIcon } from "@/components/icons/AppIcon";
 import { ThemedText } from "@/components/themed-text";
-import { setShadow, Spacing } from "@/constants/theme";
-import { useTheme } from "@/hooks/use-theme";
+import { Colors, setShadow, Spacing } from "@/constants/theme";
 import { StyleSheet, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { UserMenu } from "./user-menu";
@@ -11,7 +10,6 @@ const LOGO_SIZE = 32;
 
 export const Header = () => {
   const insets = useSafeAreaInsets();
-  const { Colors } = useTheme();
 
   return (
     <View

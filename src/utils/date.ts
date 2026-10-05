@@ -20,10 +20,10 @@ export const MONTHS = [
   "dic",
 ];
 
-export const startOfDay = (date: Date) =>
+const startOfDay = (date: Date) =>
   new Date(date.getFullYear(), date.getMonth(), date.getDate());
 
-export const getDayDiff = (date: Date, base: Date = new Date()) =>
+const getDayDiff = (date: Date, base: Date = new Date()) =>
   Math.round(
     (startOfDay(date).getTime() - startOfDay(base).getTime()) / DAY_MS,
   );

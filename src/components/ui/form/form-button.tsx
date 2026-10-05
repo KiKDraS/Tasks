@@ -1,5 +1,5 @@
 import { ThemedText } from "@/components/themed-text";
-import { PressableOpacity } from "@/components/ui/pressable-opacity";
+import { AppTouchableOpacity } from "@/components/ui/app-touchable-opacity";
 import {
   Colors,
   Rounded,
@@ -59,7 +59,7 @@ export function FormButton({
   const { container, textColor, indicatorColor } = VARIANTS[variant];
 
   return (
-    <PressableOpacity
+    <AppTouchableOpacity
       {...rest}
       disabled={isDisabled}
       style={[styles.base, container, isDisabled && styles.disabled, style]}
@@ -71,7 +71,7 @@ export function FormButton({
           {children}
         </ThemedText>
       )}
-    </PressableOpacity>
+    </AppTouchableOpacity>
   );
 }
 

@@ -1,5 +1,5 @@
 import { ThemedText } from "@/components/themed-text";
-import { PressableOpacity } from "@/components/ui/pressable-opacity";
+import { AppTouchableOpacity } from "@/components/ui/app-touchable-opacity";
 import { StyleSheet, View } from "react-native";
 
 interface AuthRedirectProps {
@@ -18,11 +18,11 @@ export function AuthRedirect({
       <ThemedText type="body-md" style={styles.question}>
         {question} -{" "}
       </ThemedText>
-      <PressableOpacity onPress={onPress}>
+      <AppTouchableOpacity onPress={onPress}>
         <ThemedText type="body-md" style={styles.link}>
           {linkLabel}
         </ThemedText>
-      </PressableOpacity>
+      </AppTouchableOpacity>
     </View>
   );
 }

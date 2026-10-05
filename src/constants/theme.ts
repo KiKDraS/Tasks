@@ -12,19 +12,14 @@ export const Colors = {
   "surface-variant": "#e2e4e6",
   "on-surface": "#191c1e",
   "on-surface-variant": "#6e7073",
-  "surface-tint": "#545f73",
   primary: "#091426",
   "on-primary": "#ffffff",
   "primary-container": "#1e293b",
   "on-primary-container": "#8590a6",
   secondary: "#505f76",
-  "on-secondary": "#ffffff",
   "secondary-container": "#d0e1fb",
   "on-secondary-container": "#54647a",
   error: "#ba1a1a",
-  "on-error": "#ffffff",
-  "error-container": "#ffdad6",
-  "on-error-container": "#93000a",
 } as const;
 
 export type ThemeColor = keyof typeof Colors;

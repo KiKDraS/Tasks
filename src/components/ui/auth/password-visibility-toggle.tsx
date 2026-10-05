@@ -1,6 +1,6 @@
 import HidePasswordIcon from "@/components/icons/HidePasswordIcon";
 import ShowPasswordIcon from "@/components/icons/ShowPasswordIcon";
-import { PressableOpacity } from "@/components/ui/pressable-opacity";
+import { AppTouchableOpacity } from "@/components/ui/app-touchable-opacity";
 import { Colors } from "@/constants/theme";
 import { AUTH_MESSAGES } from "@/context/auth/constants";
 
@@ -16,7 +16,7 @@ export function PasswordVisibilityToggle({
   onToggle,
 }: Readonly<PasswordVisibilityToggleProps>) {
   return (
-    <PressableOpacity
+    <AppTouchableOpacity
       onPress={onToggle}
       accessibilityRole="button"
       accessibilityLabel={
@@ -34,6 +34,6 @@ export function PasswordVisibilityToggle({
           color={Colors["on-surface-variant"]}
         />
       )}
-    </PressableOpacity>
+    </AppTouchableOpacity>
   );
 }

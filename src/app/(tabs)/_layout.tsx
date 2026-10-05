@@ -1,9 +1,8 @@
 import HomeIcon from "@/components/icons/HomeIcon";
 import SchedulingIcon from "@/components/icons/SchedulingIcon";
 import { Header } from "@/components/ui/header";
-import { setShadow } from "@/constants/theme";
+import { Colors, setShadow, Spacing } from "@/constants/theme";
 import { TasksProvider } from "@/context/tasks/tasks-context";
-import { useTheme } from "@/hooks/use-theme";
 import { Tabs } from "expo-router";
 import { type ComponentProps } from "react";
 import { type ViewStyle } from "react-native";
@@ -16,7 +15,6 @@ const TAB_BAR_BOTTOM_PADDING = 24;
 type TabScreenOptions = ComponentProps<typeof Tabs>["screenOptions"];
 
 export default function TabLayout() {
-  const { Colors, Spacing } = useTheme();
   const insets = useSafeAreaInsets();
 
   const tabBarStyle: ViewStyle = {

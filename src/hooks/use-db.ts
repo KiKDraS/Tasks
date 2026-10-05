@@ -38,12 +38,6 @@ export function useDB<T>(storageKey: string, initialData: T[] = []) {
     [items, setItems],
   );
 
-  const readItems = useCallback(async () => {
-    await delay(NETWORK_DELAY_MS);
-
-    return hasStoredItems ? items : initialData;
-  }, [hasStoredItems, initialData, items]);
-
   const updateItem = useCallback(
     async (predicate: (item: T) => boolean, updates: Partial<T>) => {
       await delay(NETWORK_DELAY_MS);
@@ -78,11 +72,10 @@ export function useDB<T>(storageKey: string, initialData: T[] = []) {
       items,
       isLoading,
       createItem,
-      readItems,
       updateItem,
       deleteItem,
       itemExists,
     }),
-    [items, isLoading, createItem, readItems, updateItem, deleteItem, itemExists],
+    [items, isLoading, createItem, updateItem, deleteItem, itemExists],
   );
 }

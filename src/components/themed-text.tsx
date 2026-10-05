@@ -1,7 +1,11 @@
 import { Text, type TextProps } from "react-native";
 
-import { ThemeColor, Typography, TypographyType } from "@/constants/theme";
-import { useTheme } from "@/hooks/use-theme";
+import {
+  Colors,
+  Typography,
+  type ThemeColor,
+  type TypographyType,
+} from "@/constants/theme";
 
 export function ThemedText({
   type = "body-md",
@@ -9,8 +13,6 @@ export function ThemedText({
   style,
   ...rest
 }: Readonly<TextProps & { color?: ThemeColor; type?: TypographyType }>) {
-  const { Colors } = useTheme();
-
   return (
     <Text
       style={[{ color: Colors[color] }, Typography[type], style]}

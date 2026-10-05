@@ -1,5 +1,5 @@
 import AddIcon from "@/components/icons/AddIcon";
-import { PressableOpacity } from "@/components/ui/pressable-opacity";
+import { AppTouchableOpacity } from "@/components/ui/app-touchable-opacity";
 import { ROUTES } from "@/constants/routes";
 import { Colors, Rounded, setShadow } from "@/constants/theme";
 import { router } from "expo-router";
@@ -14,9 +14,9 @@ export function HomeAddButton() {
   };
 
   return (
-    <PressableOpacity onPress={navigateToTaskForm} style={styles.button}>
+    <AppTouchableOpacity onPress={navigateToTaskForm} style={styles.button}>
       <AddIcon size={FAB_SIZE} color={Colors["on-primary"]} />
-    </PressableOpacity>
+    </AppTouchableOpacity>
   );
 }
 

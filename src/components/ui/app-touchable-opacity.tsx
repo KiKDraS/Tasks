@@ -1,12 +1,12 @@
 import { TouchableOpacity, type TouchableOpacityProps } from "react-native";
 
-interface PressableOpacityProps extends TouchableOpacityProps {
+interface AppTouchableOpacityProps extends TouchableOpacityProps {
   activeOpacity?: number;
 }
 
-export function PressableOpacity({
+export function AppTouchableOpacity({
   activeOpacity = 0.85,
   ...props
-}: Readonly<PressableOpacityProps>) {
+}: Readonly<AppTouchableOpacityProps>) {
   return <TouchableOpacity {...props} activeOpacity={activeOpacity} />;
 }

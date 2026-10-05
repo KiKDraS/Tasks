@@ -21,7 +21,7 @@ async function readStorageItemAsync(
   return AsyncStorage.getItem(key);
 }
 
-export async function setStorageItemAsync(
+async function setStorageItemAsync(
   key: string,
   value: StorageValue<string>,
 ) {

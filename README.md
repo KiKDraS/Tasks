@@ -23,8 +23,8 @@ pnpm start
 
 Escaneá el QR con **Expo Go** o abrí un emulador (también podés usar
 `pnpm android`, `pnpm ios` o `pnpm web`). Si algún componente nativo no se
-renderiza, usá un development build (`npx expo run:ios` /
-`npx expo run:android`).
+renderiza, usá un development build (`pnpm dlx expo run:ios` /
+`pnpm dlx expo run:android`).
 
 Usuario de prueba (seed): `Ana` / `1234`, o creá una cuenta desde la pantalla de
 registro.

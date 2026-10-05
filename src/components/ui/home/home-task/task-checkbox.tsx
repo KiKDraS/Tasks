@@ -1,5 +1,5 @@
 import { AppIcon } from "@/components/icons/AppIcon";
-import { PressableOpacity } from "@/components/ui/pressable-opacity";
+import { AppTouchableOpacity } from "@/components/ui/app-touchable-opacity";
 import { Colors, Rounded } from "@/constants/theme";
 import { StyleSheet, View } from "react-native";
 
@@ -15,13 +15,13 @@ export function TaskCheckbox({
   onToggle,
 }: Readonly<TaskCheckboxProps>) {
   return (
-    <PressableOpacity onPress={onToggle}>
+    <AppTouchableOpacity onPress={onToggle}>
       {isComplete ? (
         <AppIcon style={styles.completeCheckTask} />
       ) : (
         <View style={styles.incompleteCheckTask} />
       )}
-    </PressableOpacity>
+    </AppTouchableOpacity>
   );
 }
 

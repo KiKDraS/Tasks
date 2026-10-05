@@ -48,7 +48,7 @@ function getNotificationTrigger(
       };
 }
 
-export async function getPermissions(): Promise<boolean> {
+async function getPermissions(): Promise<boolean> {
   await ensureAndroidChannel();
 
   const { status } = await Notifications.getPermissionsAsync();

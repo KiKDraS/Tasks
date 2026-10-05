@@ -1,6 +1,6 @@
 import DeleteIcon from "@/components/icons/DeleteIcon";
 import EditIcon from "@/components/icons/EditIcon";
-import { PressableOpacity } from "@/components/ui/pressable-opacity";
+import { AppTouchableOpacity } from "@/components/ui/app-touchable-opacity";
 import { Colors, Spacing } from "@/constants/theme";
 import { StyleSheet, View } from "react-native";
 
@@ -14,15 +14,15 @@ interface TaskActionsProps {
 export function TaskActions({ onEdit, onDelete }: Readonly<TaskActionsProps>) {
   return (
     <View style={styles.actions}>
-      <PressableOpacity onPress={onEdit}>
+      <AppTouchableOpacity onPress={onEdit}>
         <EditIcon
           size={ACTION_ICON_SIZE}
           color={Colors["on-surface-variant"]}
         />
-      </PressableOpacity>
-      <PressableOpacity onPress={onDelete}>
+      </AppTouchableOpacity>
+      <AppTouchableOpacity onPress={onDelete}>
         <DeleteIcon size={ACTION_ICON_SIZE} color={Colors.error} />
-      </PressableOpacity>
+      </AppTouchableOpacity>
     </View>
   );
 }
