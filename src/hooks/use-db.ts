@@ -16,8 +16,8 @@ function parseStoredItems<T>(rawItems: string | null): T[] {
   }
 }
 
-export function useDB<T>(dbName: string, initialData: T[] = []) {
-  const [[isLoading, rawItems], setItems] = useStorageState(dbName);
+export function useDB<T>(storageKey: string, initialData: T[] = []) {
+  const [[isLoading, rawItems], setItems] = useStorageState(storageKey);
 
   const hasStoredItems = rawItems !== null && rawItems !== "";
 

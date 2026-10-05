@@ -1,17 +1,18 @@
 import { STORAGE_KEYS } from "@/constants/storage-keys";
 import { useDB } from "@/hooks/use-db";
+import { useClearSentNotification } from "@/hooks/tasks/use-clear-sent-notification";
 import { generateId } from "@/utils/id";
-import * as Notifications from "expo-notifications";
 import {
   createContext,
   PropsWithChildren,
   useCallback,
   useContext,
-  useEffect,
   useMemo,
 } from "react";
 import { TASKS_DB } from "./data/tasks-seed";
 import { Task } from "./types/Task";
+import { findTaskById } from "./utils/find-task-by-id";
+import { getNotificationToCancel } from "./utils/get-notification-to-cancel";
 import { cancelTaskReminder } from "./utils/notifications";
 
 const TasksContext = createContext<{
@@ -21,31 +22,6 @@ const TasksContext = createContext<{
   removeTask: (id: string) => Promise<void>;
   updateTask: (updatedTask: Task) => Promise<void>;
 } | null>(null);
-
-const findTaskById = (tasks: Task[], id?: string) =>
-  tasks.find((item) => item.id === id);
-
-function getNotificationToCancel(updatedTask: Task, currentTask?: Task) {
-  if (!updatedTask.isComplete) {
-    return null;
-  }
-
-  return updatedTask.notification ?? currentTask?.notification ?? null;
-}
-
-function useClearSentNotification(
-  clearByNotificationId: (notificationId: string) => void,
-) {
-  useEffect(() => {
-    const subscription = Notifications.addNotificationReceivedListener(
-      (notification) => {
-        clearByNotificationId(notification.request.identifier);
-      },
-    );
-
-    return () => subscription.remove();
-  }, [clearByNotificationId]);
-}
 
 export function TasksProvider({ children }: Readonly<PropsWithChildren>) {
   const {

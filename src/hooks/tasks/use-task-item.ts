@@ -1,5 +1,7 @@
+import { ROUTES } from "@/constants/routes";
 import { useTasks } from "@/context/tasks/tasks-context";
 import { Task } from "@/context/tasks/types/Task";
+import { router } from "expo-router";
 import { useCallback } from "react";
 
 export function useTaskItem(task: Task) {
@@ -16,5 +18,12 @@ export function useTaskItem(task: Task) {
     }
   }, [removeTask, task.id]);
 
-  return { isComplete, toggleCompletion, handleDelete };
+  const openEdit = useCallback(() => {
+    if (!task.id) {
+      return;
+    }
+    router.push({ pathname: ROUTES.taskForm, params: { id: task.id } });
+  }, [task.id]);
+
+  return { isComplete, toggleCompletion, handleDelete, openEdit };
 }

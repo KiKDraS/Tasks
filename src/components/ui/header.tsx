@@ -7,6 +7,11 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import UserIcon from "../icons/UserIcon";
 import { ThemedText } from "../themed-text";
 
+const HEADER_HEIGHT = 56;
+const LOGO_SIZE = 32;
+const USER_BADGE_SIZE = 36;
+const USER_ICON_SIZE = 24;
+
 export const Header = (props: BottomTabHeaderProps) => {
   const insets = useSafeAreaInsets();
   const { Colors } = useTheme();
@@ -32,7 +37,7 @@ export const Header = (props: BottomTabHeaderProps) => {
         </View>
 
         <View style={styles.userIconContainer}>
-          <UserIcon size={24} color={Colors["on-primary"]} />
+          <UserIcon size={USER_ICON_SIZE} color={Colors["on-primary"]} />
         </View>
       </View>
     </View>
@@ -45,7 +50,7 @@ const styles = StyleSheet.create({
     ...setShadow("on-primary-container"),
   },
   content: {
-    height: 56,
+    height: HEADER_HEIGHT,
     paddingHorizontal: Spacing.gutter,
     flexDirection: "row",
     alignItems: "center",
@@ -57,13 +62,13 @@ const styles = StyleSheet.create({
     gap: Spacing["space-sm"],
   },
   image: {
-    width: 32,
-    height: 32,
+    width: LOGO_SIZE,
+    height: LOGO_SIZE,
   },
   userIconContainer: {
     backgroundColor: Colors["primary-container"],
-    width: 36,
-    height: 36,
+    width: USER_BADGE_SIZE,
+    height: USER_BADGE_SIZE,
     borderRadius: Rounded.lg,
     alignItems: "center",
     justifyContent: "center",

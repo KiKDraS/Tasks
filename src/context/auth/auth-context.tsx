@@ -11,13 +11,18 @@ import {
 import { useDB } from "../../hooks/use-db";
 import { USERS_DB } from "./data/users-seed";
 
-const AuthContext = createContext<{
-  signIn: (session: Session) => Promise<void>;
+type AuthContextValue = {
+  registerUser: (session: Session) => Promise<void>;
   logIn: (session: Session) => Promise<boolean>;
   signOut: () => void;
   session?: Session | null;
   isLoading: boolean;
-} | null>(null);
+};
+
+const AuthContext = createContext<AuthContextValue | null>(null);
+
+const hasValidCredentials = (item: Session, session: Session) =>
+  item.user === session.user && item.password === session.password;
 
 export function SessionProvider({ children }: Readonly<PropsWithChildren>) {
   const [[isLoading, session], setSession] = useStorageState(
@@ -28,7 +33,7 @@ export function SessionProvider({ children }: Readonly<PropsWithChildren>) {
     USERS_DB,
   );
 
-  const signIn = useCallback(
+  const registerUser = useCallback(
     async (session: Session) => {
       await createUser(session);
       setSession(JSON.stringify(session));
@@ -42,11 +47,9 @@ export function SessionProvider({ children }: Readonly<PropsWithChildren>) {
 
   const logIn = useCallback(
     async (session: Session) => {
-      const isValidSession = await itemExists((item) => {
-        const isValidCredentials =
-          item.user === session.user && item.password === session.password;
-        return isValidCredentials;
-      });
+      const isValidSession = await itemExists((item) =>
+        hasValidCredentials(item, session),
+      );
 
       if (!isValidSession) {
         return false;
@@ -60,13 +63,13 @@ export function SessionProvider({ children }: Readonly<PropsWithChildren>) {
 
   const data = useMemo(
     () => ({
-      signIn,
+      registerUser,
       signOut,
       logIn,
       session: session ? JSON.parse(session) : null,
       isLoading,
     }),
-    [signIn, signOut, logIn, session, isLoading],
+    [registerUser, signOut, logIn, session, isLoading],
   );
 
   return <AuthContext.Provider value={data}>{children}</AuthContext.Provider>;

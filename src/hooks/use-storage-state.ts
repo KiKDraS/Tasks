@@ -15,6 +15,12 @@ function useAsyncState<T>(
   return [state, setValue];
 }
 
+async function readStorageItemAsync(
+  key: string,
+): Promise<StorageValue<string>> {
+  return SecureStore.getItemAsync(key);
+}
+
 export async function setStorageItemAsync(
   key: string,
   value: StorageValue<string>,
@@ -30,7 +36,7 @@ export function useStorageState(key: string): UseStateHook<string> {
   const [state, setState] = useAsyncState<string>();
 
   useEffect(() => {
-    void SecureStore.getItemAsync(key).then((value: StorageValue<string>) => {
+    void readStorageItemAsync(key).then((value) => {
       setState(value);
     });
   }, [key, setState]);

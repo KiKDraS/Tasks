@@ -2,9 +2,11 @@ import DeleteIcon from "@/components/icons/DeleteIcon";
 import EditIcon from "@/components/icons/EditIcon";
 import { ThemedText } from "@/components/themed-text";
 import { PressableOpacity } from "@/components/ui/pressable-opacity";
-import { Colors, Rounded, Spacing } from "@/constants/theme";
-import { Image } from "expo-image";
+import { Colors, Spacing } from "@/constants/theme";
 import { StyleSheet, View } from "react-native";
+import { TaskCheckbox } from "./task-checkbox";
+
+const ACTION_ICON_SIZE = 22;
 
 interface TaskHeaderProps {
   title: string;
@@ -23,17 +25,7 @@ export function TaskHeader({
 }: Readonly<TaskHeaderProps>) {
   return (
     <View style={styles.header}>
-      <PressableOpacity onPress={onToggle}>
-        {isComplete ? (
-          <Image
-            source={require("@/assets/images/icon.png")}
-            style={styles.completeCheckTask}
-            contentFit="contain"
-          />
-        ) : (
-          <View style={styles.incompleteCheckTask} />
-        )}
-      </PressableOpacity>
+      <TaskCheckbox isComplete={isComplete} onToggle={onToggle} />
       <ThemedText
         type="headline-md"
         style={[styles.title, isComplete && styles.completeText]}
@@ -42,10 +34,10 @@ export function TaskHeader({
       </ThemedText>
       <View style={styles.actions}>
         <PressableOpacity onPress={onEdit}>
-          <EditIcon size={22} color={Colors["on-surface-variant"]} />
+          <EditIcon size={ACTION_ICON_SIZE} color={Colors["on-surface-variant"]} />
         </PressableOpacity>
         <PressableOpacity onPress={onDelete}>
-          <DeleteIcon size={22} color={Colors.error} />
+          <DeleteIcon size={ACTION_ICON_SIZE} color={Colors.error} />
         </PressableOpacity>
       </View>
     </View>
@@ -70,15 +62,5 @@ const styles = StyleSheet.create({
   completeText: {
     color: Colors["on-surface-variant"],
     textDecorationLine: "line-through",
-  },
-  incompleteCheckTask: {
-    width: 24,
-    height: 24,
-    backgroundColor: Colors["surface-variant"],
-    borderRadius: Rounded.md,
-  },
-  completeCheckTask: {
-    width: 24,
-    height: 24,
   },
 });

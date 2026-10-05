@@ -8,6 +8,8 @@ import { REMINDER_TIME_PRESETS } from "@/hooks/task-form/constants";
 import { StyleSheet, View } from "react-native";
 import { OptionChip } from "./option-chip";
 
+const defaultReminderSeconds = REMINDER_TIME_PRESETS[0].seconds;
+
 interface ReminderModeSelectorProps {
   reminder: ReminderSelection;
   selectedDate: Date;
@@ -31,7 +33,7 @@ export function ReminderModeSelector({
             seconds:
               reminder.type === REMINDER_TYPES.TIME
                 ? reminder.seconds
-                : REMINDER_TIME_PRESETS[0].seconds,
+                : defaultReminderSeconds,
           })
         }
         style={styles.modeChip}
