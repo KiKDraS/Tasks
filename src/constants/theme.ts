@@ -9,7 +9,9 @@ import { Platform } from "react-native";
 export const Colors = {
   surface: "#f7f9fb",
   "surface-container": "#eceef0",
+  "surface-variant": "#e2e4e6",
   "on-surface": "#191c1e",
+  "on-surface-variant": "#6e7073",
   "surface-tint": "#545f73",
   primary: "#091426",
   "on-primary": "#ffffff",
@@ -19,16 +21,10 @@ export const Colors = {
   "on-secondary": "#ffffff",
   "secondary-container": "#d0e1fb",
   "on-secondary-container": "#54647a",
-  tertiary: "#061525",
-  "on-tertiary": "#ffffff",
-  "tertiary-container": "#1b2a3b",
-  "on-tertiary-container": "#8291a6",
   error: "#ba1a1a",
   "on-error": "#ffffff",
   "error-container": "#ffdad6",
   "on-error-container": "#93000a",
-  background: "#f7f9fb",
-  "on-background": "#191c1e",
 } as const;
 
 export type ThemeColor = keyof typeof Colors;
@@ -135,7 +131,7 @@ export const NavigationTheme: Theme = {
   dark: false,
   colors: {
     primary: Colors.primary,
-    background: Colors.background,
+    background: Colors.surface,
     card: Colors["surface-container"],
     text: Colors["on-surface"],
     border: Colors["surface-container"],

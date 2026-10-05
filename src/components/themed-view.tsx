@@ -13,6 +13,6 @@ export function ThemedView({ style, children, ...rest }: Readonly<ViewProps>) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.background,
+    backgroundColor: Colors.surface,
   },
 });

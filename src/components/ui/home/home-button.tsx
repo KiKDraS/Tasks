@@ -1,5 +1,5 @@
 import AddIcon from "@/components/icons/AddIcon";
-import { Colors, setShadow } from "@/constants/theme";
+import { Colors, Rounded, setShadow } from "@/constants/theme";
 import { Pressable, StyleSheet } from "react-native";
 
 interface HomeButtonProps {
@@ -19,7 +19,7 @@ const styles = StyleSheet.create({
     width: 42,
     height: 42,
     backgroundColor: Colors["primary-container"],
-    borderRadius: 50,
+    borderRadius: Rounded.full,
     position: "absolute",
     bottom: 24,
     right: 24,

@@ -1,6 +1,8 @@
 import { ThemedText } from "@/components/themed-text";
+import { Colors, Spacing } from "@/constants/theme";
 import { useTasks } from "@/context/users/tasks-context";
-import { FlatList } from "react-native";
+import { FlatList, StyleSheet, View } from "react-native";
+import { HomeTask } from "./home-task";
 
 export function HomeTasksList() {
   const { tasks } = useTasks();
@@ -10,11 +12,23 @@ export function HomeTasksList() {
   }
 
   return (
-    <FlatList
-      data={tasks}
-      keyExtractor={(item) => item.id!}
-      renderItem={({ item }) => <ThemedText>{item.title}</ThemedText>}
-      contentContainerStyle={{ paddingBottom: 16 }}
-    />
+    <View style={styles.container}>
+      <ThemedText type="display">Mis tareas</ThemedText>
+      <FlatList
+        data={tasks}
+        keyExtractor={(item) => item.id!}
+        renderItem={({ item }) => <HomeTask task={item} />}
+        contentContainerStyle={{ gap: Spacing.gutter }}
+      />
+    </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    padding: Spacing.gutter,
+    backgroundColor: Colors["surface-container"],
+    gap: Spacing.margin,
+  },
+});

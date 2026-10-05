@@ -1,4 +1,4 @@
-import { Colors, setShadow } from "@/constants/theme";
+import { Colors, Rounded, setShadow, Spacing } from "@/constants/theme";
 import { useTheme } from "@/hooks/use-theme";
 import { Image } from "expo-image";
 import { BottomTabHeaderProps } from "expo-router/build/react-navigation/bottom-tabs/types";
@@ -16,7 +16,7 @@ export const Header = (props: BottomTabHeaderProps) => {
       style={[
         styles.container,
         {
-          backgroundColor: Colors["background"],
+          backgroundColor: Colors["surface"],
           paddingTop: insets.top,
         },
       ]}
@@ -46,7 +46,7 @@ const styles = StyleSheet.create({
   },
   content: {
     height: 56,
-    paddingHorizontal: 16,
+    paddingHorizontal: Spacing.gutter,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
@@ -54,7 +54,7 @@ const styles = StyleSheet.create({
   iconContainer: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 8,
+    gap: Spacing["space-sm"],
   },
   image: {
     width: 32,
@@ -64,7 +64,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors["primary-container"],
     width: 36,
     height: 36,
-    borderRadius: 8,
+    borderRadius: Rounded.lg,
     alignItems: "center",
     justifyContent: "center",
   },
