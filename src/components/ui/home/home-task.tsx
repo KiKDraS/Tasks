@@ -1,3 +1,4 @@
+import DeleteIcon from "@/components/icons/DeleteIcon";
 import ReminderNotificationIcon from "@/components/icons/ReminderNotificationIcon";
 import { ThemedText } from "@/components/themed-text";
 import { Colors, Rounded, setShadow, Spacing } from "@/constants/theme";
@@ -12,13 +13,17 @@ interface HomeTaskProps {
 }
 
 export function HomeTask({
-  task: { title, description, isComplete, notification },
+  task: { id, title, description, isComplete, notification },
   task,
 }: Readonly<HomeTaskProps>) {
-  const { updateTask } = useTasks();
+  const { updateTask, removeTask } = useTasks();
 
   const toggleCompletion = () => {
     updateTask({ ...task, isComplete: !isComplete });
+  };
+
+  const handleDelete = () => {
+    removeTask(id as string);
   };
 
   return (
@@ -43,10 +48,17 @@ export function HomeTask({
         </Pressable>
         <ThemedText
           type="headline-md"
-          style={isComplete ? styles.completeText : null}
+          style={
+            isComplete
+              ? { ...styles.title, ...styles.completeText }
+              : styles.title
+          }
         >
           {title}
         </ThemedText>
+        <Pressable onPress={handleDelete}>
+          <DeleteIcon size={22} color={Colors.error} />
+        </Pressable>
       </View>
       <View style={styles.body}>
         <ThemedText
@@ -89,12 +101,11 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: "row",
     alignItems: "center",
+    justifyContent: "space-between",
     gap: Spacing["space-md"],
   },
-  headerIcons: {
-    flexDirection: "row",
-    gap: Spacing["space-md"],
-    alignItems: "center",
+  title: {
+    width: "75%",
   },
   body: {
     gap: Spacing["space-md"],
