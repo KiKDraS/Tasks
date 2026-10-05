@@ -1,6 +1,6 @@
 import { SECONDS_PER_HOUR, SECONDS_PER_MINUTE } from "@/constants/time";
+import { REMINDER_TYPES, ReminderSelection } from "@/context/tasks/types/Reminder";
 import { DATE_LABELS, MONTHS, formatTime, isToday, isTomorrow } from "@/utils/date";
-import { REMINDER_TYPES, ReminderSelection } from "../types/Reminder";
 
 const formatDuration = (totalSeconds: number) => {
   const hours = Math.floor(totalSeconds / SECONDS_PER_HOUR);
@@ -19,6 +19,18 @@ const formatDuration = (totalSeconds: number) => {
   }
 
   return parts.join(" ") || "0 segundos";
+};
+
+export const mergePickedDate = (base: Date, pickedDate: Date) => {
+  const merged = new Date(pickedDate);
+  merged.setHours(base.getHours(), base.getMinutes(), 0, 0);
+  return merged;
+};
+
+export const mergePickedTime = (base: Date, pickedTime: Date) => {
+  const merged = new Date(base);
+  merged.setHours(pickedTime.getHours(), pickedTime.getMinutes(), 0, 0);
+  return merged;
 };
 
 export const formatReminderLabel = (reminder: ReminderSelection) => {

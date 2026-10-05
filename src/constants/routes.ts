@@ -1,5 +1,5 @@
 export const ROUTES = {
   tabs: "/(tabs)",
   login: "/login",
-  createTask: "/(tabs)/create-task",
+  taskForm: "/(tabs)/task-form",
 } as const;

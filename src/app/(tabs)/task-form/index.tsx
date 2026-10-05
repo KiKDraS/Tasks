@@ -1,19 +1,27 @@
 import { ThemedText } from "@/components/themed-text";
-import { CreateTaskForm } from "@/components/ui/create-task/create-task-form";
+import { TaskForm } from "@/components/ui/task-form/task-form";
 import { Spacing } from "@/constants/theme";
+import { useLocalSearchParams } from "expo-router";
 import { ScrollView, StyleSheet, View } from "react-native";
 
-export default function CreateTasksScreen() {
+export default function TaskFormScreen() {
+  const { id } = useLocalSearchParams<{ id?: string }>();
+  const isEditing = !!id;
+
   return (
     <ScrollView style={styles.container}>
       <View style={styles.header}>
-        <ThemedText type="display">Nueva tarea</ThemedText>
+        <ThemedText type="display">
+          {isEditing ? "Editar tarea" : "Nueva tarea"}
+        </ThemedText>
         <ThemedText type="body-md" color="on-surface-variant">
-          Completá los datos para crear tu tarea
+          {isEditing
+            ? "Modificá los datos de tu tarea"
+            : "Completá los datos para crear tu tarea"}
         </ThemedText>
       </View>
       <View style={styles.content}>
-        <CreateTaskForm />
+        <TaskForm taskId={id} />
       </View>
     </ScrollView>
   );

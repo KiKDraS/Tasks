@@ -1,10 +1,10 @@
 import { ThemedText } from "@/components/themed-text";
 import { Spacing } from "@/constants/theme";
-import { REMINDER_TIME_PRESETS } from "@/hooks/create-task/constants";
 import {
   REMINDER_TYPES,
   ReminderSelection,
-} from "@/hooks/create-task/types/Reminder";
+} from "@/context/tasks/types/Reminder";
+import { REMINDER_TIME_PRESETS } from "@/hooks/task-form/constants";
 import { StyleSheet, View } from "react-native";
 import { OptionChip } from "./option-chip";
 

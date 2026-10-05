@@ -1,6 +1,6 @@
-import { ReminderSelection } from "./Reminder";
+import { ReminderSelection } from "@/context/tasks/types/Reminder";
 
-export type CreateTaskFormState = {
+export type TaskFormState = {
   title: string;
   description: string;
   reminderEnabled: boolean;
@@ -10,7 +10,7 @@ export type CreateTaskFormState = {
   isSubmitting: boolean;
 };
 
-export type CreateTaskFormAction =
+export type TaskFormAction =
   | { type: "SET_TITLE"; payload: string }
   | { type: "SET_DESCRIPTION"; payload: string }
   | { type: "TOGGLE_REMINDER" }

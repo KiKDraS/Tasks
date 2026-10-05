@@ -1,4 +1,5 @@
 import DeleteIcon from "@/components/icons/DeleteIcon";
+import EditIcon from "@/components/icons/EditIcon";
 import { ThemedText } from "@/components/themed-text";
 import { PressableOpacity } from "@/components/ui/pressable-opacity";
 import { Colors, Rounded, Spacing } from "@/constants/theme";
@@ -10,6 +11,7 @@ interface TaskHeaderProps {
   isComplete: boolean;
   onToggle: () => void;
   onDelete: () => void;
+  onEdit: () => void;
 }
 
 export function TaskHeader({
@@ -17,6 +19,7 @@ export function TaskHeader({
   isComplete,
   onToggle,
   onDelete,
+  onEdit,
 }: Readonly<TaskHeaderProps>) {
   return (
     <View style={styles.header}>
@@ -37,9 +40,14 @@ export function TaskHeader({
       >
         {title}
       </ThemedText>
-      <PressableOpacity onPress={onDelete}>
-        <DeleteIcon size={22} color={Colors.error} />
-      </PressableOpacity>
+      <View style={styles.actions}>
+        <PressableOpacity onPress={onEdit}>
+          <EditIcon size={22} color={Colors["on-surface-variant"]} />
+        </PressableOpacity>
+        <PressableOpacity onPress={onDelete}>
+          <DeleteIcon size={22} color={Colors.error} />
+        </PressableOpacity>
+      </View>
     </View>
   );
 }
@@ -52,7 +60,12 @@ const styles = StyleSheet.create({
     gap: Spacing["space-md"],
   },
   title: {
-    width: "75%",
+    flex: 1,
+  },
+  actions: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: Spacing["space-md"],
   },
   completeText: {
     color: Colors["on-surface-variant"],

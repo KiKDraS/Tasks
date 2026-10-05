@@ -1,5 +1,4 @@
 import { STORAGE_KEYS } from "@/constants/storage-keys";
-import { cancelTaskReminder } from "@/hooks/create-task/utils/notifications";
 import { useDB } from "@/hooks/use-db";
 import { generateId } from "@/utils/id";
 import * as Notifications from "expo-notifications";
@@ -13,41 +12,63 @@ import {
 } from "react";
 import { TASKS_DB } from "./data/tasks-seed";
 import { Task } from "./types/Task";
-import { normalizeTask } from "./utils/normalize-task";
+import { cancelTaskReminder } from "./utils/notifications";
 
 const TasksContext = createContext<{
   tasks: Task[];
+  isLoading: boolean;
   addTask: (task: Task) => Promise<void>;
   removeTask: (id: string) => Promise<void>;
   updateTask: (updatedTask: Task) => Promise<void>;
 } | null>(null);
 
+const findTaskById = (tasks: Task[], id?: string) =>
+  tasks.find((item) => item.id === id);
+
+function getNotificationToCancel(updatedTask: Task, currentTask?: Task) {
+  if (!updatedTask.isComplete) {
+    return null;
+  }
+
+  return updatedTask.notification ?? currentTask?.notification ?? null;
+}
+
+function useClearSentNotification(
+  clearByNotificationId: (notificationId: string) => void,
+) {
+  useEffect(() => {
+    const subscription = Notifications.addNotificationReceivedListener(
+      (notification) => {
+        clearByNotificationId(notification.request.identifier);
+      },
+    );
+
+    return () => subscription.remove();
+  }, [clearByNotificationId]);
+}
+
 export function TasksProvider({ children }: Readonly<PropsWithChildren>) {
   const {
     items: storedTasks,
+    isLoading,
     createItem: createTaskDB,
     updateItem: updateTaskDB,
     deleteItem: deleteTaskDB,
   } = useDB<Task>(STORAGE_KEYS.tasks, TASKS_DB);
 
-  const tasks = useMemo(
-    () => storedTasks.map((task) => normalizeTask(task)),
-    [storedTasks],
+  const tasks = storedTasks;
+
+  const clearSentNotification = useCallback(
+    (notificationId: string) => {
+      void updateTaskDB(
+        (task) => task.notification?.id === notificationId,
+        { notification: null },
+      );
+    },
+    [updateTaskDB],
   );
 
-  useEffect(() => {
-    const subscription = Notifications.addNotificationReceivedListener(
-      (notification) => {
-        const notificationId = notification.request.identifier;
-        void updateTaskDB(
-          (task) => task.notification?.id === notificationId,
-          { notification: null },
-        );
-      },
-    );
-
-    return () => subscription.remove();
-  }, [updateTaskDB]);
+  useClearSentNotification(clearSentNotification);
 
   const addTask = useCallback(
     async (task: Task) => {
@@ -58,9 +79,7 @@ export function TasksProvider({ children }: Readonly<PropsWithChildren>) {
 
   const removeTask = useCallback(
     async (id: string) => {
-      const pendingNotification = tasks.find(
-        (item) => item.id === id,
-      )?.notification;
+      const pendingNotification = findTaskById(tasks, id)?.notification;
       if (pendingNotification) {
         await cancelTaskReminder(pendingNotification.id);
       }
@@ -72,13 +91,15 @@ export function TasksProvider({ children }: Readonly<PropsWithChildren>) {
 
   const updateTask = useCallback(
     async (updatedTask: Task) => {
-      const currentTask = tasks.find((task) => task.id === updatedTask.id);
-      const pendingNotification = currentTask?.notification;
-      const isCompletingTask = Boolean(updatedTask.isComplete);
+      const currentTask = findTaskById(tasks, updatedTask.id);
+      const notificationToCancel = getNotificationToCancel(
+        updatedTask,
+        currentTask,
+      );
       let nextTask = updatedTask;
 
-      if (isCompletingTask && pendingNotification) {
-        await cancelTaskReminder(pendingNotification.id);
+      if (notificationToCancel) {
+        await cancelTaskReminder(notificationToCancel.id);
         nextTask = { ...updatedTask, notification: null };
       }
 
@@ -90,11 +111,12 @@ export function TasksProvider({ children }: Readonly<PropsWithChildren>) {
   const data = useMemo(
     () => ({
       tasks,
+      isLoading,
       addTask,
       removeTask,
       updateTask,
     }),
-    [addTask, removeTask, tasks, updateTask],
+    [addTask, isLoading, removeTask, tasks, updateTask],
   );
 
   return <TasksContext.Provider value={data}>{children}</TasksContext.Provider>;

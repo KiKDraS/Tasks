@@ -5,14 +5,14 @@ import { ROUTES } from "@/constants/routes";
 import { router } from "expo-router";
 
 export default function HomeScreen() {
-  const navigateToCreateTask = () => {
-    router.push(ROUTES.createTask);
+  const navigateToTaskForm = () => {
+    router.push(ROUTES.taskForm);
   };
 
   return (
     <ThemedView>
       <HomeTasksList />
-      <HomeButton onPress={navigateToCreateTask} />
+      <HomeButton onPress={navigateToTaskForm} />
     </ThemedView>
   );
 }

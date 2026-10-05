@@ -39,7 +39,7 @@ export default function TabLayout() {
           }}
         />
         <Tabs.Screen
-          name="create-task"
+          name="task-form"
           options={{
             title: "Create Task",
             tabBarIcon: ({ color }) => (

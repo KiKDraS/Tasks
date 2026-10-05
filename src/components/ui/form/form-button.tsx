@@ -55,7 +55,7 @@ export function FormButton({
   children,
   ...rest
 }: Readonly<FormButtonProps>) {
-  const isDisabled = Boolean(disabled || loading);
+  const isDisabled = !!(disabled || loading);
   const { container, textColor, indicatorColor } = VARIANTS[variant];
 
   return (

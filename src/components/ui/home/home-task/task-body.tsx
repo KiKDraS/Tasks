@@ -20,18 +20,16 @@ export function TaskBody({
   now,
 }: Readonly<TaskBodyProps>) {
   const notificationLabel = getNotificationBadgeLabel(notification, now);
-  const hasNotificationBadge = !isComplete && Boolean(notificationLabel);
+  const hasNotificationBadge = !isComplete && !!notificationLabel;
 
   return (
     <View style={styles.body}>
-      <ThemedText type="body-md" style={isComplete ? styles.completeText : null}>
+      <ThemedText
+        type="body-md"
+        style={isComplete ? styles.completeText : null}
+      >
         {description}
       </ThemedText>
-      {isComplete && (
-        <HomeBadge>
-          <ThemedText type="label-sm">Completed</ThemedText>
-        </HomeBadge>
-      )}
       {hasNotificationBadge && (
         <HomeBadge>
           <ReminderNotificationIcon size={11} color={Colors["on-surface"]} />

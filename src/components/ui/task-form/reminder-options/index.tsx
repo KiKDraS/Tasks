@@ -2,8 +2,8 @@ import { Spacing } from "@/constants/theme";
 import {
   REMINDER_TYPES,
   ReminderSelection,
-} from "@/hooks/create-task/types/Reminder";
-import { useReminderOptions } from "@/hooks/create-task/use-reminder-options";
+} from "@/context/tasks/types/Reminder";
+import { useReminderOptions } from "@/hooks/task-form/use-reminder-options";
 import { StyleSheet, View } from "react-native";
 import { ReminderDateOptions } from "./reminder-date-options";
 import { ReminderHeader } from "./reminder-header";
@@ -15,6 +15,7 @@ interface ReminderOptionsProps {
   onToggle: (enabled: boolean) => void;
   reminder: ReminderSelection;
   onSelect: (reminder: ReminderSelection) => void;
+  disabled?: boolean;
 }
 
 export function ReminderOptions({
@@ -22,6 +23,7 @@ export function ReminderOptions({
   onToggle,
   reminder,
   onSelect,
+  disabled,
 }: Readonly<ReminderOptionsProps>) {
   const {
     androidPicker,
@@ -32,7 +34,10 @@ export function ReminderOptions({
   } = useReminderOptions(reminder, onSelect);
 
   return (
-    <View style={styles.container}>
+    <View
+      pointerEvents={disabled ? "none" : "auto"}
+      style={[styles.container, disabled && styles.disabled]}
+    >
       <ReminderHeader enabled={enabled} onToggle={onToggle} />
       {enabled && (
         <>
@@ -61,5 +66,8 @@ export function ReminderOptions({
 const styles = StyleSheet.create({
   container: {
     gap: Spacing["space-md"],
+  },
+  disabled: {
+    opacity: 0.5,
   },
 });

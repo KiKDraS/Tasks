@@ -1,12 +1,9 @@
 import * as Notifications from "expo-notifications";
 import { Platform } from "react-native";
 import { SECOND_MS } from "@/constants/time";
-import { TaskNotification } from "@/context/tasks/types/Task";
-import {
-  NOTIFICATION_COPY,
-  NOTIFICATION_DATA_KEYS,
-} from "@/hooks/create-task/constants";
+import { NOTIFICATION_COPY, NOTIFICATION_DATA_KEYS } from "../constants";
 import { REMINDER_TYPES, ReminderSelection } from "../types/Reminder";
+import { TaskNotification } from "../types/Task";
 
 const DEFAULT_CHANNEL_ID = "default";
 
@@ -19,13 +16,40 @@ Notifications.setNotificationHandler({
   }),
 });
 
-export async function getPermissions(): Promise<boolean> {
-  if (Platform.OS === "android") {
-    await Notifications.setNotificationChannelAsync(DEFAULT_CHANNEL_ID, {
-      name: NOTIFICATION_COPY.channelName,
-      importance: Notifications.AndroidImportance.HIGH,
-    });
+async function ensureAndroidChannel(): Promise<void> {
+  if (Platform.OS !== "android") {
+    return;
   }
+
+  await Notifications.setNotificationChannelAsync(DEFAULT_CHANNEL_ID, {
+    name: NOTIFICATION_COPY.channelName,
+    importance: Notifications.AndroidImportance.HIGH,
+  });
+}
+
+function getScheduledAt(reminder: ReminderSelection): Date {
+  return reminder.type === REMINDER_TYPES.DATE
+    ? reminder.date
+    : new Date(Date.now() + reminder.seconds * SECOND_MS);
+}
+
+function getNotificationTrigger(
+  reminder: ReminderSelection,
+  scheduledAt: Date,
+): Notifications.SchedulableNotificationTriggerInput {
+  return reminder.type === REMINDER_TYPES.DATE
+    ? {
+        type: Notifications.SchedulableTriggerInputTypes.DATE,
+        date: scheduledAt,
+      }
+    : {
+        type: Notifications.SchedulableTriggerInputTypes.TIME_INTERVAL,
+        seconds: reminder.seconds,
+      };
+}
+
+export async function getPermissions(): Promise<boolean> {
+  await ensureAndroidChannel();
 
   const { status } = await Notifications.getPermissionsAsync();
   if (status === "granted") {
@@ -49,22 +73,8 @@ export async function scheduleTaskReminder(options: {
     return null;
   }
 
-  const reminder = options.reminder;
-  const isDateReminder = reminder.type === REMINDER_TYPES.DATE;
-  const scheduledAt = isDateReminder
-    ? reminder.date
-    : new Date(Date.now() + reminder.seconds * SECOND_MS);
-
-  const trigger: Notifications.SchedulableNotificationTriggerInput =
-    isDateReminder
-      ? {
-          type: Notifications.SchedulableTriggerInputTypes.DATE,
-          date: scheduledAt,
-        }
-      : {
-          type: Notifications.SchedulableTriggerInputTypes.TIME_INTERVAL,
-          seconds: reminder.seconds,
-        };
+  const scheduledAt = getScheduledAt(options.reminder);
+  const trigger = getNotificationTrigger(options.reminder, scheduledAt);
 
   const id = await Notifications.scheduleNotificationAsync({
     content: {

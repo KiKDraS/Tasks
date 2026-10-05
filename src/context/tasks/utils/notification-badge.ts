@@ -26,7 +26,7 @@ export function getNotificationBadgeLabel(
 
   const time = formatTime(scheduledAt);
   if (isToday(scheduledAt, now)) {
-    return time;
+    return `Hoy, ${time}`;
   }
 
   return `${formatDate(scheduledAt)}, ${time}`;

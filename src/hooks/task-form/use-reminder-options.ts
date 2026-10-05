@@ -2,7 +2,11 @@ import {
   REMINDER_TYPES,
   ReminderSelection,
   ReminderType,
-} from "@/hooks/create-task/types/Reminder";
+} from "@/context/tasks/types/Reminder";
+import {
+  mergePickedDate,
+  mergePickedTime,
+} from "@/hooks/task-form/utils/reminder";
 import { useCallback, useMemo, useState } from "react";
 import { Platform } from "react-native";
 
@@ -13,7 +17,6 @@ export function useReminderOptions(
   onSelect: (reminder: ReminderSelection) => void,
 ) {
   const [androidPicker, setAndroidPicker] = useState<AndroidPicker>(null);
-
   const selectedDate = useMemo(() => {
     const isDateReminder = reminder.type === REMINDER_TYPES.DATE;
     return isDateReminder ? reminder.date : new Date();
@@ -27,9 +30,10 @@ export function useReminderOptions(
 
   const handleDateChange = useCallback(
     (date: Date) => {
-      const next = new Date(date);
-      next.setHours(selectedDate.getHours(), selectedDate.getMinutes(), 0, 0);
-      onSelect({ type: REMINDER_TYPES.DATE, date: next });
+      onSelect({
+        type: REMINDER_TYPES.DATE,
+        date: mergePickedDate(selectedDate, date),
+      });
       closeAndroidPicker();
     },
     [closeAndroidPicker, onSelect, selectedDate],
@@ -37,9 +41,10 @@ export function useReminderOptions(
 
   const handleTimeChange = useCallback(
     (date: Date) => {
-      const next = new Date(selectedDate);
-      next.setHours(date.getHours(), date.getMinutes(), 0, 0);
-      onSelect({ type: REMINDER_TYPES.DATE, date: next });
+      onSelect({
+        type: REMINDER_TYPES.DATE,
+        date: mergePickedTime(selectedDate, date),
+      });
       closeAndroidPicker();
     },
     [closeAndroidPicker, onSelect, selectedDate],

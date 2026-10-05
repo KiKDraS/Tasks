@@ -4,21 +4,24 @@ import { useCallback, useEffect, useMemo } from "react";
 
 const NETWORK_DELAY_MS = 800;
 
+function parseStoredItems<T>(rawItems: string | null): T[] {
+  if (rawItems === null || rawItems === "") {
+    return [];
+  }
+
+  try {
+    return JSON.parse(rawItems) as T[];
+  } catch {
+    return [];
+  }
+}
+
 export function useDB<T>(dbName: string, initialData: T[] = []) {
   const [[isLoading, rawItems], setItems] = useStorageState(dbName);
 
   const hasStoredItems = rawItems !== null && rawItems !== "";
 
-  const items = useMemo<T[]>(() => {
-    if (!hasStoredItems) {
-      return [];
-    }
-    try {
-      return JSON.parse(rawItems) as T[];
-    } catch {
-      return [];
-    }
-  }, [hasStoredItems, rawItems]);
+  const items = useMemo<T[]>(() => parseStoredItems<T>(rawItems), [rawItems]);
 
   useEffect(() => {
     if (!hasStoredItems) {
@@ -38,18 +41,16 @@ export function useDB<T>(dbName: string, initialData: T[] = []) {
   const readItems = useCallback(async () => {
     await delay(NETWORK_DELAY_MS);
 
-    return items;
-  }, [items]);
+    return hasStoredItems ? items : initialData;
+  }, [hasStoredItems, initialData, items]);
 
   const updateItem = useCallback(
     async (predicate: (item: T) => boolean, updates: Partial<T>) => {
       await delay(NETWORK_DELAY_MS);
 
-      setItems(
-        JSON.stringify(
-          items.map((item) => (predicate(item) ? { ...item, ...updates } : item)),
-        ),
-      );
+      const applyUpdates = (item: T) =>
+        predicate(item) ? { ...item, ...updates } : item;
+      setItems(JSON.stringify(items.map(applyUpdates)));
     },
     [items, setItems],
   );

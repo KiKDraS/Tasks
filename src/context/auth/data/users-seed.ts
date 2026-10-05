@@ -1,3 +1,3 @@
 import { Session } from "../types/Session";
 
-export const USERS_DB: Session[] = [{ user: "pepe", password: "1234" }];
+export const USERS_DB: Session[] = [{ user: "Ana", password: "1234" }];

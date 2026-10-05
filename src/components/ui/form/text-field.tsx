@@ -44,7 +44,7 @@ export function TextField({
         multiline={multiline}
         textAlignVertical={multiline ? "top" : "center"}
       />
-      {Boolean(error) && (
+      {!!error && (
         <ThemedText type="label-sm" color="error">
           {error}
         </ThemedText>

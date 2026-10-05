@@ -4,7 +4,7 @@ import { useCallback } from "react";
 
 export function useTaskItem(task: Task) {
   const { updateTask, removeTask } = useTasks();
-  const isComplete = Boolean(task.isComplete);
+  const isComplete = !!task.isComplete;
 
   const toggleCompletion = useCallback(() => {
     updateTask({ ...task, isComplete: !isComplete });
