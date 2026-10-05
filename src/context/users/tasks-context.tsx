@@ -1,65 +1,64 @@
+import { useDB } from "@/hooks/use-db";
 import {
   createContext,
   PropsWithChildren,
   useCallback,
   useContext,
   useMemo,
-  useState,
 } from "react";
-import { delay } from "../auth/utils/delay";
 import { Task } from "./types/Task";
 
 const TASKS_DB: Task[] = [
   {
+    id: "task-1",
     title: "Task 1",
     description: "Description for Task 1",
     isComplete: false,
   },
   {
+    id: "task-2",
     title: "Task 2",
     description: "Description for Task 2",
     isComplete: true,
   },
 ];
 
+const generateId = () => crypto.randomUUID();
+
 const TasksContext = createContext<{
   tasks: Task[];
-  addTask: (task: Task) => void;
-  removeTask: (id: string) => void;
-  updateTask: (updatedTask: Task) => void;
+  addTask: (task: Task) => Promise<void>;
+  removeTask: (id: string) => Promise<void>;
+  updateTask: (updatedTask: Task) => Promise<void>;
 } | null>(null);
 
-const NETWORK_DELAY_MS = 500;
-
 export function TasksProvider({ children }: Readonly<PropsWithChildren>) {
-  const [tasks, setTasks] = useState<Task[]>(TASKS_DB);
+  const {
+    items: tasks,
+    createItem: createTaskDB,
+    updateItem: updateTaskDB,
+    deleteItem: deleteTaskDB,
+  } = useDB<Task>("tasks", TASKS_DB);
 
   const addTask = useCallback(
     async (task: Task) => {
-      await delay(NETWORK_DELAY_MS);
-      setTasks((prevTasks) => [...prevTasks, task]);
+      await createTaskDB({ ...task, id: task.id ?? generateId() });
     },
-    [setTasks],
+    [createTaskDB],
   );
 
   const removeTask = useCallback(
     async (id: string) => {
-      await delay(NETWORK_DELAY_MS);
-      setTasks((prevTasks) => prevTasks.filter((task) => task.id !== id));
+      await deleteTaskDB((task) => task.id === id);
     },
-    [setTasks],
+    [deleteTaskDB],
   );
 
   const updateTask = useCallback(
     async (updatedTask: Task) => {
-      await delay(NETWORK_DELAY_MS);
-      setTasks((prevTasks) =>
-        prevTasks.map((task) =>
-          task.id === updatedTask.id ? updatedTask : task,
-        ),
-      );
+      await updateTaskDB((task) => task.id === updatedTask.id, updatedTask);
     },
-    [setTasks],
+    [updateTaskDB],
   );
 
   const data = useMemo(

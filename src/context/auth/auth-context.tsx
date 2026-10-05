@@ -8,7 +8,6 @@ import {
   type PropsWithChildren,
 } from "react";
 import { useDB } from "../../hooks/use-db";
-import { delay } from "./utils/delay";
 
 const USERS_DB: Session[] = [{ user: "pepe", password: "1234" }];
 
@@ -20,18 +19,19 @@ const AuthContext = createContext<{
   isLoading: boolean;
 } | null>(null);
 
-const NETWORK_DELAY_MS = 800;
-
 export function SessionProvider({ children }: Readonly<PropsWithChildren>) {
   const [[isLoading, session], setSession] = useStorageState("session");
-  const { itemExists } = useDB<Session>("users", USERS_DB);
+  const { createItem: createUser, itemExists } = useDB<Session>(
+    "users",
+    USERS_DB,
+  );
 
   const signIn = useCallback(
     async (session: Session) => {
-      await delay(NETWORK_DELAY_MS);
+      await createUser(session);
       setSession(JSON.stringify(session));
     },
-    [setSession],
+    [createUser, setSession],
   );
 
   const signOut = useCallback(() => {
