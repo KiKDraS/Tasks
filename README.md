@@ -48,6 +48,10 @@ pnpm lint
 - **UI**: componentes reutilizables (`FormButton`, `TextField`, `OptionChip`,
   `TaskCheckbox`) y tema centralizado de colores, tipografía y espaciado.
 
+## Tests
+
+![Resultado de los tests](assets/images/test.png)
+
 ## Video DEMO
 
 🎥
