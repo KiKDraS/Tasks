@@ -18,11 +18,13 @@ Canonical source-of-truth policy for this repo.
 | Assignment requirements, acceptance checklist, accepted gaps, manual QA | `docs/project-brief.md` |
 | Stage flow, gates, git flow, handoff format | `.opencode/docs/pipeline.md` |
 | Review/test checklist and test conventions | `.opencode/docs/quality-gates.md` |
+| Skills rules: caveman, Context7, CodeGraph | `.opencode/docs/skills-settings-rules.md` |
+| Knowledge-awareness rules | `.opencode/docs/agent-knowledge-awareness.md` |
 | Agent-specific behavior and permissions | `.opencode/agents/<id>.md` |
 
 ## Binding
 
-`opencode.json` auto-loads `docs/expo-react-native.md`, `docs/project-brief.md`, `.opencode/docs/pipeline.md`, and `.opencode/docs/directive-sync.md` for every agent. Read the additional docs below before acting.
+`opencode.json` auto-loads `docs/expo-react-native.md`, `docs/project-brief.md`, `.opencode/docs/pipeline.md`, and `.opencode/docs/directive-sync.md` for every agent. `.opencode/plugins/load-context.js` injects `.opencode/docs/skills-settings-rules.md` and `.opencode/docs/agent-knowledge-awareness.md` on every model request. Read the additional docs below before acting.
 
 | Agent | Additional reads |
 | --- | --- |

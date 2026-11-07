@@ -11,5 +11,7 @@ Expo/React Native school project for ISTEA Parcial 1: a local task manager with 
 | Agent stages, gates, git flow | `.opencode/docs/pipeline.md` |
 | Source-of-truth map and no-duplication policy | `.opencode/docs/directive-sync.md` |
 | Review and test checklist | `.opencode/docs/quality-gates.md` |
+| Skills rules: caveman, Context7, CodeGraph | `.opencode/docs/skills-settings-rules.md` |
+| Knowledge-awareness rules | `.opencode/docs/agent-knowledge-awareness.md` |
 
 Default agent: `orchestrator`. Agent files live in `.opencode/agents/`. Source-of-truth policy: `.opencode/docs/directive-sync.md`.
