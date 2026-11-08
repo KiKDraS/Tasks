@@ -37,7 +37,7 @@ Docs: https://docs.expo.dev/eas/index.md
 ## Rules
 
 - If `ios/` and `android/` directories do not exist, they are generated (Continuous Native Generation). Never create or edit them by hand — configure native behavior in `app.json` and config plugins.
-- Expo Go only includes its bundled native modules. After adding a library with native code, the app needs a development build: `npx expo run:ios|android` locally, or `eas build --profile development`.
+- Expo Go only includes its bundled native modules. After adding a library with native code, the app needs a development build: `npx expo run:ios|android` locally, or `eas build --profile development`. Parcial 2 device modules (camera, gallery, location, contacts, calendar) also need a development build; Expo Go cannot prove their permissions or native pickers.
 - Prefer recommended Expo modules over third-party libraries, and check your available skills before adding dependencies. Docs: https://docs.expo.dev/versions/latest/index.md
 
 ## Repo Notes
@@ -46,7 +46,9 @@ Docs: https://docs.expo.dev/eas/index.md
 - App map:
   - `src/app/` — Expo Router routes: login (`index`), registration (`sign-up`), home (`(tabs)/index`), task form (`(tabs)/task-form`).
   - `src/components/ui/` — reusable UI, including `FormButton`, `TextField`, `OptionChip`, `TaskCheckbox`.
-  - `src/context/` — auth and tasks providers.
+  - `src/context/` — auth and tasks providers; Parcial 2 target moves tasks to `src/stores/`.
+  - `src/stores/` — Zustand task store (target).
+  - `src/services/` — device APIs and task storage adapter (target).
   - `src/hooks/` — form, auth, task, and storage hooks.
   - `src/constants/` — theme, routes, storage keys, time.
   - `src/utils/` — id, date, delay.
