@@ -1,11 +1,12 @@
-# Parcial 1 — Project Brief
+# Parcial 1 + 2 — Project Brief
 
 Canonical requirements source for all agents. Reference sections from other
 docs.
 
-> **Precedence:** the implementation in `src/` is the source of truth. Where
-> this brief and the code disagree, the code wins; the exam was already
-> approved. Behavior is documented in `.opencode/docs/SPEC.md`.
+> **Precedence:** the implementation in `src/` is the source of truth for
+> Parcial 1. Where this brief and the code disagree, the code wins; the Parcial
+> 1 exam was already approved. Parcial 2 requirements are not implemented or
+> scored yet. Behavior is documented in `.opencode/docs/SPEC.md`.
 
 ## Objetivo del Parcial
 
@@ -125,10 +126,10 @@ Agregar tareas con título y recordatorio.
     - Funcionalidades implementadas.
     - Enlace Video DEMO de la app en YouTube (no más de 1 min).
 
-## Acceptance checklist
+## Parcial 1 acceptance checklist
 
-Map each requirement to current evidence. Update this table when the app
-changes.
+Parcial 1 is approved. Map each requirement to current evidence. Update this
+table when the app changes.
 
 | #   | Requirement                                  | Evidence                                                                                                                                  | Status                    |
 | --- | -------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- | ------------------------- |
@@ -142,11 +143,14 @@ changes.
 
 ## Accepted gaps
 
-The exam was already approved. These gaps are recorded but are not blockers for
-agent work:
+The Parcial 1 exam was already approved. These gaps are recorded but are not
+blockers for agent work:
 
 - `README.md` says 4 suites / 12 tests; actual suite is 5 files / 13 tests.
 - `README.md` demo link points to Google Drive; the assignment asks for YouTube.
+
+Parcial 2 requirements are not approved or scored yet; see §Parcial 2
+acceptance checklist.
 
 ## Manual QA
 
@@ -158,7 +162,7 @@ agent work:
   notification fires on a development build/device, then confirm it is cancelled
   when the task is completed or deleted.
 
-# Parcial 2 - Project Brief continuity
+# Parcial 2 — Project Brief continuity
 
 ## Objetivo del Parcial
 
@@ -170,7 +174,7 @@ del manejo de estado a una solución de estado global (Zustand o Redux Toolkit).
 ## Consigna General
 
 Cada alumno deberá continuar trabajando sobre la misma aplicación entregada en
-el Parcial 1 , incorporando las nuevas funcionalidades que se detallan a
+el Parcial 1, incorporando las nuevas funcionalidades que se detallan a
 continuación.
 
 ## Requerimientos obligatorios
@@ -214,9 +218,11 @@ continuación.
 Gestor de tareas: Foto adjunta a la tarea, ubicación del lugar a realizarla,
 contacto relacionado (responsable) y evento en el calendario.
 
-##Punto Extra: IA aplicada al desarrollo Como parte extra del parcial, el alumno
-puede incorporar el uso de herramientas de Inteligencia Artificial como apoyo al
-desarrollo, aplicando alguno (o varios) de los siguientes conceptos:
+## Punto Extra: IA aplicada al desarrollo
+
+Como parte extra del parcial, el alumno puede incorporar el uso de herramientas
+de Inteligencia Artificial como apoyo al desarrollo, aplicando alguno (o varios)
+de los siguientes conceptos:
 
 - Generación de código con IA: utilizar un asistente de IA (ej: GitHub Copilot,
   ChatGPT, Claude, etc.) para generar o refactorizar parte del código de la app.
@@ -256,3 +262,19 @@ desarrollo, aplicando alguno (o varios) de los siguientes conceptos:
   - Cómo ejecutar la app y cómo correr los tests.
   - Enlace al video DEMO actualizado en YouTube (no más de 1 minuto), mostrando
     las nuevas funcionalidades.
+
+## Parcial 2 acceptance checklist
+
+Parcial 2 is not implemented and not scored. Update each row when the feature
+lands and the exam is graded. Target evidence is in `.opencode/docs/SPEC.md`
+§15.7; do not mark a row ✅ before scoring.
+
+| # | Requirement | Evidence | Status |
+| --- | --- | --- | --- |
+| 1 | Permissions for camera, gallery, location, contacts, calendar; granted / denied / pending states; clear denied message | None yet; target `SPEC.md` §15.2 | ⏳ pending implementation and scoring |
+| 2 | Camera and gallery photo attached to a task and shown in the list | None yet; target `SPEC.md` §15.3–§15.5 | ⏳ pending implementation and scoring |
+| 3 | GPS location attached to a task and shown as coordinates or address | None yet; target `SPEC.md` §15.3–§15.5 | ⏳ pending implementation and scoring |
+| 4 | Contact selected from the device and calendar event created for a task | None yet; target `SPEC.md` §15.3–§15.5 | ⏳ pending implementation and scoring |
+| 5 | Zustand global state with add, update, and delete actions; components read through store selectors | None yet; target `SPEC.md` §15.4 | ⏳ pending implementation and scoring |
+| 6 | Jest automated tests for the new state and device flows | None yet; target `SPEC.md` §15.6 | ⏳ pending implementation and scoring |
+| 7 | Delivery: updated public repo, README with new features, YouTube demo | None yet; target `README.md` | ⏳ pending implementation and scoring |

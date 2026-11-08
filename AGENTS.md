@@ -1,6 +1,6 @@
 # Tasks
 
-Expo/React Native school project for ISTEA Parcial 1 + 2: a local task manager with authentication, AsyncStorage persistence, local notifications, device resources (camera, gallery, location, contacts, calendar), and Zustand global state.
+Expo/React Native school project for ISTEA Parcial 1 + 2. Parcial 1 is shipped and approved; Parcial 2 is the target scope: device resources (camera, gallery, location, contacts, calendar) and Zustand global state.
 
 ## Project structure
 

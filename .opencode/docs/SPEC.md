@@ -8,8 +8,8 @@ shipped. Every shipped statement cites the file that implements it.
 
 1. The implementation (`src/`, `app.json`, `package.json`) is authoritative.
 2. `.opencode/docs/project-brief.md` records the assignments. Where the
-   assignment and the code disagree, the code wins; the exam was already
-   approved.
+   assignment and the code disagree, the code wins. The Parcial 1 exam was
+   already approved; Parcial 2 is not implemented or scored yet.
 3. §15 is a target contract for Parcial 2, not shipped behavior. Until an item
    exists in `src/`, the current code wins.
 4. Stitch project `Minimalist Reminder Todo App` is a visual reference only. It
@@ -365,10 +365,10 @@ Recorded, not hidden:
 | Completed task edit | Reminder controls disabled, so a completed task cannot gain a reminder | `task-form-content.tsx` |
 | Past reminder on edit | Silently replaced by the default 15-minute option | `task-form-reducer.ts` |
 
-## 14. Assignment traceability
+## 14. Parcial 1 assignment traceability
 
 Requirements live in `.opencode/docs/project-brief.md`. This table points to the
-current implementation, not a restatement of the assignment.
+current Parcial 1 implementation, not a restatement of the assignment.
 
 | Requirement | Implementation |
 | --- | --- |
@@ -379,14 +379,15 @@ current implementation, not a restatement of the assignment.
 | Local notification | `src/context/tasks/utils/notifications.ts`, `app.json` plugin |
 | Jest + RNTL | `__tests__/`, `package.json` `jest` block |
 
-Parcial 2 traceability is in §15.7. Its rows are targets, not evidence.
+Parcial 2 traceability is in §15.7. Its rows are targets; they are not evidence and not scored.
 
 ## 15. Parcial 2 target (not implemented)
 
 Status: the requirements exist in `.opencode/docs/project-brief.md` §Parcial 2.
 The code in `src/` still implements Parcial 1 only. This section is the target
-contract for the next build; it is not evidence. `(target)` marks files that do
-not exist yet. Update this section to shipped behavior as each item lands.
+contract for the next build; it is not evidence and it is not scored. `(target)`
+marks files that do not exist yet. Update this section to shipped behavior as
+each item lands and the exam is graded.
 
 ### 15.1 Target stack additions
 
@@ -622,6 +623,9 @@ Mock `expo-image-picker`, `expo-location`, `expo-contacts/legacy`,
 | Zustand global state | `src/stores/tasks/` | ⏳ |
 | Tests | `__tests__/` additions | ⏳ |
 | README + demo | `README.md` | ⏳ `release-manager` |
+
+⏳ = not implemented and not scored. Do not mark a row ✅ before the exam is
+graded.
 
 ### 15.8 Target copy
 
