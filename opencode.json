@@ -59,6 +59,14 @@
           "CONTEXT7_API_KEY": "{file:.opencode/secrets/context7-api-key}"
         },
         "disabled": false
+      },
+      "stitch": {
+        "type": "remote",
+        "url": "https://stitch.googleapis.com/mcp",
+        "disabled": false,
+        "headers": {
+          "X-Goog-Api-Key": "{file:.opencode/secrets/stitch-api-key}"
+        }
       }
     }
   },
