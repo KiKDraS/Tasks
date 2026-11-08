@@ -30,6 +30,7 @@ Authoritative roster: `AGENTS.md` §Agents. Agent permissions: `.opencode/agents
   creates it and reports the URL.
 - Delete the merged head branch after every merge: local and remote. Never delete
   `main`, `feature/parcial-2`, or the active phase branch.
+- Phase integration PR body lists every PR merged into the phase branch, with URL.
 - Merge to `main` only after the gates and explicit user approval.
 
 ## Handoff format

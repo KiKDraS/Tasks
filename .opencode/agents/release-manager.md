@@ -30,7 +30,7 @@ Report the branch, commit, PR URL if any, branch deletion, and the remaining use
 
 ## PR flow
 
-Use `gh`. Do not build release tooling by hand.
+For phase integration PRs, list every merged phase PR with URL in the body (`.opencode/docs/pipeline.md` §Git). Use `gh`. Do not build release tooling by hand.
 
 ```bash
 # branch and push
