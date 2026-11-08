@@ -1,10 +1,9 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 import { STORAGE_KEYS } from "@/constants/storage-keys";
+import { NETWORK_DELAY_MS } from "@/constants/time";
 import { Task } from "@/context/tasks/types/Task";
 import { delay } from "@/utils/delay";
-
-const NETWORK_DELAY_MS = 800;
 
 export function parseTasks(rawItems: string | null): Task[] {
   if (rawItems === null || rawItems === "") {

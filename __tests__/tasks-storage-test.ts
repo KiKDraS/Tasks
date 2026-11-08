@@ -1,24 +1,27 @@
-jest.mock("@react-native-async-storage/async-storage", () =>
-  require("@react-native-async-storage/async-storage/jest/async-storage-mock"),
-);
-jest.mock("@/utils/delay", () => ({
-  delay: jest.fn(() => Promise.resolve()),
-}));
-
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 import { STORAGE_KEYS } from "@/constants/storage-keys";
+import { NETWORK_DELAY_MS } from "@/constants/time";
+import { Task } from "@/context/tasks/types/Task";
 import {
   parseTasks,
   readOrSeedTasks,
   writeTasks,
 } from "@/services/tasks-storage";
 import { delay } from "@/utils/delay";
-import { Task } from "@/context/tasks/types/Task";
 
-const delayMock = delay as unknown as jest.Mock;
-const getItemMock = AsyncStorage.getItem as jest.Mock;
-const setItemMock = AsyncStorage.setItem as jest.Mock;
+jest.mock("@react-native-async-storage/async-storage", () =>
+  jest.requireActual(
+    "@react-native-async-storage/async-storage/jest/async-storage-mock",
+  ),
+);
+jest.mock("@/utils/delay", () => ({
+  delay: jest.fn(() => Promise.resolve()),
+}));
+
+const delayMock = jest.mocked(delay);
+const getItemMock = jest.mocked(AsyncStorage.getItem);
+const setItemMock = jest.mocked(AsyncStorage.setItem);
 
 const seedTasks: Task[] = [
   {
@@ -91,10 +94,10 @@ describe("writeTasks", () => {
     jest.clearAllMocks();
   });
 
-  test("waits 800 ms then writes the JSON array", async () => {
+  test("waits for the network delay then writes the JSON array", async () => {
     await writeTasks(seedTasks);
 
-    expect(delayMock).toHaveBeenCalledWith(800);
+    expect(delayMock).toHaveBeenCalledWith(NETWORK_DELAY_MS);
     expect(setItemMock).toHaveBeenCalledWith(
       STORAGE_KEYS.tasks,
       JSON.stringify(seedTasks),
