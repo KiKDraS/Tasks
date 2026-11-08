@@ -43,9 +43,9 @@ behavior.
 - `expo-crypto` for task IDs (`generateId` → `randomUUID`).
 - `@expo-google-fonts/geist` for the typeface.
 - Jest 29 with `jest-expo` and React Native Testing Library.
-- Parcial 2 target additions (not installed yet): `expo-image-picker`,
-  `expo-location`, `expo-contacts/legacy`, `expo-calendar/legacy`,
-  `expo-file-system`, and `zustand`. See §15.1.
+- Parcial 2 target additions: `zustand` is installed; `expo-image-picker`,
+  `expo-location`, `expo-contacts/legacy`, `expo-calendar/legacy`, and
+  `expo-file-system` are not installed yet. See §15.1.
 
 Sources: `package.json`, `app.json`, `src/utils/id.ts`, `src/constants/theme.ts`.
 
@@ -343,13 +343,14 @@ in `package.json`.
 | `__tests__/generate-id-test.ts` | 1 | UUID shape |
 | `__tests__/validate-sign-up-form-test.ts` | 3 | Required fields and password mismatch |
 | `__tests__/validate-task-form-test.ts` | 3 | Title required, reminder validity |
+| `__tests__/tasks-storage-test.ts` | 9 | Parse, seed, and write task storage |
 
-Total: 5 files, 13 tests. Contexts, AsyncStorage, notifications, and date
-helpers have no automated coverage. Manual checks: `.opencode/docs/project-brief.md`
+Total: 6 files, 22 tests. Contexts, notifications, and date helpers have no
+automated coverage. Manual checks: `.opencode/docs/project-brief.md`
 §Manual QA.
 
-Parcial 2 target test additions are in §15.6; the counts above describe the
-shipped suite.
+Counts above describe the current suite. Remaining Parcial 2 target test
+additions are in §15.6.
 
 ## 13. Known gaps and deviations
 
@@ -399,7 +400,7 @@ behavior as each item lands.
 | `expo-contacts` | Contact picker | `npx expo install expo-contacts` |
 | `expo-calendar` | Device calendar event | `npx expo install expo-calendar` |
 | `expo-file-system` | Copy the picked image into app storage | `npx expo install expo-file-system` |
-| `zustand` | Global task state | `pnpm add zustand` |
+| `zustand` | Global task state | installed |
 
 SDK 57 notes:
 
