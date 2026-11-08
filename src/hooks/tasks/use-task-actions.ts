@@ -1,15 +1,18 @@
 import { ROUTES } from "@/constants/routes";
-import { useTasks } from "@/context/tasks/tasks-context";
 import { Task } from "@/context/tasks/types/Task";
+import { useTasksStore } from "@/stores/tasks/tasks-store";
 import { router } from "expo-router";
 import { useCallback } from "react";
 
 export function useTaskActions(task: Task) {
-  const { updateTask, removeTask } = useTasks();
+  const toggleComplete = useTasksStore((state) => state.toggleComplete);
+  const removeTask = useTasksStore((state) => state.removeTask);
 
   const toggleCompletion = useCallback(() => {
-    updateTask({ ...task, isComplete: !task.isComplete });
-  }, [task, updateTask]);
+    if (task.id) {
+      toggleComplete(task.id);
+    }
+  }, [task.id, toggleComplete]);
 
   const handleDelete = useCallback(() => {
     if (task.id) {
