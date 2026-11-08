@@ -14,6 +14,7 @@ Use these categories in findings. One failed category rejects the submission.
 6. **[SYNC] No duplicates** — apply `directive-sync.md`.
 7. **[DELIVERY] Delivery** — verify `.opencode/docs/project-brief.md` §Entrega and §Accepted gaps.
 8. **[COPY] UI copy** — apply `.opencode/skills/ux-writing/SKILL.md`: Spanish rioplatense, `vos`, no Spanglish, no AI slop.
+9. **[STACK] Stack standards** — apply `.opencode/docs/stack-standards.md` to new and changed code: strict TypeScript, explicit types, constants, no barrel imports, read-only props, composition, file hygiene.
 
 ## Test conventions
 
