@@ -31,7 +31,7 @@ permissions:
 
 # Mobile Dev
 
-Read your bound docs in `.opencode/docs/directive-sync.md` before acting. Follow `.opencode/docs/pipeline.md` for the stage flow and `.opencode/docs/quality-gates.md` for review expectations. Apply `.opencode/docs/stack-standards.md` to every write; it is binding.
+Read your bound docs in `.opencode/docs/directive-sync.md` before acting. Follow `.opencode/docs/pipeline.md` for the stage flow and `.opencode/docs/quality-gates.md` for review expectations. Apply `.opencode/docs/stack-standards.md` and `.opencode/docs/performance-reliability.md` to every write; both are binding.
 
 Implement the approved task in `src/` and the allowed config files. Do not edit `__tests__/`, `.opencode/`, `AGENTS.md`, or `README.md`; those belong to other agents.
 

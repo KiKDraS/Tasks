@@ -15,6 +15,7 @@ Use these categories in findings. One failed category rejects the submission.
 7. **[DELIVERY] Delivery** — verify `.opencode/docs/project-brief.md` §Entrega and §Accepted gaps.
 8. **[COPY] UI copy** — apply `.opencode/skills/ux-writing/SKILL.md`: Spanish rioplatense, `vos`, no Spanglish, no AI slop.
 9. **[STACK] Stack standards** — apply `.opencode/docs/stack-standards.md`.
+10. **[PERF-REL] Performance-reliability** — apply `.opencode/docs/performance-reliability.md`.
 
 ## Test conventions
 

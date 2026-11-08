@@ -5,7 +5,8 @@
     ".opencode/docs/project-brief.md",
     ".opencode/docs/pipeline.md",
     ".opencode/docs/directive-sync.md",
-    ".opencode/docs/stack-standards.md"
+    ".opencode/docs/stack-standards.md",
+    ".opencode/docs/performance-reliability.md"
   ],
   "default_agent": "orchestrator",
   "permissions": [

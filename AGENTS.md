@@ -81,6 +81,7 @@ Stage flow and gates: `.opencode/docs/pipeline.md`.
 | Source-of-truth map and no-duplication policy | `.opencode/docs/directive-sync.md` |
 | Review and test checklist | `.opencode/docs/quality-gates.md` |
 | TypeScript, composition, component hygiene standards | `.opencode/docs/stack-standards.md` |
+| Cognitive difficulty and lookup performance | `.opencode/docs/performance-reliability.md` |
 | Skills rules: caveman, Context7, CodeGraph | `.opencode/docs/skills-settings-rules.md` |
 | Knowledge-awareness rules | `.opencode/docs/agent-knowledge-awareness.md` |
 | App behavior, data model, flows | `.opencode/docs/SPEC.md` |
