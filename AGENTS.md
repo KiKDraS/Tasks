@@ -4,40 +4,51 @@ Expo/React Native school project for ISTEA Parcial 1: a local task manager with 
 
 ## Project structure
 
+Place new files by intent, not by copying the current tree. The tree marks
+ownership boundaries; the table decides the destination.
+
 ```text
 src/
-├── app/                  Expo Router routes: screens and layouts
-│   ├── (tabs)/           authenticated tabs: home and task form
-│   └── sign-up/          registration screen
-├── components/           UI components
-│   ├── icons/            cross-platform symbol wrappers
-│   └── ui/               auth, form, header, home, task-form
-├── constants/            theme tokens, routes, storage keys, time
-├── context/              auth and tasks providers, types, seed data
-├── hooks/                auth, task form, tasks, storage, DB, clock
-└── utils/                id, date, delay
+├── app/          ROUTES — screens, layouts, route groups
+├── components/   REUSABLE UI
+│   ├── icons/    platform symbol wrappers
+│   └── ui/       feature-grouped components
+├── constants/    STATIC CONFIG — tokens, routes, keys, time
+├── context/      GLOBAL STATE — providers, types, seeds, pure helpers
+├── hooks/        REUSABLE BEHAVIOR — stateful logic, no JSX
+└── utils/        PURE HELPERS — no React, no Expo
 
-__tests__/                Jest + React Native Testing Library suites
-assets/images/            app icon and test evidence
-.github/                  pull request template
-.opencode/                agents, commands, docs, plugins, skills
-app.json                  Expo config and plugins
-eslint.config.js          lint config
-expo-env.d.ts             Expo type declarations
-opencode.json             OpenCode instructions, permissions, MCP
-package.json              scripts, dependencies, Jest config
-pnpm-lock.yaml            dependency lockfile
-pnpm-workspace.yaml       pnpm workspace config
-skills-lock.json          installed skill registry
-tsconfig.json             TypeScript config and `@/` alias
-AGENTS.md                 agent roster, canonical sources, this tree
-README.md                 Spanish delivery README
+__tests__/        TESTS — one file per unit
+assets/images/    STATIC IMAGES — icon and test evidence
+.github/          GITHUB META — PR template
+.opencode/        AGENT META — agents, commands, docs, plugins, skills
 ```
 
-Generated, not edited by hand: `node_modules/`, `.expo/`, `dist/`, and native
-`ios/` / `android/` directories when Expo creates them. Route rules and the
-screen map live in `.opencode/docs/expo-react-native.md` §Navigation & Routing
-and §Repo Notes.
+| Adding... | Destination | Rule |
+| --- | --- | --- |
+| A screen or route | `src/app/` | Every file is a route. `_layout.tsx` is a navigator; route groups use `(...)`. Keep non-route code outside. |
+| A layout or navigator | `src/app/**/_layout.tsx` | One layout per route group. No screen UI inside. |
+| A reusable component | `src/components/ui/<feature>/` | Group by feature (`home`, `auth`, `form`, `task-form`). Shared primitives at `src/components/ui/`. |
+| An icon wrapper | `src/components/icons/<Name>Icon.tsx` | Map iOS/Android symbols through `icons/base/BaseIcon`. One icon per file. |
+| A design token | `src/constants/theme.ts` | Colors, type, spacing, radius, shadow only. |
+| A route, key, or time constant | `src/constants/` | `routes.ts`, `storage-keys.ts`, `time.ts`. No component logic. |
+| Global state | `src/context/<domain>/` | Provider and context. Types in `types/`, seed in `data/`, pure helpers in `utils/`. |
+| A reusable hook | `src/hooks/<domain>/use-<thing>.ts` | Stateful/React logic only. No JSX. Form hooks live under their form domain. |
+| A pure helper | `src/utils/` | No React, no Expo, no app state. |
+| A test | `__tests__/<unit>-test.ts(x)` | Jest + RNTL. Match the unit name. |
+| An agent definition | `.opencode/agents/<id>.md` | One role per file. Permissions and pointers only. |
+| A shared rule or spec | `.opencode/docs/` | Canonical source. Link it; do not copy it into an agent file. |
+| A slash command | `.opencode/commands/<id>.md` | Commands call skills or print references. |
+| A skill | `.opencode/skills/<id>/SKILL.md` | One skill per directory; optional `references/` and `templates/`. |
+| A plugin | `.opencode/plugins/<id>.js` | OpenCode plugin API only. |
+| App or native config | `app.json` | Expo config and plugins. Never edit generated native folders. |
+| A dependency or script | `package.json` | Use `pnpm`; commit `pnpm-lock.yaml`. |
+| Delivery docs | `README.md` | Spanish, delivery-facing. Behavior → `SPEC.md`, visuals → `DESIGN.md`. |
+| GitHub meta | `.github/` | PR and issue templates only. |
+
+Generated, never edited: `node_modules/`, `.expo/`, `dist/`, `ios/`, `android/`.
+Route rules and the screen map: `.opencode/docs/expo-react-native.md`
+§Navigation & Routing and §Repo Notes.
 
 ## Agents
 
