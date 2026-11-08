@@ -1,43 +1,168 @@
 {
   "$schema": "https://opencode.ai/config.json",
   "instructions": [
-    "docs/expo-react-native.md",
-    "docs/project-brief.md",
+    ".opencode/docs/expo-react-native.md",
+    ".opencode/docs/project-brief.md",
     ".opencode/docs/pipeline.md",
     ".opencode/docs/directive-sync.md"
   ],
   "default_agent": "orchestrator",
   "permissions": [
-    { "action": "shell", "resource": "*", "effect": "ask" },
-    { "action": "shell", "resource": "git status *", "effect": "allow" },
-    { "action": "shell", "resource": "git diff *", "effect": "allow" },
-    { "action": "shell", "resource": "git log *", "effect": "allow" },
-    { "action": "shell", "resource": "git show *", "effect": "allow" },
-    { "action": "shell", "resource": "pnpm test *", "effect": "allow" },
-    { "action": "shell", "resource": "pnpm lint *", "effect": "allow" },
-    { "action": "shell", "resource": "npx expo lint *", "effect": "allow" },
-    { "action": "shell", "resource": "pnpm exec tsc --noEmit *", "effect": "allow" },
-    { "action": "shell", "resource": "npx tsc --noEmit *", "effect": "allow" },
-    { "action": "shell", "resource": "npx expo install *", "effect": "allow" },
-    { "action": "shell", "resource": "pnpm exec expo install *", "effect": "allow" },
-    { "action": "shell", "resource": "npx expo-doctor *", "effect": "allow" },
-    { "action": "shell", "resource": "pnpm dlx expo-doctor *", "effect": "allow" },
-    { "action": "shell", "resource": "pnpm add *", "effect": "deny" },
-    { "action": "shell", "resource": "npm install *", "effect": "deny" },
-    { "action": "shell", "resource": "yarn add *", "effect": "deny" },
-    { "action": "shell", "resource": "bun add *", "effect": "deny" },
-    { "action": "shell", "resource": "rm *", "effect": "deny" },
-    { "action": "shell", "resource": "git push --force *", "effect": "deny" },
-    { "action": "shell", "resource": "git push --force-with-lease *", "effect": "deny" },
-    { "action": "shell", "resource": "git push -f *", "effect": "deny" },
-    { "action": "shell", "resource": "git reset --hard *", "effect": "deny" },
-    { "action": "shell", "resource": "git clean *", "effect": "deny" },
-    { "action": "external_directory", "resource": "*", "effect": "ask" },
-    { "action": "read", "resource": "*.env", "effect": "deny" },
-    { "action": "read", "resource": "*.env.*", "effect": "deny" },
-    { "action": "read", "resource": "*.env.example", "effect": "allow" }
+    {
+      "action": "shell",
+      "resource": "*",
+      "effect": "allow"
+    },
+    {
+      "action": "shell",
+      "resource": "git reset *",
+      "effect": "ask"
+    },
+    {
+      "action": "shell",
+      "resource": "git restore *",
+      "effect": "ask"
+    },
+    {
+      "action": "shell",
+      "resource": "git checkout -- *",
+      "effect": "ask"
+    },
+    {
+      "action": "shell",
+      "resource": "git checkout * -- *",
+      "effect": "ask"
+    },
+    {
+      "action": "shell",
+      "resource": "git checkout .",
+      "effect": "ask"
+    },
+    {
+      "action": "shell",
+      "resource": "git checkout -f *",
+      "effect": "ask"
+    },
+    {
+      "action": "shell",
+      "resource": "git switch --discard-changes *",
+      "effect": "ask"
+    },
+    {
+      "action": "shell",
+      "resource": "git clean *",
+      "effect": "ask"
+    },
+    {
+      "action": "shell",
+      "resource": "git stash drop *",
+      "effect": "ask"
+    },
+    {
+      "action": "shell",
+      "resource": "git stash clear *",
+      "effect": "ask"
+    },
+    {
+      "action": "shell",
+      "resource": "git push --force *",
+      "effect": "ask"
+    },
+    {
+      "action": "shell",
+      "resource": "git push --force-with-lease *",
+      "effect": "ask"
+    },
+    {
+      "action": "shell",
+      "resource": "git push -f *",
+      "effect": "ask"
+    },
+    {
+      "action": "shell",
+      "resource": "git push * --force*",
+      "effect": "ask"
+    },
+    {
+      "action": "shell",
+      "resource": "git push * -f *",
+      "effect": "ask"
+    },
+    {
+      "action": "shell",
+      "resource": "rm *",
+      "effect": "deny"
+    },
+    {
+      "action": "edit",
+      "resource": "*",
+      "effect": "ask"
+    },
+    {
+      "action": "external_directory",
+      "resource": "*",
+      "effect": "allow"
+    },
+    {
+      "action": "read",
+      "resource": "*",
+      "effect": "allow"
+    },
+    {
+      "action": "read",
+      "resource": "*.env",
+      "effect": "deny"
+    },
+    {
+      "action": "read",
+      "resource": "*.env.*",
+      "effect": "deny"
+    },
+    {
+      "action": "read",
+      "resource": "*.env.example",
+      "effect": "allow"
+    }
   ],
+  "plugins": [
+    "@dietrichgebert/ponytail"
+  ],
+  "mcp": {
+    "servers": {
+      "codegraph": {
+        "type": "local",
+        "command": [
+          "npx",
+          "@colbymchenry/codegraph",
+          "serve",
+          "--mcp"
+        ],
+        "disabled": false
+      },
+      "context7": {
+        "type": "remote",
+        "url": "https://mcp.context7.com/mcp",
+        "headers": {
+          "CONTEXT7_API_KEY": "{file:.opencode/secrets/context7-api-key}"
+        },
+        "disabled": false
+      },
+      "stitch": {
+        "type": "remote",
+        "url": "https://stitch.googleapis.com/mcp",
+        "disabled": false,
+        "headers": {
+          "X-Goog-Api-Key": "{file:.opencode/secrets/stitch-api-key}"
+        }
+      }
+    }
+  },
   "watcher": {
-    "ignore": ["node_modules/**", ".expo/**", "dist/**", "coverage/**"]
+    "ignore": [
+      "node_modules/**",
+      ".expo/**",
+      "dist/**",
+      "coverage/**"
+    ]
   }
 }

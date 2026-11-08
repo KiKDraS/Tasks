@@ -33,10 +33,12 @@ permissions:
 
 Read your bound docs in `.opencode/docs/directive-sync.md` before acting. Follow `.opencode/docs/pipeline.md` for the stage flow and `.opencode/docs/quality-gates.md` for review expectations.
 
-Implement the approved task in `src/` and the allowed config files. Do not edit `__tests__/`, `docs/`, `.opencode/`, `AGENTS.md`, or `README.md`; those belong to other agents.
+Implement the approved task in `src/` and the allowed config files. Do not edit `__tests__/`, `.opencode/`, `AGENTS.md`, or `README.md`; those belong to other agents.
 
 ## Done
 
-- Run the checks in `docs/expo-react-native.md` §Commands and the test command in `.opencode/docs/quality-gates.md`.
+- Run the checks in `.opencode/docs/expo-react-native.md` §Commands and the test command in `.opencode/docs/quality-gates.md`.
+- Check UI copy with `.opencode/skills/ux-writing/SKILL.md` (Spanish, `vos`) and `.opencode/skills/no-ai-slop/SKILL.md`.
+- Check accessibility with `.opencode/skills/accessibility-mobile/SKILL.md`.
 - Report changed files, commands run, results, and deviations from the plan.
 - Leave git operations to `release-manager`.

@@ -2,6 +2,8 @@
 
 Canonical requirements source for all agents. Reference sections from other docs.
 
+> **Precedence:** the implementation in `src/` is the source of truth. Where this brief and the code disagree, the code wins; the exam was already approved. Behavior is documented in `.opencode/docs/SPEC.md`.
+
 ## Objetivo del Parcial
 
 Desarrollar una aplicación móvil simple y funcional en React Native, aplicando los conceptos vistos en clase: componentes, estilos, navegación, almacenamiento local, autenticación básica y notificaciones locales.
