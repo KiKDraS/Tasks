@@ -5,8 +5,8 @@ docs.
 
 > **Precedence:** the implementation in `src/` is the source of truth for
 > Parcial 1. Where this brief and the code disagree, the code wins; the Parcial
-> 1 exam was already approved. Parcial 2 requirements are not implemented,
-> approved, or scored yet. Behavior is documented in `.opencode/docs/SPEC.md`.
+> 1 exam was already approved. Parcial 2 requirements are not implemented or
+> approved yet. Behavior is documented in `.opencode/docs/SPEC.md`.
 
 ## Objetivo del Parcial
 
@@ -149,8 +149,8 @@ blockers for agent work:
 - `README.md` says 4 suites / 12 tests; actual suite is 5 files / 13 tests.
 - `README.md` demo link points to Google Drive; the assignment asks for YouTube.
 
-Parcial 2 requirements are not implemented, approved, or scored yet; see
-§Parcial 2 acceptance checklist.
+Parcial 2 requirements are not implemented or approved yet; see §Parcial 2
+acceptance checklist.
 
 ## Manual QA
 
@@ -266,8 +266,8 @@ de los siguientes conceptos:
 ## Parcial 2 acceptance checklist
 
 This checklist tracks implementation. Mark a row `✅ implemented` when its
-feature lands and passes review/QA. Scoring is separate and stays pending until
-the exam is graded. Target evidence is in `.opencode/docs/SPEC.md` §15.7.
+feature lands and passes review/QA. Target evidence is in `.opencode/docs/SPEC.md`
+§15.7.
 
 | # | Requirement | Evidence | Status |
 | --- | --- | --- | --- |
@@ -278,5 +278,3 @@ the exam is graded. Target evidence is in `.opencode/docs/SPEC.md` §15.7.
 | 5 | Zustand global state with add, update, and delete actions; components read through store selectors | None yet; target `SPEC.md` §15.4 | ⬜ pending implementation |
 | 6 | Jest automated tests for the new state and device flows | None yet; target `SPEC.md` §15.6 | ⬜ pending implementation |
 | 7 | Delivery: updated public repo, README with new features, YouTube demo | None yet; target `README.md` | ⬜ pending implementation |
-
-Scoring: pending for every row. The checklist does not record the exam grade.
