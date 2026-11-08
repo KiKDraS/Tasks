@@ -6,7 +6,7 @@ Canonical review and test checklist. Requirements live in `.opencode/docs/projec
 
 Use these categories in findings. One failed category rejects the submission.
 
-1. **[REQ] Requirements** — verify against `.opencode/docs/project-brief.md` §Acceptance checklist.
+1. **[REQ] Requirements** — verify against `.opencode/docs/project-brief.md` §Acceptance checklist. For Parcial 2 target work, use `.opencode/docs/SPEC.md` §15.7.
 2. **[ARCH] Architecture** — verify against `.opencode/docs/expo-react-native.md` §Navigation & Routing and §Repo Notes. Scope guardrails: `.opencode/docs/project-brief.md` §No se requiere.
 3. **[RN] Expo/React Native** — verify against `.opencode/docs/expo-react-native.md`.
 4. **[A11Y] Accessibility** — apply `.opencode/skills/accessibility-mobile/SKILL.md`: labels, roles, state, touch targets, dynamic type, contrast, screen-reader order.
@@ -18,7 +18,7 @@ Use these categories in findings. One failed category rejects the submission.
 ## Test conventions
 
 - Jest + React Native Testing Library with the `jest-expo` preset; tests live in `__tests__/`.
-- Use the `@/` import alias. Mock native modules where needed (`expo-crypto`, `expo-notifications`, AsyncStorage).
+- Use the `@/` import alias. Mock native modules where needed (`expo-crypto`, `expo-notifications`, `expo-image-picker`, `expo-location`, `expo-contacts/legacy`, `expo-calendar/legacy`, `expo-file-system`, AsyncStorage).
 - Run `pnpm test`.
 - Coverage target: `.opencode/docs/project-brief.md` §Testing.
 

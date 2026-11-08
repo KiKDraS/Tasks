@@ -1,6 +1,6 @@
 # Tasks
 
-Expo/React Native school project for ISTEA Parcial 1: a local task manager with authentication, AsyncStorage persistence, and local notifications.
+Expo/React Native school project for ISTEA Parcial 1 + 2: a local task manager with authentication, AsyncStorage persistence, local notifications, device resources (camera, gallery, location, contacts, calendar), and Zustand global state.
 
 ## Project structure
 
@@ -14,7 +14,9 @@ src/
 │   ├── icons/    platform symbol wrappers
 │   └── ui/       feature-grouped components
 ├── constants/    STATIC CONFIG — tokens, routes, keys, time
-├── context/      GLOBAL STATE — providers, types, seeds, pure helpers
+├── context/      REACT CONTEXT — provider-bound state (auth; legacy tasks)
+├── stores/       GLOBAL STATE — Zustand stores, selectors, actions
+├── services/     SERVICES — device APIs, storage adapters
 ├── hooks/        REUSABLE BEHAVIOR — stateful logic, no JSX
 └── utils/        PURE HELPERS — no React, no Expo
 
@@ -32,7 +34,11 @@ assets/images/    STATIC IMAGES — icon and test evidence
 | An icon wrapper | `src/components/icons/<Name>Icon.tsx` | Map iOS/Android symbols through `icons/base/BaseIcon`. One icon per file. |
 | A design token | `src/constants/theme.ts` | Colors, type, spacing, radius, shadow only. |
 | A route, key, or time constant | `src/constants/` | `routes.ts`, `storage-keys.ts`, `time.ts`. No component logic. |
-| Global state | `src/context/<domain>/` | Provider and context. Types in `types/`, seed in `data/`, pure helpers in `utils/`. |
+| Global state | `src/stores/<domain>/` | Zustand store. State, actions, selectors. Components read and write through store hooks; no prop drilling. |
+| React context | `src/context/<domain>/` | Provider-bound state only (auth session). Types in `types/`, seed in `data/`, pure helpers in `utils/`. |
+| A device integration | `src/services/<resource>.ts` | Wrap Expo APIs (`expo-image-picker`, `expo-location`, `expo-contacts/legacy`, `expo-calendar/legacy`). Return typed results and permission state. No JSX. |
+| A storage adapter | `src/services/<domain>-storage.ts` | AsyncStorage read/write for a store. No React, no JSX. |
+| A permission notice | `src/components/ui/permissions/` | Denied/blocked message, retry, settings link. Reuse `ThemedText` and `FormButton`. |
 | A reusable hook | `src/hooks/<domain>/use-<thing>.ts` | Stateful/React logic only. No JSX. Form hooks live under their form domain. |
 | A pure helper | `src/utils/` | No React, no Expo, no app state. |
 | A test | `__tests__/<unit>-test.ts(x)` | Jest + RNTL. Match the unit name. |
@@ -42,6 +48,7 @@ assets/images/    STATIC IMAGES — icon and test evidence
 | A skill | `.opencode/skills/<id>/SKILL.md` | One skill per directory; optional `references/` and `templates/`. |
 | A plugin | `.opencode/plugins/<id>.js` | OpenCode plugin API only. |
 | App or native config | `app.json` | Expo config and plugins. Never edit generated native folders. |
+| Native permission strings | `app.json` | Camera, gallery, location, contacts, calendar usage text. Build a new binary after changes. |
 | A dependency or script | `package.json` | Use `pnpm`; commit `pnpm-lock.yaml`. |
 | Delivery docs | `README.md` | Spanish, delivery-facing. Behavior → `.opencode/docs/SPEC.md`, visuals → `.opencode/docs/DESIGN.md`. |
 | GitHub meta | `.github/` | PR and issue templates only. |
@@ -56,7 +63,7 @@ Authoritative roster. Each agent's behavior, permissions, and detailed instructi
 
 | Agent | Mode | Responsibility | Writes / owns | File |
 | --- | --- | --- | --- | --- |
-| `orchestrator` | primary | Intake, plan, delegate, enforce gates, request approval | No project files | `.opencode/agents/orchestrator.md` |
+| `orchestrator` | primary | Intake, plan, delegate app code, own OpenCode and requirement docs, enforce gates, request approval | `AGENTS.md`, `opencode.json`, `.opencode/{docs,agents,commands,skills,plugins}/**` | `.opencode/agents/orchestrator.md` |
 | `mobile-dev` | subagent | Implement approved Expo/React Native changes | `src/**`, `assets/**`, `app.json`, `package.json`, `tsconfig.json`, `eslint.config.js` | `.opencode/agents/mobile-dev.md` |
 | `code-review` | subagent | Read-only audit of requirements, architecture, RN patterns, accessibility, tests, sync | No files | `.opencode/agents/code-review.md` |
 | `qa-engineer` | subagent | Maintain Jest/RNTL tests, run the suite, verify notifications | `__tests__/**` | `.opencode/agents/qa-engineer.md` |
@@ -69,7 +76,7 @@ Stage flow and gates: `.opencode/docs/pipeline.md`.
 | Topic | Source |
 | --- | --- |
 | Expo/React Native rules, commands, app map | `.opencode/docs/expo-react-native.md` |
-| Assignment requirements, acceptance checklist, accepted gaps | `.opencode/docs/project-brief.md` |
+| Parcial 1 + 2 requirements, acceptance checklist, accepted gaps | `.opencode/docs/project-brief.md` |
 | Agent stages, gates, git flow | `.opencode/docs/pipeline.md` |
 | Source-of-truth map and no-duplication policy | `.opencode/docs/directive-sync.md` |
 | Review and test checklist | `.opencode/docs/quality-gates.md` |

@@ -1,7 +1,7 @@
 # DESIGN — Tasks
 
-Visual system for the shipped app. This document covers tokens, components,
-layout, and visual states only. Behavior lives in `SPEC.md`.
+Visual system for the shipped app. §1–11 cover tokens, components, layout, and
+visual states only; §12 is the Parcial 2 target. Behavior lives in `SPEC.md`.
 
 ## 1. Precedence
 
@@ -10,6 +10,8 @@ layout, and visual states only. Behavior lives in `SPEC.md`.
    Where Stitch and the code disagree, the code wins. The conflict table is in
    §10.
 3. `README.md` and the app UI are Spanish; this document is English.
+4. §12 is a target UI for Parcial 2, not shipped. Where §12 and the code
+   disagree, the code wins until the feature lands.
 
 ## 2. Design intent
 
@@ -183,6 +185,8 @@ Chrome:
 | `UserMenu` | `src/components/ui/header/user-menu.tsx` | Native menu, account row disabled, destructive sign-out |
 | `SplashScreenController` | `src/components/splash-screen-controller.tsx` | Splash is `#f7f9fb` with a 76 px icon |
 
+Parcial 2 target components are listed in §12.2; they are not shipped.
+
 ## 7. Screen layouts
 
 ### Sign in (`src/app/index.tsx`)
@@ -288,6 +292,8 @@ color `primary`.
 | `SchedulingIcon` | `calendar` | `calendar_month` | 42 (tab) |
 | `UserIcon` | `person` | `person` | 24 |
 
+Parcial 2 target icons are listed in §12.5.
+
 The app mark is `assets/images/icon.png`, rendered through `AppIcon`
 (`src/components/icons/AppIcon.tsx`). The splash uses the same image at 76 px on
 `#f7f9fb`.
@@ -372,4 +378,131 @@ Gaps in the current build:
   normal-text threshold; rework that pair before using it for labels,
   placeholders, or chips.
 
+Parcial 2 target controls must meet the same checklist; see §12.6 for the
+specific labels and touch targets.
+
 These are recorded as current state, not as approved design.
+
+## 12. Parcial 2 target UI (not implemented)
+
+Status: target only; no component below exists yet. Use the tokens in §3–§5,
+the type scale in §4, and the primitives in §6. Do not add a new palette.
+
+### 12.1 Intent
+
+- Attachments are compact rows, not a second visual system.
+- One `surface-container` card per device resource, radius 8, padding 16,
+  20 px internal gap. The reminder card keeps the same treatment.
+- Photo is the only visual element; location, contact, and calendar are text
+  rows with an icon.
+- No map, no full-screen photo viewer, no new navigation destinations.
+
+### 12.2 Task form order
+
+Add the device cards after `Descripción` and before `ReminderCard`:
+
+```text
+Foto
+  [thumbnail 64] Sin foto
+  [Tomar foto] [Elegir de galería]
+  Quitar foto (only when set)
+Ubicación
+  [pin] Ubicación                 [Usar mi ubicación]
+  Sin ubicación / address / coords
+Contacto
+  [person] Contacto               [Elegir contacto]
+  Sin contacto / name · phone
+Calendario
+  [calendar] Evento en el calendario   [switch]
+  Se crea al guardar la tarea
+  Evento creado (when set)
+Recordatorio (existing)
+```
+
+Component names (target):
+
+| Component | File | Notes |
+| --- | --- | --- |
+| `PhotoCard` | `src/components/ui/task-form/photo-card.tsx` | 64 px thumbnail, two actions, remove |
+| `LocationCard` | `src/components/ui/task-form/location-card.tsx` | Icon, value, `Usar mi ubicación` |
+| `ContactCard` | `src/components/ui/task-form/contact-card.tsx` | Icon, name/phone, `Elegir contacto` |
+| `CalendarCard` | `src/components/ui/task-form/calendar-card.tsx` | Icon, switch, helper, event state |
+| `PermissionNotice` | `src/components/ui/permissions/permission-notice.tsx` | Inline message, retry or settings |
+| `TaskAttachments` | `src/components/ui/home/home-task/task-attachments.tsx` | Card thumbnail and meta row |
+
+The cards reuse `ThemedText`, `HomeBadge`, and `AppTouchableOpacity`. Buttons
+inside cards use `label-md`; helper text uses `label-sm` and
+`on-surface-variant`.
+
+### 12.3 Task card
+
+```text
+TaskCard
+  [checkbox] Title                  [edit] [delete]
+  description
+  TaskAttachments
+    [photo 56]  [pin] address
+                [person] name · phone
+                [calendar] Evento
+  reminder badge (existing)
+```
+
+- Thumbnail 56×56, radius 6, `surface-variant` placeholder when empty.
+- Meta rows use `label-sm`, `on-surface-variant`, one line each with
+  `numberOfLines={1}`.
+- Calendar indicator is a small icon plus `Evento`; no date duplication.
+- The card grows only when an attachment exists. Do not reserve empty space.
+- The photo is not tappable in this target; there is no viewer.
+
+### 12.4 Permission states
+
+| State | Treatment |
+| --- | --- |
+| Pending | Action disabled; `ActivityIndicator` in the card action; card stays at full opacity |
+| Denied, can retry | `PermissionNotice` below the card value: `Permiso denegado. Podés volver a intentarlo.` + `Reintentar` |
+| Blocked | `PermissionNotice`: `Permiso denegado. Habilitalo en Ajustes.` + `Abrir ajustes` |
+| Granted, empty value | Normal empty copy (`Sin foto`, `Sin ubicación`, `Sin contacto`, `Sin evento`) |
+| Granted, value set | Value row plus remove or change action |
+| Device error | `PermissionNotice` with `No pudimos completar la acción. Intentá de nuevo.` |
+
+`PermissionNotice` uses `label-sm` and `error` for the message, and a
+`FormButton` `variant="surface"` for the action. It is not a modal.
+
+### 12.5 Icons
+
+Add these wrappers under `src/components/icons/`:
+
+| Component | iOS | Android | Size |
+| --- | --- | --- | --- |
+| `CameraIcon` | `camera` | `photo_camera` | 20 |
+| `GalleryIcon` | `photo.on.rectangle` | `photo_library` | 20 |
+| `LocationIcon` | `mappin.and.ellipse` | `location_on` | 20 |
+| `ContactIcon` | `person.crop.circle` | `person` | 20 |
+| `CalendarIcon` | `calendar` | `calendar_month` | 20 |
+| `CloseIcon` | `xmark` | `close` | 18 |
+
+Use `BaseIcon`; one icon per file. Existing `ReminderIcon` and
+`SchedulingIcon` keep their current sizes.
+
+### 12.6 Accessibility
+
+- Every icon-only action gets an `accessibilityLabel`: `Tomar foto`,
+  `Elegir de galería`, `Quitar foto`, `Usar mi ubicación`, `Elegir contacto`,
+  `Crear evento`.
+- Every action target is at least 44×44 (iOS) / 48×48 (Android); pad the icon
+  wrappers, do not enlarge the glyph.
+- `PermissionNotice` uses `accessibilityLiveRegion="polite"` on Android and
+  announces once on iOS when the state changes.
+- The photo thumbnail gets `accessibilityLabel="Foto de la tarea"`; decorative
+  icons use `accessibilityElementsHidden` on iOS and
+  `importantForAccessibility="no"` on Android.
+- Errors and permission notices are linked to the card value with
+  `accessibilityHint`; do not rely on color alone.
+- Body text keeps the platform font scale. Fixed-height rows must not clip at
+  large sizes; let the value wrap to two lines.
+
+### 12.7 Copy
+
+Use §15.8 in `SPEC.md` for the exact strings. Follow
+`.opencode/skills/ux-writing/SKILL.md`: Spanish rioplatense, `vos`, sentence
+case, no terminal period on labels or buttons.

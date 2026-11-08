@@ -1,16 +1,18 @@
 # SPEC — Tasks
 
-Behavior and architecture of the shipped app. This document describes what the
-code does, not what it should do. Every statement cites the file that
-implements it.
+Behavior and architecture of the shipped app. §1–14 describe what the code
+does, not what it should do. §15 is a target contract for Parcial 2; it is not
+shipped. Every shipped statement cites the file that implements it.
 
 ## 1. Precedence
 
 1. The implementation (`src/`, `app.json`, `package.json`) is authoritative.
-2. `.opencode/docs/project-brief.md` records the original assignment. Where the
+2. `.opencode/docs/project-brief.md` records the assignments. Where the
    assignment and the code disagree, the code wins; the exam was already
    approved.
-3. Stitch project `Minimalist Reminder Todo App` is a visual reference only. It
+3. §15 is a target contract for Parcial 2, not shipped behavior. Until an item
+   exists in `src/`, the current code wins.
+4. Stitch project `Minimalist Reminder Todo App` is a visual reference only. It
    never overrides behavior or tokens; see `DESIGN.md` for the conflict table.
 
 ## 2. Scope
@@ -28,6 +30,9 @@ In scope:
 Out of scope: password recovery, profile editing, per-user task isolation,
 sharing, recurring tasks, priorities, categories, and server-side validation.
 
+Parcial 2 target scope and status are in §15. That section is not shipped
+behavior.
+
 ## 3. Stack and runtime
 
 - Expo SDK 57, React Native 0.86.3, React 19.2.3, TypeScript.
@@ -38,6 +43,9 @@ sharing, recurring tasks, priorities, categories, and server-side validation.
 - `expo-crypto` for task IDs (`generateId` → `randomUUID`).
 - `@expo-google-fonts/geist` for the typeface.
 - Jest 29 with `jest-expo` and React Native Testing Library.
+- Parcial 2 target additions (not installed yet): `expo-image-picker`,
+  `expo-location`, `expo-contacts/legacy`, `expo-calendar/legacy`,
+  `expo-file-system`, and `zustand`. See §15.1.
 
 Sources: `package.json`, `app.json`, `src/utils/id.ts`, `src/constants/theme.ts`.
 
@@ -340,6 +348,9 @@ Total: 5 files, 13 tests. Contexts, AsyncStorage, notifications, and date
 helpers have no automated coverage. Manual checks: `.opencode/docs/project-brief.md`
 §Manual QA.
 
+Parcial 2 target test additions are in §15.6; the counts above describe the
+shipped suite.
+
 ## 13. Known gaps and deviations
 
 Recorded, not hidden:
@@ -367,3 +378,271 @@ current implementation, not a restatement of the assignment.
 | AsyncStorage persistence | `src/hooks/use-storage-state.ts`, `src/hooks/use-db.ts` |
 | Local notification | `src/context/tasks/utils/notifications.ts`, `app.json` plugin |
 | Jest + RNTL | `__tests__/`, `package.json` `jest` block |
+
+Parcial 2 traceability is in §15.7. Its rows are targets, not evidence.
+
+## 15. Parcial 2 target (not implemented)
+
+Status: the requirements exist in `.opencode/docs/project-brief.md` §Parcial 2.
+The code in `src/` still implements Parcial 1 only. This section is the target
+contract for the next build; it is not evidence. `(target)` marks files that do
+not exist yet. Update this section to shipped behavior as each item lands.
+
+### 15.1 Target stack additions
+
+| Package | Use | Install |
+| --- | --- | --- |
+| `expo-image-picker` | Camera and gallery selection | `npx expo install expo-image-picker` |
+| `expo-location` | Foreground location and reverse geocoding | `npx expo install expo-location` |
+| `expo-contacts` | Contact picker | `npx expo install expo-contacts` |
+| `expo-calendar` | Device calendar event | `npx expo install expo-calendar` |
+| `expo-file-system` | Copy the picked image into app storage | `npx expo install expo-file-system` |
+| `zustand` | Global task state | `pnpm add zustand` |
+
+SDK 57 notes:
+
+- Import `expo-contacts/legacy` for `requestPermissionsAsync` and
+  `presentContactPickerAsync`. The top-level SDK 57 methods are deprecated and
+  throw at runtime.
+- Import `expo-calendar/legacy` for `requestCalendarPermissionsAsync`,
+  `getDefaultCalendarAsync`, `createEventAsync`, and `deleteEventAsync`. The
+  top-level SDK 57 methods are deprecated and throw at runtime.
+- `expo-image-picker` covers both `launchCameraAsync` and
+  `launchImageLibraryAsync`; no `expo-camera` dependency is needed.
+
+`app.json` target config:
+
+- `expo-image-picker` plugin: `photosPermission`, `cameraPermission`,
+  `microphonePermission: false`.
+- `expo-location` plugin: `locationWhenInUsePermission`.
+- `expo-contacts` plugin: `contactsPermission`; Android `READ_CONTACTS`.
+- `expo-calendar` plugin: `calendarPermission`; Android `READ_CALENDAR` and
+  `WRITE_CALENDAR`.
+- Add the plugins to `expo.plugins`; never edit generated `ios/` or `android/`.
+
+### 15.2 Permission model
+
+Every device action runs the same sequence: read the current status, request
+when needed, run the action only when granted, and report the result to the
+form.
+
+| Resource | Request API | UI action |
+| --- | --- | --- |
+| Camera | `ImagePicker.requestCameraPermissionsAsync()` | Take photo |
+| Gallery | `ImagePicker.requestMediaLibraryPermissionsAsync()` | Choose from gallery |
+| Location | `Location.requestForegroundPermissionsAsync()` | Use my location |
+| Contacts | `Contacts.requestPermissionsAsync()` from `expo-contacts/legacy` | Choose contact |
+| Calendar | `Calendar.requestCalendarPermissionsAsync()` from `expo-calendar/legacy` | Create calendar event |
+
+Target UI states:
+
+| State | Trigger | UI |
+| --- | --- | --- |
+| `idle` | No request yet | Action enabled |
+| `pending` | Request or device call in flight | Action disabled, spinner |
+| `granted` | `status === "granted"` | Action enabled; show attached value |
+| `denied` | `status === "denied"` and `canAskAgain` | Inline message, retry allowed |
+| `blocked` | `status === "denied"` and `!canAskAgain` | Inline message + `Abrir ajustes` (`Linking.openSettings()`) |
+| `error` | Device call throws | Inline message, retry allowed |
+
+The form keeps one state per resource. A denied permission never blocks saving
+the task; the task saves without that attachment. The message is inline, not a
+modal.
+
+Target files: `src/services/permissions.ts` (shared result types),
+`src/utils/permission-state.ts` (pure status mapping),
+`src/components/ui/permissions/permission-notice.tsx`.
+
+### 15.3 Extended task model
+
+The current `Task` stays backward compatible. New fields are optional and
+nullable; old stored tasks load with `null` defaults.
+
+```ts
+type TaskLocation = {
+  latitude: number;
+  longitude: number;
+  address?: string;
+};
+
+type TaskContact = {
+  id: string;
+  name: string;
+  phoneNumber?: string;
+};
+
+type Task = {
+  id?: string;
+  title: string;
+  description: string;
+  isComplete?: boolean;
+  notification: TaskNotification | null;
+  photoUri?: string | null;
+  location?: TaskLocation | null;
+  contact?: TaskContact | null;
+  calendarEventId?: string | null;
+};
+```
+
+- `photoUri` points to a file copied into the app document directory, not the
+  picker cache URI. Removing or replacing a photo best-effort deletes the old
+  file.
+- `location.address` is best effort from `Location.reverseGeocodeAsync`; the
+  coordinates are always stored.
+- `contact` stores only the ID, display name, and first phone number.
+- `calendarEventId` is the device event ID returned by
+  `Calendar.createEventAsync`; the event is not duplicated in AsyncStorage.
+- The storage key stays `tasks` with the same bare-array JSON format. No
+  migration is required.
+
+Target files: `src/stores/tasks/types.ts`,
+`src/services/tasks-storage.ts`.
+
+### 15.4 Target architecture
+
+Layers after the migration:
+
+| Layer | Responsibility | Location |
+| --- | --- | --- |
+| Routes | Screen composition and protected groups | `src/app/` |
+| Stores | Global task state, selectors, actions | `src/stores/` |
+| Services | AsyncStorage task adapter and device APIs | `src/services/` |
+| Context | Auth session only | `src/context/auth/` |
+| Hooks | Form state and reusable behavior | `src/hooks/` |
+| Components | Presentational UI | `src/components/` |
+| Constants and utils | Tokens, keys, pure helpers | `src/constants/`, `src/utils/` |
+
+Task store (`src/stores/tasks/tasks-store.ts`, target):
+
+```ts
+type TasksState = {
+  tasks: Task[];
+  isLoading: boolean;
+  hydrate: () => Promise<void>;
+  addTask: (task: Task) => Promise<void>;
+  updateTask: (task: Task) => Promise<void>;
+  removeTask: (id: string) => Promise<void>;
+  toggleComplete: (id: string) => Promise<void>;
+  clearSentNotification: (notificationId: string) => Promise<void>;
+};
+```
+
+- `hydrate` reads `tasks` through `src/services/tasks-storage.ts`, writes the
+  seed when the key is missing or empty, and sets `isLoading`.
+- Actions write storage first, then update the store. The existing notification
+  cancellation rules stay in the action.
+- Components use `useTasksStore` selectors. `useTaskById` becomes a selector.
+- `TasksProvider` is removed from `src/app/(tabs)/_layout.tsx`. A small
+  `TasksHydrator` (`src/components/tasks-hydrator.tsx`, target) calls
+  `hydrate()` once while the authenticated area mounts.
+- `useDB` is no longer used by tasks. Auth keeps `useStorageState`.
+- The store does not use `persist`; storage stays in the existing adapter to
+  preserve the `tasks` key, seed behavior, and the 800 ms simulated delay.
+- No prop drilling: `HomeTasksList`, `TaskHeader`, `TaskBody`, and
+  `TaskFormContent` read the store directly.
+
+Device results use one shape:
+
+```ts
+type DeviceResult<T> =
+  | { status: "granted"; value: T }
+  | { status: "cancelled" }
+  | { status: "denied"; canAskAgain: boolean }
+  | { status: "error"; message: string };
+```
+
+Device services (target):
+
+| File | Contract |
+| --- | --- |
+| `src/services/media.ts` | `takePhoto()` / `pickPhoto()` return `{ status, uri? }`; request permission, launch the picker, copy the asset into the document directory |
+| `src/services/location.ts` | `getCurrentLocation()` returns `{ status, location? }`; request foreground permission, get position, reverse geocode |
+| `src/services/contacts.ts` | `pickContact()` returns `{ status, contact? }`; request permission, open the native picker |
+| `src/services/calendar.ts` | `createTaskEvent(task)` / `deleteTaskEvent(id)` return `{ status, eventId? }`; request permission, use the default calendar |
+| `src/services/permissions.ts` | Shared `DeviceResult<T>` and permission state types |
+
+### 15.5 Target task flows
+
+Create:
+
+1. The form validates the title and reminder as today.
+2. Photo, location, contact, and calendar are optional. Each action requests
+   permission on first use and stores the result in form state.
+3. `resolveTaskNotification` runs as today.
+4. When the calendar toggle is on, create the device event. The event start is
+   the resolved reminder date, or one hour from now when no reminder is set;
+   the end is one hour later. Title = task title, notes = description,
+   location = address. Use `getDefaultCalendarAsync`; if it fails, use the
+   first writable event calendar, otherwise return the device error.
+5. `addTask` writes the extended task. A denied device permission saves the
+   task without that attachment and shows the inline notice.
+6. `router.back()` runs as today.
+
+Edit:
+
+1. The form prefills the attachments from the task.
+2. Changing or removing an attachment updates the form state only; storage is
+   written on save.
+3. The calendar event is created on first save. Editing the title or reminder
+   does not update an existing device event; this is a known target gap.
+4. Saving merges the extended fields and replaces the notification as today.
+
+Complete / delete:
+
+- Completing a task cancels the notification as today. Attachments stay.
+- Deleting a task cancels the notification, best-effort deletes the photo file,
+  best-effort deletes the calendar event, then removes the task.
+- Deleting a task with a denied calendar permission still removes the task; the
+  event cleanup is skipped.
+
+Permission denial messages are listed in §15.8.
+
+### 15.6 Target tests
+
+Keep the 13 shipped tests. Add at least:
+
+| File | Tests | Covers |
+| --- | --- | --- |
+| `__tests__/tasks-store-test.ts` | 3 | hydrate, add, remove/update actions |
+| `__tests__/permission-state-test.ts` | 3 | granted, denied with retry, blocked |
+| `__tests__/task-attachments-test.tsx` | 2 | card renders photo/location/contact; empty attachments |
+
+Mock `expo-image-picker`, `expo-location`, `expo-contacts/legacy`,
+`expo-calendar/legacy`, `expo-file-system`, and AsyncStorage. Run `pnpm test`.
+
+### 15.7 Target traceability
+
+| Parcial 2 requirement | Target evidence | Status |
+| --- | --- | --- |
+| Permission states and denied message | `src/services/permissions.ts`, `src/utils/permission-state.ts`, `src/components/ui/permissions/permission-notice.tsx` | ⏳ |
+| Camera / gallery photo | `src/services/media.ts`, task-form photo card, task-card thumbnail | ⏳ |
+| GPS location | `src/services/location.ts`, task-form location card, task-card meta | ⏳ |
+| Contact | `src/services/contacts.ts`, task-form contact card, task-card meta | ⏳ |
+| Calendar event | `src/services/calendar.ts`, task-form calendar card | ⏳ |
+| Zustand global state | `src/stores/tasks/` | ⏳ |
+| Tests | `__tests__/` additions | ⏳ |
+| README + demo | `README.md` | ⏳ `release-manager` |
+
+### 15.8 Target copy
+
+| Context | String |
+| --- | --- |
+| Photo empty | `Sin foto` |
+| Photo actions | `Tomar foto`, `Elegir de galería` |
+| Photo remove | `Quitar foto` |
+| Location empty | `Sin ubicación` |
+| Location action | `Usar mi ubicación` |
+| Location loading | `Obteniendo ubicación...` |
+| Contact empty | `Sin contacto` |
+| Contact action | `Elegir contacto` |
+| Calendar off | `Sin evento` |
+| Calendar on | `Evento en el calendario` |
+| Calendar helper | `Se crea al guardar la tarea` |
+| Calendar created | `Evento creado` |
+| Permission denied (retry) | `Permiso denegado. Podés volver a intentarlo.` |
+| Retry action | `Reintentar` |
+| Permission blocked | `Permiso denegado. Habilitalo en Ajustes.` |
+| Settings action | `Abrir ajustes` |
+| Device error | `No pudimos completar la acción. Intentá de nuevo.` |
+
+Copy rules: Spanish rioplatense, `vos`, sentence case, no terminal period.
