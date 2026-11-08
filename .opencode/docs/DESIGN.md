@@ -10,8 +10,10 @@ visual states only; §12 is the Parcial 2 target. Behavior lives in `SPEC.md`.
    Where Stitch and the code disagree, the code wins. The conflict table is in
    §10.
 3. `README.md` and the app UI are Spanish; this document is English.
-4. §12 is a target UI for Parcial 2: not shipped and not scored. Where §12 and
-   the code disagree, the code wins until the feature lands.
+4. §12 is a target UI for Parcial 2, not shipped. Implementation status is
+   tracked in the project-brief §Parcial 2 acceptance checklist; scoring stays
+   separate. Where §12 and the code disagree, the code wins until the feature
+   lands.
 
 ## 2. Design intent
 
@@ -385,9 +387,10 @@ These are recorded as current state, not as approved design.
 
 ## 12. Parcial 2 target UI (not implemented)
 
-Status: target only; no component below exists yet and Parcial 2 is not scored.
-Use the tokens in §3–§5, the type scale in §4, and the primitives in §6. Do not
-add a new palette.
+Status: target only; no component below exists yet. Implementation status is
+tracked in the project-brief §Parcial 2 acceptance checklist; scoring stays
+separate. Use the tokens in §3–§5, the type scale in §4, and the primitives in
+§6. Do not add a new palette.
 
 ### 12.1 Intent
 

@@ -9,7 +9,7 @@ shipped. Every shipped statement cites the file that implements it.
 1. The implementation (`src/`, `app.json`, `package.json`) is authoritative.
 2. `.opencode/docs/project-brief.md` records the assignments. Where the
    assignment and the code disagree, the code wins. The Parcial 1 exam was
-   already approved; Parcial 2 is not implemented or scored yet.
+   already approved; Parcial 2 is not implemented, approved, or scored yet.
 3. §15 is a target contract for Parcial 2, not shipped behavior. Until an item
    exists in `src/`, the current code wins.
 4. Stitch project `Minimalist Reminder Todo App` is a visual reference only. It
@@ -385,9 +385,10 @@ Parcial 2 traceability is in §15.7. Its rows are targets; they are not evidence
 
 Status: the requirements exist in `.opencode/docs/project-brief.md` §Parcial 2.
 The code in `src/` still implements Parcial 1 only. This section is the target
-contract for the next build; it is not evidence and it is not scored. `(target)`
-marks files that do not exist yet. Update this section to shipped behavior as
-each item lands and the exam is graded.
+contract for the next build; it is not evidence. `(target)` marks files that do
+not exist yet. Implementation status is tracked in the project-brief §Parcial 2
+acceptance checklist; scoring stays separate. Update this section to shipped
+behavior as each item lands.
 
 ### 15.1 Target stack additions
 
@@ -615,17 +616,17 @@ Mock `expo-image-picker`, `expo-location`, `expo-contacts/legacy`,
 
 | Parcial 2 requirement | Target evidence | Status |
 | --- | --- | --- |
-| Permission states and denied message | `src/services/permissions.ts`, `src/utils/permission-state.ts`, `src/components/ui/permissions/permission-notice.tsx` | ⏳ |
-| Camera / gallery photo | `src/services/media.ts`, task-form photo card, task-card thumbnail | ⏳ |
-| GPS location | `src/services/location.ts`, task-form location card, task-card meta | ⏳ |
-| Contact | `src/services/contacts.ts`, task-form contact card, task-card meta | ⏳ |
-| Calendar event | `src/services/calendar.ts`, task-form calendar card | ⏳ |
-| Zustand global state | `src/stores/tasks/` | ⏳ |
-| Tests | `__tests__/` additions | ⏳ |
-| README + demo | `README.md` | ⏳ `release-manager` |
+| Permission states and denied message | `src/services/permissions.ts`, `src/utils/permission-state.ts`, `src/components/ui/permissions/permission-notice.tsx` | ⬜ pending |
+| Camera / gallery photo | `src/services/media.ts`, task-form photo card, task-card thumbnail | ⬜ pending |
+| GPS location | `src/services/location.ts`, task-form location card, task-card meta | ⬜ pending |
+| Contact | `src/services/contacts.ts`, task-form contact card, task-card meta | ⬜ pending |
+| Calendar event | `src/services/calendar.ts`, task-form calendar card | ⬜ pending |
+| Zustand global state | `src/stores/tasks/` | ⬜ pending |
+| Tests | `__tests__/` additions | ⬜ pending |
+| README + demo | `README.md` | ⬜ pending |
 
-⏳ = not implemented and not scored. Do not mark a row ✅ before the exam is
-graded.
+Implementation status is tracked in the project-brief §Parcial 2 acceptance
+checklist. ⬜ = pending implementation; ✅ = implemented. Scoring stays separate.
 
 ### 15.8 Target copy
 
