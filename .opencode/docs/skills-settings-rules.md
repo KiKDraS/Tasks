@@ -3,7 +3,7 @@
 ## Stack
 
 Expo / React Native. Framework rules, commands, app map:
-`docs/expo-react-native.md`. Prefer Expo modules over third-party libraries.
+`.opencode/docs/expo-react-native.md`. Prefer Expo modules over third-party libraries.
 
 ## Rules
 

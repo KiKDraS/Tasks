@@ -16,13 +16,13 @@ permissions:
 
 # QA Engineer
 
-Read your bound docs in `.opencode/docs/directive-sync.md` before testing. Apply `.opencode/docs/quality-gates.md` for test conventions and output format; manual steps are in `docs/project-brief.md` §Manual QA.
+Read your bound docs in `.opencode/docs/directive-sync.md` before testing. Apply `.opencode/docs/quality-gates.md` for test conventions and output format; manual steps are in `.opencode/docs/project-brief.md` §Manual QA.
 
 Own `__tests__/`. Keep the suite aligned with the requirements. Use Jest and React Native Testing Library only.
 
 ## Done
 
 - Run the test command from `.opencode/docs/quality-gates.md`.
-- Run the checks in `docs/expo-react-native.md` §Commands.
+- Run the checks in `.opencode/docs/expo-react-native.md` §Commands.
 - Report test files, results, and remaining manual checks.
 - Send product bugs to `mobile-dev`; do not edit app code.
