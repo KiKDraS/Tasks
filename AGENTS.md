@@ -43,7 +43,7 @@ assets/images/    STATIC IMAGES — icon and test evidence
 | A plugin | `.opencode/plugins/<id>.js` | OpenCode plugin API only. |
 | App or native config | `app.json` | Expo config and plugins. Never edit generated native folders. |
 | A dependency or script | `package.json` | Use `pnpm`; commit `pnpm-lock.yaml`. |
-| Delivery docs | `README.md` | Spanish, delivery-facing. Behavior → `SPEC.md`, visuals → `DESIGN.md`. |
+| Delivery docs | `README.md` | Spanish, delivery-facing. Behavior → `.opencode/docs/SPEC.md`, visuals → `.opencode/docs/DESIGN.md`. |
 | GitHub meta | `.github/` | PR and issue templates only. |
 
 Generated, never edited: `node_modules/`, `.expo/`, `dist/`, `ios/`, `android/`.
