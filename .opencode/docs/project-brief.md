@@ -5,8 +5,8 @@ docs.
 
 > **Precedence:** the implementation in `src/` is the source of truth for
 > Parcial 1. Where this brief and the code disagree, the code wins; the Parcial
-> 1 exam was already approved. Parcial 2 requirements are not implemented or
-> approved yet. Behavior is documented in `.opencode/docs/SPEC.md`.
+> 1 exam was already approved. Parcial 2 task state is implemented; device
+> features remain target. Behavior is documented in `.opencode/docs/SPEC.md`.
 
 ## Objetivo del Parcial
 
@@ -136,9 +136,9 @@ table when the app changes.
 | 1   | Components + StyleSheet + reusable component | `src/components/ui/form/form-button.tsx`, `text-field.tsx`, `option-chip.tsx`, `task-checkbox.tsx`; `src/constants/theme.ts`              | ✅                        |
 | 2   | Stack navigation + required screens          | `src/app/_layout.tsx`, `src/app/index.tsx`, `src/app/sign-up/index.tsx`, `src/app/(tabs)/index.tsx`, `src/app/(tabs)/task-form/index.tsx` | ✅ Expo Router Stack/Tabs |
 | 3   | Local auth + protected routes                | `src/context/auth/auth-context.tsx`, `src/hooks/sign-in/`, `src/hooks/sign-up/`, `Stack.Protected` in `src/app/_layout.tsx`               | ✅                        |
-| 4   | AsyncStorage tasks + persistence             | `src/hooks/use-db.ts`, `src/context/tasks/tasks-context.tsx`, `src/constants/storage-keys.ts`                                             | ✅                        |
+| 4   | AsyncStorage tasks + persistence             | `src/services/tasks-storage.ts`, `src/stores/tasks/tasks-store.ts`, `src/constants/storage-keys.ts`                                             | ✅                        |
 | 5   | Local notification                           | `src/context/tasks/utils/notifications.ts`, `src/hooks/task-form/utils/reminder.ts`, `expo-notifications` plugin in `app.json`            | ✅                        |
-| 6   | Jest + RNTL tests, single command            | `__tests__/` (5 files, 13 tests); test command in `.opencode/docs/quality-gates.md`                                                       | ✅                        |
+| 6   | Jest + RNTL tests, single command            | `__tests__/` (7 files, 30 tests); test command in `.opencode/docs/quality-gates.md`                                                       | ✅                        |
 | 7   | Delivery: public repo, README, YouTube demo  | `README.md`; repo visibility and demo link require manual verification                                                                    | ⚠️ accepted gaps          |
 
 ## Accepted gaps
@@ -146,11 +146,11 @@ table when the app changes.
 The Parcial 1 exam was already approved. These gaps are recorded but are not
 blockers for agent work:
 
-- `README.md` says 4 suites / 12 tests; actual suite is 5 files / 13 tests.
+- `README.md` says 4 suites / 12 tests; actual suite is 7 files / 30 tests.
 - `README.md` demo link points to Google Drive; the assignment asks for YouTube.
 
-Parcial 2 requirements are not implemented or approved yet; see §Parcial 2
-acceptance checklist.
+Parcial 2 task state is implemented; device features are not implemented or
+approved yet; see §Parcial 2 acceptance checklist.
 
 ## Manual QA
 
@@ -275,6 +275,6 @@ feature lands and passes review/QA. Target evidence is in `.opencode/docs/SPEC.m
 | 2 | Camera and gallery photo attached to a task and shown in the list | None yet; target `SPEC.md` §15.3–§15.5 | ⬜ pending implementation |
 | 3 | GPS location attached to a task and shown as coordinates or address | None yet; target `SPEC.md` §15.3–§15.5 | ⬜ pending implementation |
 | 4 | Contact selected from the device and calendar event created for a task | None yet; target `SPEC.md` §15.3–§15.5 | ⬜ pending implementation |
-| 5 | Zustand global state with add, update, and delete actions; components read through store selectors | None yet; target `SPEC.md` §15.4 | ⬜ pending implementation |
+| 5 | Zustand global state with add, update, and delete actions; components read through store selectors | `src/stores/tasks/`, `src/hooks/tasks/use-hydrate-tasks.ts` | ✅ implemented |
 | 6 | Jest automated tests for the new state and device flows | None yet; target `SPEC.md` §15.6 | ⬜ pending implementation |
 | 7 | Delivery: updated public repo, README with new features, YouTube demo | None yet; target `README.md` | ⬜ pending implementation |

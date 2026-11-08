@@ -1,6 +1,6 @@
 # Tasks
 
-Expo/React Native school project for ISTEA Parcial 1 + 2. Parcial 1 is shipped and approved; Parcial 2 is the target scope: device resources (camera, gallery, location, contacts, calendar) and Zustand global state.
+Expo/React Native school project for ISTEA Parcial 1 + 2. Parcial 1 is shipped and approved. Parcial 2 task state (Zustand) is shipped; device resources (camera, gallery, location, contacts, calendar) remain target.
 
 ## Project structure
 
@@ -14,7 +14,7 @@ src/
 │   ├── icons/    platform symbol wrappers
 │   └── ui/       feature-grouped components
 ├── constants/    STATIC CONFIG — tokens, routes, keys, time
-├── context/      REACT CONTEXT — provider-bound state (auth; legacy tasks)
+├── context/      REACT CONTEXT — auth session; task types/seed
 ├── stores/       GLOBAL STATE — Zustand stores, selectors, actions
 ├── services/     SERVICES — device APIs, storage adapters
 ├── hooks/        REUSABLE BEHAVIOR — stateful logic, no JSX
@@ -80,6 +80,8 @@ Stage flow and gates: `.opencode/docs/pipeline.md`.
 | Agent stages, gates, git flow | `.opencode/docs/pipeline.md` |
 | Source-of-truth map and no-duplication policy | `.opencode/docs/directive-sync.md` |
 | Review and test checklist | `.opencode/docs/quality-gates.md` |
+| TypeScript, composition, component hygiene standards (mobile-dev + code-review) | `.opencode/docs/stack-standards.md` |
+| Cognitive difficulty and lookup performance (mobile-dev + code-review) | `.opencode/docs/performance-reliability.md` |
 | Skills rules: caveman, Context7, CodeGraph | `.opencode/docs/skills-settings-rules.md` |
 | Knowledge-awareness rules | `.opencode/docs/agent-knowledge-awareness.md` |
 | App behavior, data model, flows | `.opencode/docs/SPEC.md` |

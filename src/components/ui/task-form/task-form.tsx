@@ -1,6 +1,6 @@
 import { ThemedText } from "@/components/themed-text";
 import { Colors } from "@/constants/theme";
-import { useTaskById } from "@/hooks/tasks/use-task-by-id";
+import { useTaskById } from "@/stores/tasks/selectors";
 import { ActivityIndicator } from "react-native";
 import { TaskFormContent } from "./task-form-content";
 

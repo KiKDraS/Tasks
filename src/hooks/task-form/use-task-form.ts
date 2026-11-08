@@ -1,4 +1,3 @@
-import { useTasks } from "@/context/tasks/tasks-context";
 import { Task } from "@/context/tasks/types/Task";
 import { TASK_FORM_ACTION_TYPES } from "@/hooks/task-form/constants";
 import {
@@ -11,11 +10,13 @@ import { resolveTaskNotification } from "@/hooks/task-form/utils/resolve-task-no
 import { saveTask } from "@/hooks/task-form/utils/save-task";
 import { buildTaskFields } from "@/hooks/task-form/utils/task-fields";
 import { validateTaskForm } from "@/hooks/task-form/utils/validate-task-form";
+import { useTasksStore } from "@/stores/tasks/tasks-store";
 import { router } from "expo-router";
 import { useCallback, useReducer } from "react";
 
 export function useTaskForm(task?: Task) {
-  const { addTask, updateTask } = useTasks();
+  const addTask = useTasksStore((state) => state.addTask);
+  const updateTask = useTasksStore((state) => state.updateTask);
   const [state, dispatch] = useReducer(taskFormReducer, task, (initialTask) =>
     initialTask ? taskFormStateFromTask(initialTask) : initialTaskFormState,
   );

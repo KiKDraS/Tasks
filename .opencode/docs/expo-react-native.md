@@ -46,9 +46,9 @@ Docs: https://docs.expo.dev/eas/index.md
 - App map:
   - `src/app/` — Expo Router routes: login (`index`), registration (`sign-up`), home (`(tabs)/index`), task form (`(tabs)/task-form`).
   - `src/components/ui/` — reusable UI, including `FormButton`, `TextField`, `OptionChip`, `TaskCheckbox`.
-  - `src/context/` — auth and tasks providers; Parcial 2 target moves tasks to `src/stores/`.
-  - `src/stores/` — Zustand task store (target).
-  - `src/services/` — device APIs and task storage adapter (target).
+  - `src/context/` — auth session provider; task domain types, seeds, and utils.
+  - `src/stores/` — Zustand task store and selectors.
+  - `src/services/` — task storage adapter; device APIs (target).
   - `src/hooks/` — form, auth, task, and storage hooks.
   - `src/constants/` — theme, routes, storage keys, time.
   - `src/utils/` — id, date, delay.
