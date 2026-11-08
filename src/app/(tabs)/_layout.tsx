@@ -2,7 +2,9 @@ import HomeIcon from "@/components/icons/HomeIcon";
 import SchedulingIcon from "@/components/icons/SchedulingIcon";
 import { Header } from "@/components/ui/header";
 import { Colors, setShadow, Spacing } from "@/constants/theme";
-import { TasksProvider } from "@/context/tasks/tasks-context";
+import { useClearSentNotification } from "@/hooks/tasks/use-clear-sent-notification";
+import { useHydrateTasks } from "@/hooks/tasks/use-hydrate-tasks";
+import { useTasksStore } from "@/stores/tasks/tasks-store";
 import { Tabs } from "expo-router";
 import { type ComponentProps } from "react";
 import { type ViewStyle } from "react-native";
@@ -16,6 +18,11 @@ type TabScreenOptions = ComponentProps<typeof Tabs>["screenOptions"];
 
 export default function TabLayout() {
   const insets = useSafeAreaInsets();
+  useHydrateTasks();
+  const clearSentNotification = useTasksStore(
+    (state) => state.clearSentNotification,
+  );
+  useClearSentNotification(clearSentNotification);
 
   const tabBarStyle: ViewStyle = {
     height: TAB_BAR_HEIGHT,
@@ -35,27 +42,25 @@ export default function TabLayout() {
   };
 
   return (
-    <TasksProvider>
-      <Tabs screenOptions={screenOptions}>
-        <Tabs.Screen
-          name="index"
-          options={{
-            title: "Home",
-            tabBarIcon: ({ color }) => (
-              <HomeIcon size={TAB_ICON_SIZE} color={color as string} />
-            ),
-          }}
-        />
-        <Tabs.Screen
-          name="task-form"
-          options={{
-            title: "Create Task",
-            tabBarIcon: ({ color }) => (
-              <SchedulingIcon size={TAB_ICON_SIZE} color={color as string} />
-            ),
-          }}
-        />
-      </Tabs>
-    </TasksProvider>
+    <Tabs screenOptions={screenOptions}>
+      <Tabs.Screen
+        name="index"
+        options={{
+          title: "Home",
+          tabBarIcon: ({ color }) => (
+            <HomeIcon size={TAB_ICON_SIZE} color={color as string} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="task-form"
+        options={{
+          title: "Create Task",
+          tabBarIcon: ({ color }) => (
+            <SchedulingIcon size={TAB_ICON_SIZE} color={color as string} />
+          ),
+        }}
+      />
+    </Tabs>
   );
 }

@@ -1,17 +1,18 @@
 # SPEC — Tasks
 
 Behavior and architecture of the shipped app. §1–14 describe what the code
-does, not what it should do. §15 is a target contract for Parcial 2; it is not
-shipped. Every shipped statement cites the file that implements it.
+does, not what it should do. §15 tracks shipped Parcial 2 task state and target
+device features. Every shipped statement cites the file that implements it.
 
 ## 1. Precedence
 
 1. The implementation (`src/`, `app.json`, `package.json`) is authoritative.
 2. `.opencode/docs/project-brief.md` records the assignments. Where the
    assignment and the code disagree, the code wins. The Parcial 1 exam was
-   already approved; Parcial 2 is not implemented, approved, or scored yet.
-3. §15 is a target contract for Parcial 2, not shipped behavior. Until an item
-   exists in `src/`, the current code wins.
+   already approved; Parcial 2 task state is implemented, device features
+   remain target.
+3. §15 records Parcial 2 status: shipped task state and target device features.
+   Until an item exists in `src/`, the current code wins.
 4. Stitch project `Minimalist Reminder Todo App` is a visual reference only. It
    never overrides behavior or tokens; see `DESIGN.md` for the conflict table.
 
@@ -30,8 +31,7 @@ In scope:
 Out of scope: password recovery, profile editing, per-user task isolation,
 sharing, recurring tasks, priorities, categories, and server-side validation.
 
-Parcial 2 target scope and status are in §15. That section is not shipped
-behavior.
+Parcial 2 status is in §15. Task state is shipped; device features are target.
 
 ## 3. Stack and runtime
 
@@ -56,8 +56,10 @@ Layers, from outside in:
 | Layer | Responsibility | Location |
 | --- | --- | --- |
 | Routes | Screen composition and protected groups | `src/app/` |
-| Contexts | Auth session and task collections | `src/context/` |
-| Hooks | Form state, storage, task lookup, reminder helpers | `src/hooks/` |
+| Stores | Global task state, selectors, actions | `src/stores/` |
+| Services | AsyncStorage task adapter and device APIs | `src/services/` |
+| Context | Auth session only | `src/context/auth/` |
+| Hooks | Form state and reusable behavior | `src/hooks/` |
 | Components | Presentational UI and reusable primitives | `src/components/` |
 | Constants and utils | Tokens, routes, storage keys, dates, IDs | `src/constants/`, `src/utils/` |
 
@@ -71,8 +73,9 @@ SessionProvider
         └── RootNavigator (Stack)
 ```
 
-`TasksProvider` is mounted inside the `(tabs)` layout, so task state exists only
-while the authenticated area is mounted (`src/app/(tabs)/_layout.tsx`).
+Task state lives in `useTasksStore` (`src/stores/tasks/tasks-store.ts`).
+`useHydrateTasks` hydrates it when the authenticated tabs mount
+(`src/app/(tabs)/_layout.tsx`).
 
 ## 5. Routing and access control
 
@@ -143,13 +146,14 @@ Seed data:
 - Tasks: three examples, one complete, one with a reminder one week out
   (`src/context/tasks/data/tasks-seed.ts`).
 
-Seeding happens lazily: `useDB` writes the provided seed only when the key is
-missing or empty (`src/hooks/use-db.ts`). Stored data is never overwritten on
-startup. Invalid JSON parses to an empty array.
+Task seeding happens lazily: `readOrSeedTasks` writes `TASKS_DB` only when the
+key is missing or empty (`src/services/tasks-storage.ts`). Auth users still seed
+through `useDB` (`src/hooks/use-db.ts`). Stored data is never overwritten on
+startup. Invalid or non-array JSON parses to an empty array.
 
-All writes are JSON-stringified arrays. `useDB` adds an 800 ms delay to
-`createItem`, `updateItem`, `deleteItem`, and `itemExists` to simulate a network
-round trip (`src/hooks/use-db.ts`). UI loading states rely on this delay.
+Task writes are JSON-stringified arrays. `writeTasks` adds an 800 ms delay
+(`src/services/tasks-storage.ts`, `src/constants/time.ts`). Auth user writes
+still go through `useDB`. UI loading states rely on this delay.
 
 ## 7. Authentication
 
@@ -188,11 +192,11 @@ checks run.
 
 ## 8. Task lifecycle
 
-Context: `src/context/tasks/tasks-context.tsx`.
+Store: `src/stores/tasks/tasks-store.ts`.
 
 ### List
 
-Home reads `tasks` from `TasksProvider` and renders a `FlatList`. The list is
+Home reads `tasks` from `useTasksStore` and renders a `FlatList`. The list is
 not filtered or sorted; storage order is render order, so new tasks append at
 the bottom (`src/components/ui/home/home-tasks-list.tsx`).
 
@@ -209,12 +213,12 @@ copy inconsistency; the rest of the UI is Spanish.
 3. `saveTask` calls `addTask` with `{ ...fields, isComplete: false, notification }`
    (`src/hooks/task-form/utils/save-task.ts`).
 4. `addTask` assigns `generateId()` when the task has no ID and appends it to
-   storage (`src/context/tasks/tasks-context.tsx`).
+   storage (`src/stores/tasks/tasks-store.ts`).
 5. The screen calls `router.back()`.
 
 ### Edit
 
-The same form loads the task by ID (`src/hooks/tasks/use-task-by-id.ts`) and
+The same form loads the task by ID (`src/stores/tasks/selectors.ts`) and
 prefills title, description, and the pending reminder. A reminder in the past is
 treated as disabled and replaced by the default 15-minute time reminder
 (`src/hooks/task-form/task-form-reducer.ts`). Saving merges the fields into the
@@ -222,11 +226,12 @@ existing task and replaces its notification.
 
 ### Complete / uncomplete
 
-The checkbox calls `updateTask({ ...task, isComplete: !task.isComplete })`
-(`src/hooks/tasks/use-task-actions.ts`). Completing a task cancels its pending
-notification and stores `notification: null`
-(`src/context/tasks/utils/get-notification-to-cancel.ts`,
-`src/context/tasks/tasks-context.tsx`). Uncompleting does not reschedule it.
+The checkbox calls `toggleComplete(task.id)`
+(`src/hooks/tasks/use-task-actions.ts`). The store action flips `isComplete`;
+completing cancels its pending notification and stores `notification: null`
+(`src/stores/tasks/tasks-store.ts`,
+`src/context/tasks/utils/get-notification-to-cancel.ts`). Uncompleting does not
+reschedule it.
 Completed tasks render with muted text and a filled `surface-variant` card.
 
 ### Delete
@@ -234,7 +239,7 @@ Completed tasks render with muted text and a filled `surface-variant` card.
 The delete icon calls `removeTask(id)` with no confirmation dialog
 (`src/hooks/tasks/use-task-actions.ts`). `removeTask` cancels the pending
 notification, then removes the task from storage
-(`src/context/tasks/tasks-context.tsx`).
+(`src/stores/tasks/tasks-store.ts`).
 
 Tasks are global: they are not scoped to the signed-in user. Any account sees
 the same `tasks` array. This is a known deviation from multi-user expectations,
@@ -344,8 +349,9 @@ in `package.json`.
 | `__tests__/validate-sign-up-form-test.ts` | 3 | Required fields and password mismatch |
 | `__tests__/validate-task-form-test.ts` | 3 | Title required, reminder validity |
 | `__tests__/tasks-storage-test.ts` | 9 | Parse, seed, and write task storage |
+| `__tests__/tasks-store-test.ts` | 8 | Hydrate, add, update, remove, toggle, clear notification |
 
-Total: 6 files, 22 tests. Contexts, notifications, and date helpers have no
+Total: 7 files, 30 tests. Auth context, notifications, and date helpers have no
 automated coverage. Manual checks: `.opencode/docs/project-brief.md`
 §Manual QA.
 
@@ -359,7 +365,7 @@ Recorded, not hidden:
 | Item | Current behavior | Owner |
 | --- | --- | --- |
 | Empty-state copy | English `No tasks found.` while the rest is Spanish | `home-tasks-empty.tsx` |
-| Per-user data | Tasks are shared across all local accounts | `tasks-context.tsx` |
+| Per-user data | Tasks are shared across all local accounts | `tasks-store.ts` |
 | Delete confirmation | None; the icon deletes immediately | `task-actions.tsx` |
 | Credentials | Plaintext in AsyncStorage, no hashing | `auth-context.tsx` |
 | Notification permission | Task saves without a reminder if permission is denied | `resolve-task-notification.ts` |
@@ -376,20 +382,18 @@ current Parcial 1 implementation, not a restatement of the assignment.
 | Reusable components + StyleSheet | `src/components/ui/form/`, `src/components/ui/home/home-task/` |
 | Stack navigation + 4 screens | `src/app/_layout.tsx`, `src/app/`, `src/app/(tabs)/` |
 | Local auth + protected routes | `src/context/auth/`, `Stack.Protected` in `src/app/_layout.tsx` |
-| AsyncStorage persistence | `src/hooks/use-storage-state.ts`, `src/hooks/use-db.ts` |
+| AsyncStorage persistence | `src/services/tasks-storage.ts`, `src/hooks/use-storage-state.ts`, `src/hooks/use-db.ts` |
 | Local notification | `src/context/tasks/utils/notifications.ts`, `app.json` plugin |
 | Jest + RNTL | `__tests__/`, `package.json` `jest` block |
 
-Parcial 2 traceability is in §15.7. Its rows are targets; they are not evidence and not scored.
+Parcial 2 traceability is in §15.7. Rows marked ✅ are shipped; ⬜ rows are targets.
 
-## 15. Parcial 2 target (not implemented)
+## 15. Parcial 2 status
 
-Status: the requirements exist in `.opencode/docs/project-brief.md` §Parcial 2.
-The code in `src/` still implements Parcial 1 only. This section is the target
-contract for the next build; it is not evidence. `(target)` marks files that do
-not exist yet. Implementation status is tracked in the project-brief §Parcial 2
-acceptance checklist; scoring stays separate. Update this section to shipped
-behavior as each item lands.
+Status: task state (Phase 1) is shipped in `src/stores/tasks/`; device features
+remain target. `(target)` marks files that do not exist yet. Implementation
+status is tracked in the project-brief §Parcial 2 acceptance checklist; scoring
+stays separate. Update this section as each item lands.
 
 ### 15.1 Target stack additions
 
@@ -498,10 +502,10 @@ type Task = {
 - The storage key stays `tasks` with the same bare-array JSON format. No
   migration is required.
 
-Target files: `src/stores/tasks/types.ts`,
-`src/services/tasks-storage.ts`.
+Current type: `src/context/tasks/types/Task.ts`. Target move:
+`src/stores/tasks/types.ts`. Storage: `src/services/tasks-storage.ts`.
 
-### 15.4 Target architecture
+### 15.4 Architecture
 
 Layers after the migration:
 
@@ -515,7 +519,7 @@ Layers after the migration:
 | Components | Presentational UI | `src/components/` |
 | Constants and utils | Tokens, keys, pure helpers | `src/constants/`, `src/utils/` |
 
-Task store (`src/stores/tasks/tasks-store.ts`, target):
+Task store (`src/stores/tasks/tasks-store.ts`, shipped):
 
 ```ts
 type TasksState = {
@@ -535,14 +539,15 @@ type TasksState = {
 - Actions write storage first, then update the store. The existing notification
   cancellation rules stay in the action.
 - Components use `useTasksStore` selectors. `useTaskById` becomes a selector.
-- `TasksProvider` is removed from `src/app/(tabs)/_layout.tsx`. A small
-  `TasksHydrator` (`src/components/tasks-hydrator.tsx`, target) calls
-  `hydrate()` once while the authenticated area mounts.
-- `useDB` is no longer used by tasks. Auth keeps `useStorageState`.
+- The authenticated tab layout calls `useHydrateTasks`
+  (`src/hooks/tasks/use-hydrate-tasks.ts`) and mounts the notification listener
+  (`src/app/(tabs)/_layout.tsx`).
+- `useDB` is no longer used by tasks. Auth still uses it for users alongside
+  `useStorageState`.
 - The store does not use `persist`; storage stays in the existing adapter to
   preserve the `tasks` key, seed behavior, and the 800 ms simulated delay.
-- No prop drilling: `HomeTasksList`, `TaskHeader`, `TaskBody`, and
-  `TaskFormContent` read the store directly.
+- No prop drilling: `HomeTasksList` and `TaskFormContent` read the store
+  directly. `TaskHeader` and `TaskBody` still receive props from `HomeTask`.
 
 Device results use one shape:
 
@@ -602,7 +607,7 @@ Permission denial messages are listed in §15.8.
 
 ### 15.6 Target tests
 
-Keep the 13 shipped tests. Add at least:
+Keep the 30 current tests. Add at least:
 
 | File | Tests | Covers |
 | --- | --- | --- |
@@ -622,7 +627,7 @@ Mock `expo-image-picker`, `expo-location`, `expo-contacts/legacy`,
 | GPS location | `src/services/location.ts`, task-form location card, task-card meta | ⬜ pending |
 | Contact | `src/services/contacts.ts`, task-form contact card, task-card meta | ⬜ pending |
 | Calendar event | `src/services/calendar.ts`, task-form calendar card | ⬜ pending |
-| Zustand global state | `src/stores/tasks/` | ⬜ pending |
+| Zustand global state | `src/stores/tasks/`, `src/hooks/tasks/use-hydrate-tasks.ts` | ✅ implemented |
 | Tests | `__tests__/` additions | ⬜ pending |
 | README + demo | `README.md` | ⬜ pending |
 
