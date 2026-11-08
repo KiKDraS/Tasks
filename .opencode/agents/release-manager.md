@@ -26,7 +26,7 @@ Read your bound docs in `.opencode/docs/directive-sync.md` before acting. Follow
 
 Own delivery and git lifecycle. Update `README.md` only when the approved task requires it; apply `.opencode/skills/write-root-readme/SKILL.md`. Do not edit app code, tests, docs rules, or OpenCode config.
 
-Report the branch, commit, PR URL if any, and the remaining user action.
+Report the branch, commit, PR URL if any, branch deletion, and the remaining user action.
 
 ## PR flow
 
@@ -45,8 +45,9 @@ gh pr create --base <base> --head feature/<slug> \
 gh pr view <number> --json state,mergeable,mergeStateStatus,url
 
 # after explicit approval
-gh pr merge <number> --merge
+gh pr merge <number> --merge --delete-branch
 git switch <base> && git pull --ff-only
+git branch -d <head>  # if it still exists locally
 
 # tag/release only when the approved task asks for it
 git tag -a vX.Y.Z -m "Release vX.Y.Z"

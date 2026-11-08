@@ -13,7 +13,7 @@ Authoritative roster: `AGENTS.md` §Agents. Agent permissions: `.opencode/agents
 2. **Build** — `mobile-dev` implements app code on `feature/<slug>` or `fix/<slug>`. `orchestrator` writes docs/meta changes (`AGENTS.md`, `opencode.json`, `.opencode/**`) directly. Run the checks required by `.opencode/docs/expo-react-native.md` and the test command in `quality-gates.md`. Report changed files, commands, and results.
 3. **Review** — `code-review` audits read-only against `quality-gates.md`. `STATUS: REJECTED` returns findings to `mobile-dev`; `STATUS: APPROVED` advances.
 4. **QA** — `qa-engineer` verifies or extends the Jest/RNTL suite and runs it. Real product bugs return to `mobile-dev`; test gaps stay with `qa-engineer`.
-5. **Release** — `release-manager` verifies delivery items, commits, pushes, and opens a PR for review. Wait for explicit user approval before merging to `main`.
+5. **Release** — `release-manager` verifies delivery items, commits, pushes, and opens a PR for review. After merge, delete the merged head branch local and remote. Wait for explicit user approval before merging to `main`.
 
 ## Gates
 
@@ -28,6 +28,8 @@ Authoritative roster: `AGENTS.md` §Agents. Agent permissions: `.opencode/agents
 - No force pushes. No direct agent commits to `main`.
 - Always open a PR for review, including docs/meta changes. `release-manager`
   creates it and reports the URL.
+- Delete the merged head branch after every merge: local and remote. Never delete
+  `main`, `feature/parcial-2`, or the active phase branch.
 - Merge to `main` only after the gates and explicit user approval.
 
 ## Handoff format
