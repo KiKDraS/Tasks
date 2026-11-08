@@ -304,7 +304,9 @@ Copy rules:
 
 Exact strings live in the components and in `SPEC.md` §10. Known English
 leftovers: `No tasks found.` (`home-tasks-empty.tsx`) and the hidden tab titles
-`Home` / `Create Task` (`src/app/(tabs)/_layout.tsx`).
+`Home` / `Create Task` (`src/app/(tabs)/_layout.tsx`). Full checklist:
+`.opencode/skills/ux-writing/SKILL.md`; Spanish patterns:
+`.opencode/skills/ux-writing/references/spanish-rioplatense.md`.
 
 ## 10. Stitch reference and conflicts
 
@@ -345,6 +347,8 @@ renders native symbols per platform, so shapes differ slightly.
 
 ## 11. Accessibility notes
 
+Checklist: `.opencode/skills/accessibility-mobile/SKILL.md`.
+
 Present:
 
 - Password toggle exposes `Mostrar contraseña` / `Ocultar contraseña`.
@@ -361,7 +365,11 @@ Gaps in the current build:
   toggle (20) are below the 44×44 iOS / 48×48 Android guideline.
 - Error text is not linked to its input through `accessibilityHint` or
   `aria-describedby`.
-- Color contrast is inherited from the palette; `on-surface-variant` on
-  `surface-variant` is the weakest pair and has not been measured.
+- Contrast is measured: `on-surface` on `surface` 16.23:1, `on-surface-variant`
+  on `surface` 4.71:1, `on-secondary-container` on `secondary-container`
+  4.55:1, `on-primary` on `primary-container` 14.63:1, `error` on `surface`
+  6.12:1. `on-surface-variant` on `surface-variant` is 3.90:1, below the 4.5:1
+  normal-text threshold; rework that pair before using it for labels,
+  placeholders, or chips.
 
 These are recorded as current state, not as approved design.

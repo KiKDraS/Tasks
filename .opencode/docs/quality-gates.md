@@ -9,10 +9,11 @@ Use these categories in findings. One failed category rejects the submission.
 1. **[REQ] Requirements** — verify against `.opencode/docs/project-brief.md` §Acceptance checklist.
 2. **[ARCH] Architecture** — verify against `.opencode/docs/expo-react-native.md` §Navigation & Routing and §Repo Notes. Scope guardrails: `.opencode/docs/project-brief.md` §No se requiere.
 3. **[RN] Expo/React Native** — verify against `.opencode/docs/expo-react-native.md`.
-4. **[A11Y] Accessibility** — accessible labels and roles, touch targets, contrast, readable text, screen-reader order.
+4. **[A11Y] Accessibility** — apply `.opencode/skills/accessibility-mobile/SKILL.md`: labels, roles, state, touch targets, dynamic type, contrast, screen-reader order.
 5. **[TEST] Tests** — verify coverage against `.opencode/docs/project-brief.md` §Testing and the conventions below.
 6. **[SYNC] No duplicates** — apply `directive-sync.md`.
 7. **[DELIVERY] Delivery** — verify `.opencode/docs/project-brief.md` §Entrega and §Accepted gaps.
+8. **[COPY] UI copy** — apply `.opencode/skills/ux-writing/SKILL.md`: Spanish rioplatense, `vos`, no Spanglish, no AI slop.
 
 ## Test conventions
 

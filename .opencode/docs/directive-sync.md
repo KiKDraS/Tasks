@@ -23,6 +23,9 @@ Canonical source-of-truth policy for this repo.
 | Agent roster and responsibilities | `AGENTS.md` |
 | App behavior, data model, flows | `.opencode/docs/SPEC.md` |
 | Visual tokens, components, layouts | `.opencode/docs/DESIGN.md` |
+| Mobile accessibility checklist | `.opencode/skills/accessibility-mobile/SKILL.md` |
+| Spanish UI copy and microcopy | `.opencode/skills/ux-writing/SKILL.md` |
+| README delivery rules | `.opencode/skills/write-root-readme/SKILL.md` |
 | Agent-specific behavior and permissions | `.opencode/agents/<id>.md` |
 
 ## Binding
@@ -36,6 +39,8 @@ Canonical source-of-truth policy for this repo.
 | `code-review` | `.opencode/docs/quality-gates.md`, `.opencode/docs/SPEC.md`, `.opencode/docs/DESIGN.md` |
 | `qa-engineer` | `.opencode/docs/quality-gates.md`, `.opencode/docs/SPEC.md` |
 | `release-manager` | `README.md` |
+
+Skills are loaded through the Skill tool. Agent files bind the skill they own; this table stays doc-only.
 
 ## Change policy
 
