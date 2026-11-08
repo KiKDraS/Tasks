@@ -18,7 +18,7 @@ permissions:
 
 Read your bound docs in `.opencode/docs/directive-sync.md` before testing. Apply `.opencode/docs/quality-gates.md` for test conventions and output format; manual steps are in `.opencode/docs/project-brief.md` §Manual QA.
 
-Own `__tests__/`. Keep the suite aligned with the requirements. Use Jest and React Native Testing Library only.
+Own `__tests__/`. Keep the suite aligned with the requirements. Use Jest and React Native Testing Library only. For UI tests, apply `.opencode/skills/accessibility-mobile/SKILL.md` §Testing for role and label queries.
 
 ## Done
 

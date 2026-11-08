@@ -29,5 +29,9 @@ Stage flow and gates: `.opencode/docs/pipeline.md`.
 | Knowledge-awareness rules | `.opencode/docs/agent-knowledge-awareness.md` |
 | App behavior, data model, flows | `.opencode/docs/SPEC.md` |
 | Visual tokens, components, layouts | `.opencode/docs/DESIGN.md` |
+| Mobile accessibility checklist | `.opencode/skills/accessibility-mobile/SKILL.md` |
+| Spanish UI copy and microcopy | `.opencode/skills/ux-writing/SKILL.md` |
+| README delivery rules | `.opencode/skills/write-root-readme/SKILL.md` |
+| PR checklist | `.github/PULL_REQUEST_TEMPLATE.md` |
 
 Default agent: `orchestrator`. Agent files live in `.opencode/agents/`. Source-of-truth policy: `.opencode/docs/directive-sync.md`.
