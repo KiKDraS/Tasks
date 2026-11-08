@@ -4,9 +4,7 @@
     ".opencode/docs/expo-react-native.md",
     ".opencode/docs/project-brief.md",
     ".opencode/docs/pipeline.md",
-    ".opencode/docs/directive-sync.md",
-    ".opencode/docs/stack-standards.md",
-    ".opencode/docs/performance-reliability.md"
+    ".opencode/docs/directive-sync.md"
   ],
   "default_agent": "orchestrator",
   "permissions": [
