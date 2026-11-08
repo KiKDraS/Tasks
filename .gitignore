@@ -44,3 +44,6 @@ example
 
 # tests
 coverage/
+
+# codegraph
+.codegraph/
