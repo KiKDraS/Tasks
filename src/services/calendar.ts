@@ -56,13 +56,26 @@ function createEventInCalendar(
   });
 }
 
-export async function createTaskEvent(
-  event: TaskCalendarEvent,
-): Promise<DeviceResult<{ eventId: string }>> {
+export async function requestCalendarPermission(): Promise<DeviceResult<true>> {
   try {
     const permission = await Calendar.requestCalendarPermissionsAsync();
     if (!isPermissionGranted(permission)) {
       return { status: "denied", canAskAgain: permission.canAskAgain };
+    }
+
+    return { status: "granted", value: true };
+  } catch {
+    return { status: "error", message: DEVICE_MESSAGES.calendarError };
+  }
+}
+
+export async function createTaskEvent(
+  event: TaskCalendarEvent,
+): Promise<DeviceResult<{ eventId: string }>> {
+  try {
+    const permission = await requestCalendarPermission();
+    if (permission.status !== "granted") {
+      return permission;
     }
 
     const calendar = await getWritableCalendar();

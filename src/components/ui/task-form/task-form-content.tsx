@@ -4,13 +4,11 @@ import { Spacing } from "@/constants/theme";
 import { ReminderSelection } from "@/context/tasks/types/Reminder";
 import { Task } from "@/context/tasks/types/Task";
 import { TASK_FORM_ACTION_TYPES } from "@/hooks/task-form/constants";
-import { useTaskAttachments } from "@/hooks/task-form/use-task-attachments";
 import { useTaskForm } from "@/hooks/task-form/use-task-form";
 import { router } from "expo-router";
 import { StyleSheet, View } from "react-native";
-import { LocationCard } from "./location-card";
-import { PhotoCard } from "./photo-card";
 import { ReminderCard } from "./reminder-card";
+import { TaskAttachmentCards } from "./task-attachment-cards";
 
 interface TaskFormContentProps {
   task?: Task;
@@ -19,12 +17,13 @@ interface TaskFormContentProps {
 export function TaskFormContent({ task }: Readonly<TaskFormContentProps>) {
   const { state, dispatch, handleSubmit, reminderLabel, isEditing } =
     useTaskForm(task);
-  const attachments = useTaskAttachments({ dispatch });
 
   const showReminderError = state.reminderEnabled && !!state.reminderError;
   const hasPendingAttachment =
     state.photoState.status === "pending" ||
-    state.locationState.status === "pending";
+    state.locationState.status === "pending" ||
+    state.contactState.status === "pending" ||
+    state.calendarState.status === "pending";
   const isSubmitDisabled =
     showReminderError || !!state.titleError || hasPendingAttachment;
 
@@ -65,25 +64,10 @@ export function TaskFormContent({ task }: Readonly<TaskFormContentProps>) {
         multiline
       />
 
-      <PhotoCard
-        photoUri={state.photoUri}
-        state={state.photoState}
+      <TaskAttachmentCards
+        state={state}
+        dispatch={dispatch}
         disabled={state.isSubmitting}
-        onTakePhoto={attachments.takePhoto}
-        onPickPhoto={attachments.pickPhoto}
-        onRemovePhoto={attachments.removePhoto}
-        onRetry={attachments.retryPhoto}
-        onOpenSettings={attachments.openSettings}
-      />
-
-      <LocationCard
-        location={state.location}
-        state={state.locationState}
-        disabled={state.isSubmitting}
-        onGetLocation={attachments.getLocation}
-        onRemoveLocation={attachments.removeLocation}
-        onRetry={attachments.getLocation}
-        onOpenSettings={attachments.openSettings}
       />
 
       <ReminderCard

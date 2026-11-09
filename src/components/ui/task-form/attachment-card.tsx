@@ -6,12 +6,14 @@ import { StyleSheet, View } from "react-native";
 interface AttachmentCardProps {
   icon: ReactNode;
   title: string;
+  trailing?: ReactNode;
   children: ReactNode;
 }
 
 export function AttachmentCard({
   icon,
   title,
+  trailing,
   children,
 }: Readonly<AttachmentCardProps>) {
   return (
@@ -24,7 +26,10 @@ export function AttachmentCard({
         >
           {icon}
         </View>
-        <ThemedText type="label-md">{title}</ThemedText>
+        <ThemedText type="label-md" style={styles.title}>
+          {title}
+        </ThemedText>
+        {trailing}
       </View>
       {children}
     </View>
@@ -48,5 +53,8 @@ const styles = StyleSheet.create({
     height: 20,
     alignItems: "center",
     justifyContent: "center",
+  },
+  title: {
+    flex: 1,
   },
 });
