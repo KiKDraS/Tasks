@@ -50,4 +50,4 @@ Closes #...
 
 ---
 
-> **Reviewer:** requirements live in `.opencode/docs/project-brief.md`; behavior in `.opencode/docs/SPEC.md`; visuals in `.opencode/docs/DESIGN.md`.
+> **Reviewer:** requirements live in `.opencode/docs/project-brief.md`; behavior in `SPEC.md`; visuals in `DESIGN.md`.
