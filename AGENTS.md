@@ -1,6 +1,6 @@
 # Tasks
 
-Expo/React Native school project for ISTEA Parcial 1 + 2. Parcial 1 is shipped and approved. Parcial 2 task state, device services, and form attachment cards are shipped; task-list attachments and task-delete cleanup remain target.
+Expo/React Native school project for ISTEA Parcial 1 + 2. Parcial 1 is shipped and approved. Parcial 2 app features are shipped; README and demo delivery remain target.
 
 ## Project structure
 
