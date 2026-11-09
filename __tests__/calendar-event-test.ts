@@ -1,4 +1,4 @@
-import { HOUR_MS, SECOND_MS } from "@/constants/time";
+import { HOUR_MS, MINUTE_MS, SECOND_MS } from "@/constants/time";
 import { REMINDER_TYPES } from "@/context/tasks/types/Reminder";
 import { initialTaskFormState } from "@/hooks/task-form/task-form-reducer";
 import type { TaskFormState } from "@/hooks/task-form/types/TaskForm";
@@ -71,13 +71,14 @@ describe("buildCalendarEventInput", () => {
     expect(event.endDate.getTime()).toBe(start + HOUR_MS);
   });
 
-  test("starts one hour from now when the reminder is disabled", () => {
+  test("uses the selected reminder when the reminder is disabled", () => {
     const event = buildCalendarEventInput(
       FIELDS,
       buildState({ reminderEnabled: false }),
     );
+    const start = NOW.getTime() + 15 * MINUTE_MS;
 
-    expect(event.startDate.getTime()).toBe(NOW.getTime() + HOUR_MS);
-    expect(event.endDate.getTime()).toBe(NOW.getTime() + 2 * HOUR_MS);
+    expect(event.startDate.getTime()).toBe(start);
+    expect(event.endDate.getTime()).toBe(start + HOUR_MS);
   });
 });

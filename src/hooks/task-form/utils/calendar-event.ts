@@ -9,9 +9,7 @@ export function buildCalendarEventInput(
   state: TaskFormState,
 ): TaskCalendarEvent {
   const now = new Date();
-  const startDate = state.reminderEnabled
-    ? getReminderDate(state.reminder, now)
-    : new Date(now.getTime() + HOUR_MS);
+  const startDate = getReminderDate(state.reminder, now);
 
   return {
     title: fields.title,

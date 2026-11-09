@@ -4,7 +4,10 @@ import {
   type DeviceActionState,
 } from "@/utils/permission-state";
 
-type DeviceFailure = Exclude<DeviceResult<unknown>, { status: "granted" }>;
+export type DeviceFailure = Exclude<
+  DeviceResult<unknown>,
+  { status: "granted" }
+>;
 
 export function getFailureState(result: DeviceFailure): DeviceActionState {
   if (result.status === "cancelled") {

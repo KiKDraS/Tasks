@@ -34,35 +34,39 @@ describe("resolveCalendarAttachment", () => {
     jest.clearAllMocks();
   });
 
-  test("clears the event id when the calendar is disabled", async () => {
+  test("clears the event id when the reminder is off", async () => {
     const dispatch = jest.fn();
 
     await expect(
-      resolveCalendarAttachment({ ...FIELDS, calendarEventId: "event-1" }, buildState(), dispatch),
+      resolveCalendarAttachment(
+        { ...FIELDS, calendarEventId: "event-1" },
+        buildState({ reminderEnabled: false }),
+        dispatch,
+      ),
     ).resolves.toEqual({
-      status: "ready",
       fields: { ...FIELDS, calendarEventId: null },
+      failure: null,
     });
     expect(createTaskEventMock).not.toHaveBeenCalled();
     expect(dispatch).not.toHaveBeenCalled();
   });
 
-  test("keeps the existing event when the calendar is enabled", async () => {
+  test("keeps the existing event when the reminder is on", async () => {
     const dispatch = jest.fn();
     const fields = { ...FIELDS, calendarEventId: "event-1" };
 
     await expect(
       resolveCalendarAttachment(
         fields,
-        buildState({ calendarEnabled: true, calendarEventId: "event-1" }),
+        buildState({ reminderEnabled: true, calendarEventId: "event-1" }),
         dispatch,
       ),
-    ).resolves.toEqual({ status: "ready", fields });
+    ).resolves.toEqual({ fields, failure: null });
     expect(createTaskEventMock).not.toHaveBeenCalled();
     expect(dispatch).not.toHaveBeenCalled();
   });
 
-  test("creates the event and stores its id when the calendar is enabled", async () => {
+  test("creates the event and stores its id when the reminder is on", async () => {
     const dispatch = jest.fn();
     createTaskEventMock.mockResolvedValue({
       status: "granted",
@@ -72,12 +76,12 @@ describe("resolveCalendarAttachment", () => {
     await expect(
       resolveCalendarAttachment(
         FIELDS,
-        buildState({ calendarEnabled: true }),
+        buildState({ reminderEnabled: true }),
         dispatch,
       ),
     ).resolves.toEqual({
-      status: "ready",
       fields: { ...FIELDS, calendarEventId: "event-2" },
+      failure: null,
     });
     expect(createTaskEventMock).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -91,7 +95,7 @@ describe("resolveCalendarAttachment", () => {
     });
   });
 
-  test("stores the blocked permission state and returns failed", async () => {
+  test("returns the denied failure and a null event id without aborting", async () => {
     const dispatch = jest.fn();
     createTaskEventMock.mockResolvedValue({
       status: "denied",
@@ -101,17 +105,20 @@ describe("resolveCalendarAttachment", () => {
     await expect(
       resolveCalendarAttachment(
         FIELDS,
-        buildState({ calendarEnabled: true }),
+        buildState({ reminderEnabled: true }),
         dispatch,
       ),
-    ).resolves.toEqual({ status: "failed" });
+    ).resolves.toEqual({
+      fields: { ...FIELDS, calendarEventId: null },
+      failure: { status: "denied", canAskAgain: false },
+    });
     expect(dispatch).toHaveBeenCalledWith({
       type: TASK_FORM_ACTION_TYPES.SET_CALENDAR_STATE,
       payload: { status: "blocked" },
     });
   });
 
-  test("stores the device error state and returns failed", async () => {
+  test("returns the device error failure and a null event id without aborting", async () => {
     const dispatch = jest.fn();
     const message = "No pudimos acceder a tu calendario. Intentá de nuevo.";
     createTaskEventMock.mockResolvedValue({ status: "error", message });
@@ -119,10 +126,13 @@ describe("resolveCalendarAttachment", () => {
     await expect(
       resolveCalendarAttachment(
         FIELDS,
-        buildState({ calendarEnabled: true }),
+        buildState({ reminderEnabled: true }),
         dispatch,
       ),
-    ).resolves.toEqual({ status: "failed" });
+    ).resolves.toEqual({
+      fields: { ...FIELDS, calendarEventId: null },
+      failure: { status: "error", message },
+    });
     expect(dispatch).toHaveBeenCalledWith({
       type: TASK_FORM_ACTION_TYPES.SET_CALENDAR_STATE,
       payload: { status: "error", message },

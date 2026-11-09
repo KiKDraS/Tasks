@@ -6,21 +6,18 @@ import {
 import { useReminderOptions } from "@/hooks/task-form/use-reminder-options";
 import { StyleSheet, View } from "react-native";
 import { ReminderDateOptions } from "./reminder-date-options";
-import { ReminderHeader } from "./reminder-header";
 import { ReminderModeSelector } from "./reminder-mode-selector";
 import { ReminderTimeOptions } from "./reminder-time-options";
 
 interface ReminderOptionsProps {
-  enabled: boolean;
-  onToggle: (enabled: boolean) => void;
+  visible: boolean;
   reminder: ReminderSelection;
   onSelect: (reminder: ReminderSelection) => void;
   disabled?: boolean;
 }
 
 export function ReminderOptions({
-  enabled,
-  onToggle,
+  visible,
   reminder,
   onSelect,
   disabled,
@@ -33,31 +30,30 @@ export function ReminderOptions({
     setAndroidPicker,
   } = useReminderOptions(reminder, onSelect);
 
+  if (!visible) {
+    return null;
+  }
+
   return (
     <View
       pointerEvents={disabled ? "none" : "auto"}
       style={[styles.container, disabled && styles.disabled]}
     >
-      <ReminderHeader enabled={enabled} onToggle={onToggle} />
-      {enabled && (
-        <>
-          <ReminderModeSelector
-            reminder={reminder}
-            selectedDate={selectedDate}
-            onSelect={onSelect}
-          />
-          {reminder.type === REMINDER_TYPES.TIME ? (
-            <ReminderTimeOptions reminder={reminder} onSelect={onSelect} />
-          ) : (
-            <ReminderDateOptions
-              selectedDate={selectedDate}
-              androidPicker={androidPicker}
-              onAndroidPickerChange={setAndroidPicker}
-              onDateChange={handleDateChange}
-              onTimeChange={handleTimeChange}
-            />
-          )}
-        </>
+      <ReminderModeSelector
+        reminder={reminder}
+        selectedDate={selectedDate}
+        onSelect={onSelect}
+      />
+      {reminder.type === REMINDER_TYPES.TIME ? (
+        <ReminderTimeOptions reminder={reminder} onSelect={onSelect} />
+      ) : (
+        <ReminderDateOptions
+          selectedDate={selectedDate}
+          androidPicker={androidPicker}
+          onAndroidPickerChange={setAndroidPicker}
+          onDateChange={handleDateChange}
+          onTimeChange={handleTimeChange}
+        />
       )}
     </View>
   );

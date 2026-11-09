@@ -10,6 +10,7 @@ interface PermissionNoticeProps {
   state: DeviceActionState;
   onRetry?: () => void;
   onOpenSettings?: () => void;
+  disabled?: boolean;
 }
 
 interface NoticeContent {
@@ -54,6 +55,7 @@ export function PermissionNotice({
   state,
   onRetry,
   onOpenSettings,
+  disabled,
 }: Readonly<PermissionNoticeProps>) {
   const content = getNoticeContent(state, onRetry, onOpenSettings);
   const message = content?.message;
@@ -80,6 +82,7 @@ export function PermissionNotice({
       <FormButton
         variant="surface"
         onPress={content.onPress}
+        disabled={disabled}
         style={styles.action}
       >
         {content.actionLabel}

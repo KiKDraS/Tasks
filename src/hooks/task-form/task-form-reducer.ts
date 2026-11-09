@@ -26,7 +26,6 @@ export const initialTaskFormState: TaskFormState = {
   photoUri: null,
   location: null,
   contact: null,
-  calendarEnabled: false,
   calendarEventId: null,
   photoState: { status: "idle" },
   locationState: { status: "idle" },
@@ -55,7 +54,7 @@ export function taskFormStateFromTask(task: Task): TaskFormState {
   return {
     title: task.title,
     description: task.description,
-    reminderEnabled: pendingReminder !== null,
+    reminderEnabled: pendingReminder !== null || !!task.calendarEventId,
     reminder: pendingReminder ?? createDefaultTimeReminder(),
     titleError: null,
     reminderError: null,
@@ -63,7 +62,6 @@ export function taskFormStateFromTask(task: Task): TaskFormState {
     photoUri,
     location,
     contact,
-    calendarEnabled: calendarEventId !== null,
     calendarEventId,
     photoState: photoUri ? { status: "granted" } : { status: "idle" },
     locationState: location ? { status: "granted" } : { status: "idle" },
@@ -104,8 +102,6 @@ export function taskFormReducer(
       return { ...state, contact: action.payload };
     case TASK_FORM_ACTION_TYPES.SET_CONTACT_STATE:
       return { ...state, contactState: action.payload };
-    case TASK_FORM_ACTION_TYPES.SET_CALENDAR_ENABLED:
-      return { ...state, calendarEnabled: action.payload };
     case TASK_FORM_ACTION_TYPES.SET_CALENDAR_EVENT:
       return { ...state, calendarEventId: action.payload };
     case TASK_FORM_ACTION_TYPES.SET_CALENDAR_STATE:

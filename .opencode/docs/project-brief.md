@@ -138,7 +138,7 @@ table when the app changes.
 | 3   | Local auth + protected routes                | `src/context/auth/auth-context.tsx`, `src/hooks/sign-in/`, `src/hooks/sign-up/`, `Stack.Protected` in `src/app/_layout.tsx`               | ✅                        |
 | 4   | AsyncStorage tasks + persistence             | `src/services/tasks-storage.ts`, `src/stores/tasks/tasks-store.ts`, `src/constants/storage-keys.ts`                                             | ✅                        |
 | 5   | Local notification                           | `src/context/tasks/utils/notifications.ts`, `src/hooks/task-form/utils/reminder.ts`, `expo-notifications` plugin in `app.json`            | ✅                        |
-| 6   | Jest + RNTL tests, single command            | `__tests__/` (25 files, 137 tests); test command in `.opencode/docs/quality-gates.md`                                                       | ✅                        |
+| 6   | Jest + RNTL tests, single command            | `__tests__/` (27 files, 159 tests); test command in `.opencode/docs/quality-gates.md`                                                       | ✅                        |
 | 7   | Delivery: public repo, README, YouTube demo  | `README.md`; repo visibility and demo link require manual verification                                                                    | ⚠️ accepted gaps          |
 
 ## Accepted gaps
@@ -146,7 +146,7 @@ table when the app changes.
 The Parcial 1 exam was already approved. These gaps are recorded but are not
 blockers for agent work:
 
-- `README.md` says 4 suites / 12 tests; actual suite is 25 files / 137 tests.
+- `README.md` says 4 suites / 12 tests; actual suite is 27 files / 159 tests.
 - `README.md` demo link points to Google Drive; the assignment asks for YouTube.
 
 Parcial 2 app features are implemented; README and demo delivery remain target.
@@ -274,7 +274,7 @@ feature lands and passes review/QA. Target evidence is in `SPEC.md`
 | 1 | Permissions for camera, gallery, location, contacts, calendar; granted / denied / pending states; clear denied message | `src/services/permissions.ts`, `src/utils/permission-state.ts`, `src/components/ui/permissions/permission-notice.tsx` | ✅ implemented |
 | 2 | Camera and gallery photo attached to a task and shown in the list | `src/services/media.ts`, `src/components/ui/task-form/photo-card.tsx`, `src/components/ui/home/home-task/task-attachments.tsx` | ✅ implemented |
 | 3 | GPS location attached to a task and shown as coordinates or address | `src/services/location.ts`, `src/components/ui/task-form/location-card.tsx`, `src/components/ui/home/home-task/task-attachments.tsx` | ✅ implemented |
-| 4 | Contact selected from the device and calendar event created for a task | `src/services/contacts.ts`, `src/services/calendar.ts`, `src/components/ui/task-form/contact-card.tsx`, `src/components/ui/task-form/calendar-card.tsx` | ✅ implemented |
+| 4 | Contact selected from the device and calendar event created for a task | `src/services/contacts.ts`, `src/services/calendar.ts`, `src/components/ui/task-form/contact-card.tsx`, `src/components/ui/task-form/schedule-card.tsx` | ✅ implemented |
 | 5 | Zustand global state with add, update, and delete actions; components read through store selectors | `src/stores/tasks/`, `src/hooks/tasks/use-hydrate-tasks.ts` | ✅ implemented |
 | 6 | Jest automated tests for the new state and device flows | Service, state, form, list, and cleanup tests in `__tests__/` | ✅ implemented |
 | 7 | Delivery: updated public repo, README with new features, YouTube demo | None yet; target `README.md` | ⬜ pending implementation |

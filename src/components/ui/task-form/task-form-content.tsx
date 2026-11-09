@@ -1,14 +1,15 @@
-import { FormButton } from "@/components/ui/form/form-button";
 import { TextField } from "@/components/ui/form/text-field";
-import { Spacing } from "@/constants/theme";
 import { ReminderSelection } from "@/context/tasks/types/Reminder";
 import { Task } from "@/context/tasks/types/Task";
+import { useSchedulePermission } from "@/hooks/task-form/use-schedule-permission";
 import { TASK_FORM_ACTION_TYPES } from "@/hooks/task-form/constants";
 import { useTaskForm } from "@/hooks/task-form/use-task-form";
+import { openAppSettings } from "@/services/permissions";
 import { router } from "expo-router";
-import { StyleSheet, View } from "react-native";
-import { ReminderCard } from "./reminder-card";
+import { useCallback, useRef } from "react";
+import { ScheduleCard } from "./schedule-card";
 import { TaskAttachmentCards } from "./task-attachment-cards";
+import { TaskFormActions } from "./task-form-actions";
 
 interface TaskFormContentProps {
   task?: Task;
@@ -17,6 +18,7 @@ interface TaskFormContentProps {
 export function TaskFormContent({ task }: Readonly<TaskFormContentProps>) {
   const { state, dispatch, handleSubmit, reminderLabel, isEditing } =
     useTaskForm(task);
+  const { requestPermission } = useSchedulePermission({ dispatch });
 
   const showReminderError = state.reminderEnabled && !!state.reminderError;
   const hasPendingAttachment =
@@ -26,6 +28,7 @@ export function TaskFormContent({ task }: Readonly<TaskFormContentProps>) {
     state.calendarState.status === "pending";
   const isSubmitDisabled =
     showReminderError || !!state.titleError || hasPendingAttachment;
+  const submitLock = useRef(false);
 
   const setField = (field: "title" | "description", value: string) => {
     dispatch(
@@ -36,7 +39,18 @@ export function TaskFormContent({ task }: Readonly<TaskFormContentProps>) {
   };
 
   const handleReminderToggle = () => {
+    const isEnabling = !state.reminderEnabled;
     dispatch({ type: TASK_FORM_ACTION_TYPES.TOGGLE_REMINDER });
+
+    if (isEnabling) {
+      void requestPermission();
+      return;
+    }
+
+    dispatch({
+      type: TASK_FORM_ACTION_TYPES.SET_CALENDAR_STATE,
+      payload: { status: "idle" },
+    });
   };
 
   const handleReminderSelect = (reminder: ReminderSelection) => {
@@ -46,6 +60,23 @@ export function TaskFormContent({ task }: Readonly<TaskFormContentProps>) {
   const handleCancel = () => {
     router.back();
   };
+
+  const handleSubmitGuarded = async () => {
+    if (isSubmitDisabled || state.isSubmitting || submitLock.current) {
+      return;
+    }
+
+    submitLock.current = true;
+    try {
+      await handleSubmit();
+    } finally {
+      submitLock.current = false;
+    }
+  };
+
+  const handleOpenSettings = useCallback(() => {
+    void openAppSettings();
+  }, []);
 
   return (
     <>
@@ -70,44 +101,29 @@ export function TaskFormContent({ task }: Readonly<TaskFormContentProps>) {
         disabled={state.isSubmitting}
       />
 
-      <ReminderCard
-        enabled={state.reminderEnabled}
+      <ScheduleCard
+        reminderEnabled={state.reminderEnabled}
         reminder={state.reminder}
         reminderLabel={reminderLabel}
         error={state.reminderError}
-        disabled={!!task?.isComplete}
-        onToggle={handleReminderToggle}
+        disabled={!!task?.isComplete || state.isSubmitting}
+        isComplete={!!task?.isComplete}
+        calendarEventId={state.calendarEventId}
+        calendarState={state.calendarState}
+        onToggleReminder={handleReminderToggle}
         onSelect={handleReminderSelect}
+        onRetryCalendar={requestPermission}
+        onOpenSettings={handleOpenSettings}
+        retryDisabled={state.isSubmitting}
       />
 
-      <View style={styles.actions}>
-        <FormButton
-          variant="surface"
-          onPress={handleCancel}
-          disabled={state.isSubmitting}
-          style={styles.action}
-        >
-          Cancelar
-        </FormButton>
-        <FormButton
-          onPress={handleSubmit}
-          loading={state.isSubmitting}
-          disabled={isSubmitDisabled}
-          style={styles.action}
-        >
-          {isEditing ? "Actualizar tarea" : "Crear tarea"}
-        </FormButton>
-      </View>
+      <TaskFormActions
+        isEditing={isEditing}
+        isSubmitting={state.isSubmitting}
+        submitDisabled={isSubmitDisabled}
+        onCancel={handleCancel}
+        onSubmit={handleSubmitGuarded}
+      />
     </>
   );
 }
-
-const styles = StyleSheet.create({
-  actions: {
-    flexDirection: "row",
-    gap: Spacing["space-md"],
-  },
-  action: {
-    flex: 1,
-  },
-});

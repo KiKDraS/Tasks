@@ -1,3 +1,4 @@
+import { REMINDER_TYPES } from "@/context/tasks/types/Reminder";
 import type {
   Task,
   TaskContact,
@@ -91,14 +92,26 @@ describe("taskFormStateFromTask", () => {
     expect(state.contactState).toEqual({ status: "granted" });
   });
 
-  test("prefills the calendar event and enabled state", () => {
+  test("prefills the calendar event and granted state", () => {
     const state = taskFormStateFromTask(
       buildTask({ calendarEventId: "event-1" }),
     );
 
-    expect(state.calendarEnabled).toBe(true);
     expect(state.calendarEventId).toBe("event-1");
     expect(state.calendarState).toEqual({ status: "granted" });
+  });
+
+  test("prefills the reminder from a pending notification", () => {
+    const scheduledAt = new Date(Date.now() + 60 * 60 * 1000).toISOString();
+    const state = taskFormStateFromTask(
+      buildTask({ notification: { id: "notification-1", scheduledAt } }),
+    );
+
+    expect(state.reminderEnabled).toBe(true);
+    expect(state.reminder).toEqual({
+      type: REMINDER_TYPES.DATE,
+      date: new Date(scheduledAt),
+    });
   });
 
   test("leaves attachments empty when the task has none", () => {
@@ -107,7 +120,6 @@ describe("taskFormStateFromTask", () => {
     expect(state.photoUri).toBeNull();
     expect(state.location).toBeNull();
     expect(state.contact).toBeNull();
-    expect(state.calendarEnabled).toBe(false);
     expect(state.calendarEventId).toBeNull();
     expect(state.photoState).toEqual({ status: "idle" });
     expect(state.locationState).toEqual({ status: "idle" });
@@ -172,15 +184,6 @@ describe("taskFormReducer attachments", () => {
     });
 
     expect(state.contactState).toEqual({ status: "blocked" });
-  });
-
-  test("SET_CALENDAR_ENABLED stores the calendar toggle", () => {
-    const state = taskFormReducer(initialTaskFormState, {
-      type: TASK_FORM_ACTION_TYPES.SET_CALENDAR_ENABLED,
-      payload: true,
-    });
-
-    expect(state.calendarEnabled).toBe(true);
   });
 
   test("SET_CALENDAR_EVENT stores the calendar event id", () => {
