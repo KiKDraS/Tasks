@@ -23,6 +23,10 @@ export const initialTaskFormState: TaskFormState = {
   titleError: null,
   reminderError: null,
   isSubmitting: false,
+  photoUri: null,
+  location: null,
+  photoState: { status: "idle" },
+  locationState: { status: "idle" },
 };
 
 function getPendingReminder(task: Task): ReminderSelection | null {
@@ -38,6 +42,8 @@ function getPendingReminder(task: Task): ReminderSelection | null {
 
 export function taskFormStateFromTask(task: Task): TaskFormState {
   const pendingReminder = getPendingReminder(task);
+  const photoUri = task.photoUri ?? null;
+  const location = task.location ?? null;
 
   return {
     title: task.title,
@@ -47,6 +53,10 @@ export function taskFormStateFromTask(task: Task): TaskFormState {
     titleError: null,
     reminderError: null,
     isSubmitting: false,
+    photoUri,
+    location,
+    photoState: photoUri ? { status: "granted" } : { status: "idle" },
+    locationState: location ? { status: "granted" } : { status: "idle" },
   };
 }
 
@@ -74,6 +84,14 @@ export function taskFormReducer(
       return { ...state, titleError: action.payload };
     case TASK_FORM_ACTION_TYPES.SET_SUBMITTING:
       return { ...state, isSubmitting: action.payload };
+    case TASK_FORM_ACTION_TYPES.SET_PHOTO:
+      return { ...state, photoUri: action.payload };
+    case TASK_FORM_ACTION_TYPES.SET_LOCATION:
+      return { ...state, location: action.payload };
+    case TASK_FORM_ACTION_TYPES.SET_PHOTO_STATE:
+      return { ...state, photoState: action.payload };
+    case TASK_FORM_ACTION_TYPES.SET_LOCATION_STATE:
+      return { ...state, locationState: action.payload };
     default:
       return state;
   }

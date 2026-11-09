@@ -10,10 +10,11 @@ visual states only; §12 is the Parcial 2 target. Behavior lives in `SPEC.md`.
    Where Stitch and the code disagree, the code wins. The conflict table is in
    §10.
 3. `README.md` and the app UI are Spanish; this document is English.
-4. §12 is a target UI for Parcial 2, not shipped. Implementation status is
-   tracked in the project-brief §Parcial 2 acceptance checklist; scoring stays
-   separate. Where §12 and the code disagree, the code wins until the feature
-   lands.
+4. §12 tracks Parcial 2 UI status: photo/location form cards and permission
+   notice are shipped; contact/calendar cards and list attachments are target.
+   Implementation status is tracked in the project-brief §Parcial 2 acceptance
+   checklist; scoring stays separate. Where §12 and the code disagree, the code
+   wins until the feature lands.
 
 ## 2. Design intent
 
@@ -187,7 +188,7 @@ Chrome:
 | `UserMenu` | `src/components/ui/header/user-menu.tsx` | Native menu, account row disabled, destructive sign-out |
 | `SplashScreenController` | `src/components/splash-screen-controller.tsx` | Splash is `#f7f9fb` with a 76 px icon |
 
-Parcial 2 target components are listed in §12.2; they are not shipped.
+Parcial 2 components are listed in §12.2; photo/location cards and permission notice are shipped, contact/calendar cards and list attachments are target.
 
 ## 7. Screen layouts
 
@@ -385,12 +386,13 @@ specific labels and touch targets.
 
 These are recorded as current state, not as approved design.
 
-## 12. Parcial 2 target UI (not implemented)
+## 12. Parcial 2 UI status
 
-Status: target only; no component below exists yet. Implementation status is
-tracked in the project-brief §Parcial 2 acceptance checklist; scoring stays
-separate. Use the tokens in §3–§5, the type scale in §4, and the primitives in
-§6. Do not add a new palette.
+Status: `PhotoCard`, `LocationCard`, and `PermissionNotice` are shipped;
+contact/calendar cards and task-list attachments remain target. Implementation
+status is tracked in the project-brief §Parcial 2 acceptance checklist; scoring
+stays separate. Use the tokens in §3–§5, the type scale in §4, and the
+primitives in §6. Do not add a new palette.
 
 ### 12.1 Intent
 
@@ -423,16 +425,16 @@ Calendario
 Recordatorio (existing)
 ```
 
-Component names (target):
+Component names:
 
 | Component | File | Notes |
 | --- | --- | --- |
-| `PhotoCard` | `src/components/ui/task-form/photo-card.tsx` | 64 px thumbnail, two actions, remove |
-| `LocationCard` | `src/components/ui/task-form/location-card.tsx` | Icon, value, `Usar mi ubicación` |
-| `ContactCard` | `src/components/ui/task-form/contact-card.tsx` | Icon, name/phone, `Elegir contacto` |
-| `CalendarCard` | `src/components/ui/task-form/calendar-card.tsx` | Icon, switch, helper, event state |
-| `PermissionNotice` | `src/components/ui/permissions/permission-notice.tsx` | Inline message, retry or settings |
-| `TaskAttachments` | `src/components/ui/home/home-task/task-attachments.tsx` | Card thumbnail and meta row |
+| `PhotoCard` | `src/components/ui/task-form/photo-card.tsx` | Shipped. 64 px thumbnail, two actions, remove |
+| `LocationCard` | `src/components/ui/task-form/location-card.tsx` | Shipped. Icon, value, `Usar mi ubicación` |
+| `ContactCard` | `src/components/ui/task-form/contact-card.tsx` | Target. Icon, name/phone, `Elegir contacto` |
+| `CalendarCard` | `src/components/ui/task-form/calendar-card.tsx` | Target. Icon, switch, helper, event state |
+| `PermissionNotice` | `src/components/ui/permissions/permission-notice.tsx` | Shipped. Inline message, retry or settings |
+| `TaskAttachments` | `src/components/ui/home/home-task/task-attachments.tsx` | Target. Card thumbnail and meta row |
 
 The cards reuse `ThemedText`, `HomeBadge`, and `AppTouchableOpacity`. Buttons
 inside cards use `label-md`; helper text uses `label-sm` and

@@ -5,6 +5,14 @@ export interface PermissionStatusLike {
 
 export type PermissionUiState = "granted" | "denied" | "blocked" | "undetermined";
 
+export type DeviceActionState =
+  | { status: "idle" }
+  | { status: "pending" }
+  | { status: "granted" }
+  | { status: "denied"; canAskAgain: true }
+  | { status: "blocked" }
+  | { status: "error"; message: string };
+
 export function getPermissionUiState(response: PermissionStatusLike): PermissionUiState {
   if (response.status === "granted") {
     return "granted";

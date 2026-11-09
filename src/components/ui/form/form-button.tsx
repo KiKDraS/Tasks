@@ -47,20 +47,34 @@ interface FormButtonProps extends TouchableOpacityProps {
   children: ReactNode;
 }
 
+function getAccessibleLabel(children: ReactNode): string | undefined {
+  return typeof children === "string" ? children : undefined;
+}
+
 export function FormButton({
   variant = "primary",
   loading,
   disabled,
   style,
   children,
+  accessibilityLabel,
+  accessibilityState,
   ...rest
 }: Readonly<FormButtonProps>) {
   const isDisabled = !!(disabled || loading);
+  const label = accessibilityLabel ?? getAccessibleLabel(children);
   const { container, textColor, indicatorColor } = VARIANTS[variant];
 
   return (
     <AppTouchableOpacity
       {...rest}
+      accessibilityRole="button"
+      accessibilityLabel={label}
+      accessibilityState={{
+        ...accessibilityState,
+        busy: !!loading,
+        disabled: isDisabled,
+      }}
       disabled={isDisabled}
       style={[styles.base, container, isDisabled && styles.disabled, style]}
     >
