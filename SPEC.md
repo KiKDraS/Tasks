@@ -43,9 +43,9 @@ Parcial 2 status is in §15. Task state is shipped; device features are target.
 - `expo-crypto` for task IDs (`generateId` → `randomUUID`).
 - `@expo-google-fonts/geist` for the typeface.
 - Jest 29 with `jest-expo` and React Native Testing Library.
-- Parcial 2 target additions: `zustand` is installed; `expo-image-picker`,
-  `expo-location`, `expo-contacts/legacy`, `expo-calendar/legacy`, and
-  `expo-file-system` are not installed yet. See §15.1.
+- Parcial 2 additions (installed): `expo-image-picker`, `expo-location`,
+  `expo-contacts`, `expo-calendar`, `expo-file-system`, and `zustand`. See
+  §15.1.
 
 Sources: `package.json`, `app.json`, `src/utils/id.ts`, `src/constants/theme.ts`.
 
@@ -350,8 +350,9 @@ in `package.json`.
 | `__tests__/validate-task-form-test.ts` | 3 | Title required, reminder validity |
 | `__tests__/tasks-storage-test.ts` | 9 | Parse, seed, and write task storage |
 | `__tests__/tasks-store-test.ts` | 8 | Hydrate, add, update, remove, toggle, clear notification |
+| `__tests__/permission-state-test.ts` | 4 | Granted, denied, blocked, undetermined |
 
-Total: 7 files, 30 tests. Auth context, notifications, and date helpers have no
+Total: 8 files, 34 tests. Auth context, notifications, and date helpers have no
 automated coverage. Manual checks: `.opencode/docs/project-brief.md`
 §Manual QA.
 
@@ -395,15 +396,15 @@ remain target. `(target)` marks files that do not exist yet. Implementation
 status is tracked in the project-brief §Parcial 2 acceptance checklist; scoring
 stays separate. Update this section as each item lands.
 
-### 15.1 Target stack additions
+### 15.1 Stack additions
 
-| Package | Use | Install |
+| Package | Use | Status |
 | --- | --- | --- |
-| `expo-image-picker` | Camera and gallery selection | `npx expo install expo-image-picker` |
-| `expo-location` | Foreground location and reverse geocoding | `npx expo install expo-location` |
-| `expo-contacts` | Contact picker | `npx expo install expo-contacts` |
-| `expo-calendar` | Device calendar event | `npx expo install expo-calendar` |
-| `expo-file-system` | Copy the picked image into app storage | `npx expo install expo-file-system` |
+| `expo-image-picker` | Camera and gallery selection | installed |
+| `expo-location` | Foreground location and reverse geocoding | installed |
+| `expo-contacts` | Contact picker | installed |
+| `expo-calendar` | Device calendar event | installed |
+| `expo-file-system` | Copy the picked image into app storage | installed |
 | `zustand` | Global task state | installed |
 
 SDK 57 notes:
@@ -422,7 +423,8 @@ SDK 57 notes:
 - `expo-image-picker` plugin: `photosPermission`, `cameraPermission`,
   `microphonePermission: false`.
 - `expo-location` plugin: `locationWhenInUsePermission`.
-- `expo-contacts` plugin: `contactsPermission`; Android `READ_CONTACTS`.
+- `expo-contacts` plugin: `contactsPermission`; Android `READ_CONTACTS`, with
+  `WRITE_CONTACTS` blocked.
 - `expo-calendar` plugin: `calendarPermission`; Android `READ_CALENDAR` and
   `WRITE_CALENDAR`.
 - Add the plugins to `expo.plugins`; never edit generated `ios/` or `android/`.
@@ -607,12 +609,10 @@ Permission denial messages are listed in §15.8.
 
 ### 15.6 Target tests
 
-Keep the 30 current tests. Add at least:
+Keep the 34 current tests. Add at least:
 
 | File | Tests | Covers |
 | --- | --- | --- |
-| `__tests__/tasks-store-test.ts` | 3 | hydrate, add, remove/update actions |
-| `__tests__/permission-state-test.ts` | 3 | granted, denied with retry, blocked |
 | `__tests__/task-attachments-test.tsx` | 2 | card renders photo/location/contact; empty attachments |
 
 Mock `expo-image-picker`, `expo-location`, `expo-contacts/legacy`,

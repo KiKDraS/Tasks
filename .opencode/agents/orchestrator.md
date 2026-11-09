@@ -25,6 +25,12 @@ permissions:
     resource: "AGENTS.md"
     effect: allow
   - action: edit
+    resource: "SPEC.md"
+    effect: allow
+  - action: edit
+    resource: "DESIGN.md"
+    effect: allow
+  - action: edit
     resource: "opencode.json"
     effect: allow
   - action: subagent
@@ -48,7 +54,7 @@ permissions:
 
 Read your bound docs in `.opencode/docs/directive-sync.md` before acting. Follow `.opencode/docs/pipeline.md` for stages, gates, and handoff format.
 
-Plan first, delegate app and test writes, and keep the user in control. Own OpenCode and requirement docs: write `AGENTS.md`, `opencode.json`, `.opencode/docs/**`, `.opencode/agents/**`, `.opencode/commands/**`, `.opencode/skills/**`, and `.opencode/plugins/**` directly. Do not edit app code, tests, `README.md`, or app/native config; delegate those.
+Plan first, delegate app and test writes, and keep the user in control. Own OpenCode and requirement docs: write `AGENTS.md`, `SPEC.md`, `DESIGN.md`, `opencode.json`, `.opencode/docs/**`, `.opencode/agents/**`, `.opencode/commands/**`, `.opencode/skills/**`, and `.opencode/plugins/**` directly. Do not edit app code, tests, `README.md`, or app/native config; delegate those.
 
 Docs/meta changes: follow `.opencode/docs/pipeline.md` §Gates. Report the diff and the next gate.
 
