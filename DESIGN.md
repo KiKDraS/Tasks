@@ -170,9 +170,9 @@ Task form:
 | `TaskForm` | `src/components/ui/task-form/task-form.tsx` | Loading spinner or not-found message, then content |
 | `TaskFormContent` | `src/components/ui/task-form/task-form-content.tsx` | Two fields, attachment cards, schedule card, cancel/save row |
 | `ScheduleCard` | `src/components/ui/task-form/schedule-card.tsx` | `surface-container`, radius 8, padding 16 |
-| `ScheduleHeader` | `.../reminder-options/schedule-header.tsx` | Title, two switches, calendar status, notice |
+| `ScheduleHeader` | `.../reminder-options/schedule-header.tsx` | Reminder switch, calendar status, notice |
 | `ScheduleToggleRow` | `.../schedule-toggle-row.tsx` | Label plus native switch |
-| `ReminderOptions` | `.../reminder-options/index.tsx` | Mode-dependent body; visible when notification is on, or calendar is on with no existing event |
+| `ReminderOptions` | `.../reminder-options/index.tsx` | Mode-dependent body; visible when the reminder is on |
 | `ReminderModeSelector` | `.../reminder-mode-selector.tsx` | `Tiempo` / `Fecha y hora` chips |
 | `ReminderTimeOptions` | `.../reminder-time-options.tsx` | Preset chips and custom time |
 | `ReminderCustomTime` | `.../reminder-custom-time.tsx` | Hours, minutes, seconds fields |
@@ -244,9 +244,7 @@ ScrollView, 16 padding
   Título                           label + input
   Descripción                      label + multiline input (min 96)
   ScheduleCard
-    [bell] Recordatorio
-    Notificación en la app          [switch]
-    Evento en el calendario         [switch]
+    [bell] Recordatorio              [switch]
     calendar status / notice
     Tiempo | Fecha y hora          two equal chips
     15m 30m 1h 2h                  wrap chips
@@ -422,8 +420,7 @@ Contacto
   [person] Contacto               [Elegir contacto]
   Sin contacto / name · phone
 Recordatorio
-  Notificación en la app          [switch]
-  Evento en el calendario         [switch]
+  [bell] Recordatorio             [switch]
   calendar status / notice
   Tiempo | Fecha y hora
   presets / custom / native picker
@@ -437,8 +434,8 @@ Component names:
 | `PhotoCard` | `src/components/ui/task-form/photo-card.tsx` | Shipped. 64 px thumbnail, two actions, remove |
 | `LocationCard` | `src/components/ui/task-form/location-card.tsx` | Shipped. Icon, value, `Usar mi ubicación` |
 | `ContactCard` | `src/components/ui/task-form/contact-card.tsx` | Shipped. Icon, name/phone, `Elegir contacto` |
-| `ScheduleCard` | `src/components/ui/task-form/schedule-card.tsx` | Shipped. Two switches, shared schedule, hint |
-| `ScheduleHeader` | `src/components/ui/task-form/reminder-options/schedule-header.tsx` | Shipped. Title, switches, calendar status, notice |
+| `ScheduleCard` | `src/components/ui/task-form/schedule-card.tsx` | Shipped. Reminder switch, shared schedule, hint |
+| `ScheduleHeader` | `src/components/ui/task-form/reminder-options/schedule-header.tsx` | Shipped. Reminder switch, calendar status, notice |
 | `PermissionNotice` | `src/components/ui/permissions/permission-notice.tsx` | Shipped. Inline message, retry or settings |
 | `TaskAttachments` | `src/components/ui/home/home-task/task-attachments.tsx` | Shipped. Card thumbnail and meta row |
 

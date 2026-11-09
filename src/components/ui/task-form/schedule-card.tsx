@@ -11,15 +11,14 @@ import { ScheduleHeader } from "./reminder-options/schedule-header";
 
 interface ScheduleCardProps {
   reminderEnabled: boolean;
-  calendarEnabled: boolean;
   reminder: ReminderSelection;
   reminderLabel: string;
   error: string | null;
   disabled: boolean;
+  isComplete?: boolean;
   calendarEventId: string | null;
   calendarState: DeviceActionState;
   onToggleReminder: () => void;
-  onToggleCalendar: () => void;
   onSelect: (reminder: ReminderSelection) => void;
   onRetryCalendar: () => void;
   onOpenSettings?: () => void;
@@ -28,15 +27,14 @@ interface ScheduleCardProps {
 
 export function ScheduleCard({
   reminderEnabled,
-  calendarEnabled,
   reminder,
   reminderLabel,
   error,
   disabled,
+  isComplete = false,
   calendarEventId,
   calendarState,
   onToggleReminder,
-  onToggleCalendar,
   onSelect,
   onRetryCalendar,
   onOpenSettings,
@@ -44,14 +42,11 @@ export function ScheduleCard({
 }: Readonly<ScheduleCardProps>) {
   const showsScheduleOptions = shouldShowScheduleOptions({
     reminderEnabled,
-    calendarEnabled,
     calendarEventId,
   });
   const showError = showsScheduleOptions && !!error;
   const hint = getScheduleHint(
-    reminderEnabled,
-    calendarEnabled,
-    calendarEventId,
+    { reminderEnabled, calendarEventId, calendarState, isComplete },
     reminderLabel,
   );
 
@@ -65,12 +60,10 @@ export function ScheduleCard({
     <View style={styles.scheduleCard}>
       <ScheduleHeader
         reminderEnabled={reminderEnabled}
-        calendarEnabled={calendarEnabled}
         disabled={disabled}
         calendarEventId={calendarEventId}
         calendarState={calendarState}
         onToggleReminder={onToggleReminder}
-        onToggleCalendar={onToggleCalendar}
         onRetryCalendar={onRetryCalendar}
         onOpenSettings={onOpenSettings}
         retryDisabled={retryDisabled}
@@ -80,7 +73,7 @@ export function ScheduleCard({
         visible={showsScheduleOptions}
         reminder={reminder}
         onSelect={onSelect}
-        disabled={disabled}
+        disabled={disabled || calendarState.status === "pending"}
       />
 
       {showError ? (

@@ -13,7 +13,6 @@ export type TaskFormState = {
   photoUri: string | null;
   location: TaskLocation | null;
   contact: TaskContact | null;
-  calendarEnabled: boolean;
   calendarEventId: string | null;
   photoState: DeviceActionState;
   locationState: DeviceActionState;
@@ -32,7 +31,6 @@ export type TaskFormAction =
   | { type: "SET_LOCATION"; payload: TaskLocation | null }
   | { type: "SET_CONTACT"; payload: TaskContact | null }
   | { type: "SET_CONTACT_STATE"; payload: DeviceActionState }
-  | { type: "SET_CALENDAR_ENABLED"; payload: boolean }
   | { type: "SET_CALENDAR_EVENT"; payload: string | null }
   | { type: "SET_CALENDAR_STATE"; payload: DeviceActionState }
   | { type: "SET_PHOTO_STATE"; payload: DeviceActionState }

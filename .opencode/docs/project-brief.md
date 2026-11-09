@@ -138,7 +138,7 @@ table when the app changes.
 | 3   | Local auth + protected routes                | `src/context/auth/auth-context.tsx`, `src/hooks/sign-in/`, `src/hooks/sign-up/`, `Stack.Protected` in `src/app/_layout.tsx`               | ✅                        |
 | 4   | AsyncStorage tasks + persistence             | `src/services/tasks-storage.ts`, `src/stores/tasks/tasks-store.ts`, `src/constants/storage-keys.ts`                                             | ✅                        |
 | 5   | Local notification                           | `src/context/tasks/utils/notifications.ts`, `src/hooks/task-form/utils/reminder.ts`, `expo-notifications` plugin in `app.json`            | ✅                        |
-| 6   | Jest + RNTL tests, single command            | `__tests__/` (26 files, 156 tests); test command in `.opencode/docs/quality-gates.md`                                                       | ✅                        |
+| 6   | Jest + RNTL tests, single command            | `__tests__/` (27 files, 159 tests); test command in `.opencode/docs/quality-gates.md`                                                       | ✅                        |
 | 7   | Delivery: public repo, README, YouTube demo  | `README.md`; repo visibility and demo link require manual verification                                                                    | ⚠️ accepted gaps          |
 
 ## Accepted gaps
@@ -146,7 +146,7 @@ table when the app changes.
 The Parcial 1 exam was already approved. These gaps are recorded but are not
 blockers for agent work:
 
-- `README.md` says 4 suites / 12 tests; actual suite is 26 files / 156 tests.
+- `README.md` says 4 suites / 12 tests; actual suite is 27 files / 159 tests.
 - `README.md` demo link points to Google Drive; the assignment asks for YouTube.
 
 Parcial 2 app features are implemented; README and demo delivery remain target.

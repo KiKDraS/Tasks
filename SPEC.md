@@ -350,7 +350,7 @@ in `package.json`.
 | `__tests__/form-button-test.tsx` | 5 | Render, press, disabled, role, busy state |
 | `__tests__/generate-id-test.ts` | 1 | UUID shape |
 | `__tests__/validate-sign-up-form-test.ts` | 3 | Required fields and password mismatch |
-| `__tests__/validate-task-form-test.ts` | 5 | Title required, schedule validity |
+| `__tests__/validate-task-form-test.ts` | 4 | Title required, schedule validity |
 | `__tests__/tasks-storage-test.ts` | 9 | Parse, seed, and write task storage |
 | `__tests__/tasks-store-test.ts` | 10 | Hydrate, add, update, remove, cleanup, toggle, clear notification |
 | `__tests__/permission-state-test.ts` | 4 | Granted, denied, blocked, undetermined |
@@ -366,14 +366,15 @@ in `package.json`.
 | `__tests__/location-card-test.tsx` | 5 | Empty, address, coords, pending, remove |
 | `__tests__/calendar-event-test.ts` | 3 | Date/time/disabled start and end |
 | `__tests__/contact-card-test.tsx` | 3 | Empty, filled, denied |
-| `__tests__/schedule-card-test.tsx` | 17 | Two switches, hints, existing event, error, notice, disabled |
+| `__tests__/schedule-card-test.tsx` | 15 | Reminder switch, calendar states, hints, notice, disabled, completed |
 | `__tests__/resolve-calendar-attachment-test.ts` | 5 | Disabled, existing, create, denial, error |
-| `__tests__/use-task-form-calendar-test.ts` | 7 | Switch combinations, create, abort, cleanup |
-| `__tests__/task-form-content-test.tsx` | 3 | Calendar retry routes to submit/permission, disabled |
+| `__tests__/use-task-form-calendar-test.ts` | 7 | Reminder on/off, failure save, cleanup, completed, alert order |
+| `__tests__/task-form-content-test.tsx` | 5 | Reminder toggle, permission retry, disabled |
+| `__tests__/use-schedule-permission-test.ts` | 4 | Granted, denied, blocked, error |
 | `__tests__/task-attachments-test.tsx` | 5 | Photo, location, contact, calendar, completed |
 | `__tests__/format-contact-label-test.ts` | 2 | Name only, name + phone |
 
-Total: 26 files, 156 tests. Auth context has no automated coverage. Manual checks: `.opencode/docs/project-brief.md`
+Total: 27 files, 159 tests. Auth context has no automated coverage. Manual checks: `.opencode/docs/project-brief.md`
 §Manual QA.
 
 Counts above describe the current suite. Remaining Parcial 2 target test
@@ -475,9 +476,10 @@ Target UI states:
 | `error` | Device call throws | Inline message, retry allowed |
 
 The form keeps one state per resource. Photo, location, and contact denials
-save the task without that attachment. A calendar event failure keeps the form
-open with the inline notice so the user can retry or turn the calendar toggle
-off. Messages are inline, not modal.
+save the task without that attachment. When the reminder is on, calendar
+permission denial or event failure skips the calendar event but still saves the
+task and schedules the app notification. The user sees an inline notice and a
+post-save alert.
 
 Target files: `src/services/permissions.ts` (shared result types),
 `src/utils/permission-state.ts` (pure status mapping),
@@ -597,19 +599,18 @@ Device services (shipped):
 
 Create:
 
-1. The form validates the title and shared schedule when either switch is enabled.
-2. Photo, location, and contact are wired in the form; app notification and
-   calendar event are independent switches sharing one date/time selection.
-   Each device action requests permission on first use and stores the result in
-   form state.
-3. `resolveTaskNotification` runs when the app notification switch is on.
-4. When the calendar switch is on, create the device event from the shared
-   schedule. Event end is one hour after start. Title = task title, notes =
-   description, location = address. Use `getDefaultCalendarAsync`; if it fails,
-   use the first writable event calendar, otherwise return the device error.
-5. `addTask` writes the extended task. Denied photo/location/contact
-   permissions save the task without that attachment. A calendar event failure
-   aborts the save and shows the inline notice.
+1. The form validates the title and shared schedule when the reminder is on.
+2. Photo, location, and contact are wired in the form. The reminder switch uses
+   one shared date/time selection for both the app notification and the calendar
+   event. Enabling the reminder requests calendar permission.
+3. `resolveTaskNotification` runs when the reminder is on.
+4. When the reminder is on, create the device event from the shared schedule.
+   Event end is one hour after start. Title = task title, notes = description,
+   location = address. Use `getDefaultCalendarAsync`; if it fails, use the first
+   writable event calendar.
+5. `addTask` writes the extended task. Calendar permission denial or event
+   failure skips the event but still saves the task and schedules the
+   notification; the user sees the notice and a post-save alert.
 6. `router.back()` runs as today.
 
 Edit:
@@ -633,7 +634,7 @@ Permission denial messages are listed in §15.8.
 
 ### 15.6 Tests
 
-All Parcial 2 target tests are shipped; keep the 156 current tests. Mock
+All Parcial 2 target tests are shipped; keep the 159 current tests. Mock
 `expo-image-picker`, `expo-location`, `expo-contacts/legacy`,
 `expo-calendar/legacy`, `expo-file-system`, and AsyncStorage. Run `pnpm test`.
 
@@ -660,7 +661,6 @@ Scoring stays separate.
 | Context | String |
 | --- | --- |
 | Schedule title | `Recordatorio` |
-| App reminder | `Notificación en la app` |
 | Photo empty | `Sin foto` |
 | Photo actions | `Tomar foto`, `Elegir de galería` |
 | Photo remove | `Quitar foto` |
@@ -671,11 +671,17 @@ Scoring stays separate.
 | Contact empty | `Sin contacto` |
 | Contact remove | `Quitar contacto` |
 | Contact action | `Elegir contacto` |
-| Calendar on | `Evento en el calendario` |
-| Calendar helper | `Se crea al guardar la tarea` |
-| Calendar created | `Evento creado` |
+| Calendar helper | `Se agregará al calendario al guardar` |
+| Calendar created | `Evento agregado` |
 | Calendar pending | `Verificando permiso...` |
-| Calendar will remove | `Se quitará al guardar la tarea` |
+| Calendar not added | `No se agregará al calendario` |
+| Calendar alert title | `No se agregó al calendario` |
+| Calendar alert message (notification) | `La tarea se guardó con notificación, pero sin evento en el calendario.` |
+| Calendar alert message (no notification) | `La tarea se guardó sin evento en el calendario.` |
+| Calendar will remove | `Se quitará al guardar` |
+| Calendar idle | `Se pedirá permiso al guardar` |
+| Reminder + calendar hint | `La notificación se enviará y el evento se agregará al calendario {label}` |
+| Reminder-only hint | `La notificación se enviará {label}` |
 | Permission denied (retry) | `Permiso denegado. Podés volver a intentarlo.` |
 | Retry action | `Reintentar` |
 | Permission blocked | `Permiso denegado. Habilitalo en Ajustes.` |

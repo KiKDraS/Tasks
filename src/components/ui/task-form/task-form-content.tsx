@@ -1,18 +1,15 @@
-import { FormButton } from "@/components/ui/form/form-button";
 import { TextField } from "@/components/ui/form/text-field";
-import { Spacing } from "@/constants/theme";
 import { ReminderSelection } from "@/context/tasks/types/Reminder";
 import { Task } from "@/context/tasks/types/Task";
-import { useCalendarAttachment } from "@/hooks/task-form/use-calendar-attachment";
+import { useSchedulePermission } from "@/hooks/task-form/use-schedule-permission";
 import { TASK_FORM_ACTION_TYPES } from "@/hooks/task-form/constants";
 import { useTaskForm } from "@/hooks/task-form/use-task-form";
-import { shouldShowScheduleOptions } from "@/hooks/task-form/utils/schedule-state";
 import { openAppSettings } from "@/services/permissions";
 import { router } from "expo-router";
 import { useCallback, useRef } from "react";
-import { StyleSheet, View } from "react-native";
 import { ScheduleCard } from "./schedule-card";
 import { TaskAttachmentCards } from "./task-attachment-cards";
+import { TaskFormActions } from "./task-form-actions";
 
 interface TaskFormContentProps {
   task?: Task;
@@ -21,13 +18,9 @@ interface TaskFormContentProps {
 export function TaskFormContent({ task }: Readonly<TaskFormContentProps>) {
   const { state, dispatch, handleSubmit, reminderLabel, isEditing } =
     useTaskForm(task);
-  const calendar = useCalendarAttachment({
-    dispatch,
-    enabled: state.calendarEnabled,
-  });
+  const { requestPermission } = useSchedulePermission({ dispatch });
 
-  const showReminderError =
-    shouldShowScheduleOptions(state) && !!state.reminderError;
+  const showReminderError = state.reminderEnabled && !!state.reminderError;
   const hasPendingAttachment =
     state.photoState.status === "pending" ||
     state.locationState.status === "pending" ||
@@ -46,7 +39,18 @@ export function TaskFormContent({ task }: Readonly<TaskFormContentProps>) {
   };
 
   const handleReminderToggle = () => {
+    const isEnabling = !state.reminderEnabled;
     dispatch({ type: TASK_FORM_ACTION_TYPES.TOGGLE_REMINDER });
+
+    if (isEnabling) {
+      void requestPermission();
+      return;
+    }
+
+    dispatch({
+      type: TASK_FORM_ACTION_TYPES.SET_CALENDAR_STATE,
+      payload: { status: "idle" },
+    });
   };
 
   const handleReminderSelect = (reminder: ReminderSelection) => {
@@ -74,10 +78,6 @@ export function TaskFormContent({ task }: Readonly<TaskFormContentProps>) {
     void openAppSettings();
   }, []);
 
-  const handleRetryCalendar = state.calendarEnabled
-    ? handleSubmitGuarded
-    : calendar.retryCalendar;
-
   return (
     <>
       <TextField
@@ -103,49 +103,27 @@ export function TaskFormContent({ task }: Readonly<TaskFormContentProps>) {
 
       <ScheduleCard
         reminderEnabled={state.reminderEnabled}
-        calendarEnabled={state.calendarEnabled}
         reminder={state.reminder}
         reminderLabel={reminderLabel}
         error={state.reminderError}
         disabled={!!task?.isComplete || state.isSubmitting}
+        isComplete={!!task?.isComplete}
         calendarEventId={state.calendarEventId}
         calendarState={state.calendarState}
         onToggleReminder={handleReminderToggle}
-        onToggleCalendar={calendar.toggleCalendar}
         onSelect={handleReminderSelect}
-        onRetryCalendar={handleRetryCalendar}
+        onRetryCalendar={requestPermission}
         onOpenSettings={handleOpenSettings}
-        retryDisabled={isSubmitDisabled || state.isSubmitting}
+        retryDisabled={state.isSubmitting}
       />
 
-      <View style={styles.actions}>
-        <FormButton
-          variant="surface"
-          onPress={handleCancel}
-          disabled={state.isSubmitting}
-          style={styles.action}
-        >
-          Cancelar
-        </FormButton>
-        <FormButton
-          onPress={handleSubmitGuarded}
-          loading={state.isSubmitting}
-          disabled={isSubmitDisabled}
-          style={styles.action}
-        >
-          {isEditing ? "Actualizar tarea" : "Crear tarea"}
-        </FormButton>
-      </View>
+      <TaskFormActions
+        isEditing={isEditing}
+        isSubmitting={state.isSubmitting}
+        submitDisabled={isSubmitDisabled}
+        onCancel={handleCancel}
+        onSubmit={handleSubmitGuarded}
+      />
     </>
   );
 }
-
-const styles = StyleSheet.create({
-  actions: {
-    flexDirection: "row",
-    gap: Spacing["space-md"],
-  },
-  action: {
-    flex: 1,
-  },
-});
