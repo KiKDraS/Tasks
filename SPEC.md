@@ -209,7 +209,7 @@ copy inconsistency; the rest of the UI is Spanish.
 
 ### Create
 
-1. The form validates the title and reminder.
+1. The form validates the title and shared schedule when needed.
 2. `resolveTaskNotification` cancels any previous notification, schedules a new
    one when reminders are enabled, and returns `TaskNotification | null`
    (`src/hooks/task-form/utils/resolve-task-notification.ts`).
@@ -328,7 +328,7 @@ Additional states:
 | Sign in | `src/app/index.tsx` | Brand title `Tasks`, subtitle, username, password with visibility toggle, submit, link to sign-up |
 | Sign up | `src/app/sign-up/index.tsx` | Same shell, username, password, confirmation, submit, link back |
 | Home | `src/app/(tabs)/index.tsx` | Header, `Mis tareas`, task list with attachment meta, floating add button |
-| Task form | `src/app/(tabs)/task-form/index.tsx` | `Nueva tarea` or `Editar tarea`, fields, photo/location/contact/calendar cards, reminder card, cancel/save |
+| Task form | `src/app/(tabs)/task-form/index.tsx` | `Nueva tarea` or `Editar tarea`, fields, photo/location/contact cards, combined schedule card, cancel/save |
 
 Shared layout shells:
 
@@ -350,7 +350,7 @@ in `package.json`.
 | `__tests__/form-button-test.tsx` | 5 | Render, press, disabled, role, busy state |
 | `__tests__/generate-id-test.ts` | 1 | UUID shape |
 | `__tests__/validate-sign-up-form-test.ts` | 3 | Required fields and password mismatch |
-| `__tests__/validate-task-form-test.ts` | 3 | Title required, reminder validity |
+| `__tests__/validate-task-form-test.ts` | 5 | Title required, schedule validity |
 | `__tests__/tasks-storage-test.ts` | 9 | Parse, seed, and write task storage |
 | `__tests__/tasks-store-test.ts` | 10 | Hydrate, add, update, remove, cleanup, toggle, clear notification |
 | `__tests__/permission-state-test.ts` | 4 | Granted, denied, blocked, undetermined |
@@ -366,13 +366,14 @@ in `package.json`.
 | `__tests__/location-card-test.tsx` | 5 | Empty, address, coords, pending, remove |
 | `__tests__/calendar-event-test.ts` | 3 | Date/time/disabled start and end |
 | `__tests__/contact-card-test.tsx` | 3 | Empty, filled, denied |
-| `__tests__/calendar-card-test.tsx` | 7 | Switch, event states, pending, denied, hidden helper |
+| `__tests__/schedule-card-test.tsx` | 17 | Two switches, hints, existing event, error, notice, disabled |
 | `__tests__/resolve-calendar-attachment-test.ts` | 5 | Disabled, existing, create, denial, error |
-| `__tests__/use-task-form-calendar-test.ts` | 3 | Create, abort, toggle-off cleanup |
+| `__tests__/use-task-form-calendar-test.ts` | 7 | Switch combinations, create, abort, cleanup |
+| `__tests__/task-form-content-test.tsx` | 3 | Calendar retry routes to submit/permission, disabled |
 | `__tests__/task-attachments-test.tsx` | 5 | Photo, location, contact, calendar, completed |
 | `__tests__/format-contact-label-test.ts` | 2 | Name only, name + phone |
 
-Total: 25 files, 137 tests. Auth context has no automated coverage. Manual checks: `.opencode/docs/project-brief.md`
+Total: 26 files, 156 tests. Auth context has no automated coverage. Manual checks: `.opencode/docs/project-brief.md`
 §Manual QA.
 
 Counts above describe the current suite. Remaining Parcial 2 target test
@@ -596,15 +597,16 @@ Device services (shipped):
 
 Create:
 
-1. The form validates the title and reminder as today.
-2. Photo, location, contact, and calendar are wired in the form. Each action
-   requests permission on first use and stores the result in form state.
-3. `resolveTaskNotification` runs as today.
-4. When the calendar toggle is on, create the device event. The event start is
-   the resolved reminder date, or one hour from now when no reminder is set;
-   the end is one hour later. Title = task title, notes = description,
-   location = address. Use `getDefaultCalendarAsync`; if it fails, use the
-   first writable event calendar, otherwise return the device error.
+1. The form validates the title and shared schedule when either switch is enabled.
+2. Photo, location, and contact are wired in the form; app notification and
+   calendar event are independent switches sharing one date/time selection.
+   Each device action requests permission on first use and stores the result in
+   form state.
+3. `resolveTaskNotification` runs when the app notification switch is on.
+4. When the calendar switch is on, create the device event from the shared
+   schedule. Event end is one hour after start. Title = task title, notes =
+   description, location = address. Use `getDefaultCalendarAsync`; if it fails,
+   use the first writable event calendar, otherwise return the device error.
 5. `addTask` writes the extended task. Denied photo/location/contact
    permissions save the task without that attachment. A calendar event failure
    aborts the save and shows the inline notice.
@@ -631,7 +633,7 @@ Permission denial messages are listed in §15.8.
 
 ### 15.6 Tests
 
-All Parcial 2 target tests are shipped; keep the 137 current tests. Mock
+All Parcial 2 target tests are shipped; keep the 156 current tests. Mock
 `expo-image-picker`, `expo-location`, `expo-contacts/legacy`,
 `expo-calendar/legacy`, `expo-file-system`, and AsyncStorage. Run `pnpm test`.
 
@@ -643,7 +645,7 @@ All Parcial 2 target tests are shipped; keep the 137 current tests. Mock
 | Camera / gallery photo | `src/services/media.ts`, `src/components/ui/task-form/photo-card.tsx`, `src/components/ui/home/home-task/task-attachments.tsx` | ✅ implemented |
 | GPS location | `src/services/location.ts`, `src/components/ui/task-form/location-card.tsx`, `src/components/ui/home/home-task/task-attachments.tsx` | ✅ implemented |
 | Contact | `src/services/contacts.ts`, `src/components/ui/task-form/contact-card.tsx` | ✅ implemented |
-| Calendar event | `src/services/calendar.ts`, `src/components/ui/task-form/calendar-card.tsx` | ✅ implemented |
+| Calendar event | `src/services/calendar.ts`, `src/components/ui/task-form/schedule-card.tsx` | ✅ implemented |
 | Zustand global state | `src/stores/tasks/`, `src/hooks/tasks/use-hydrate-tasks.ts` | ✅ implemented |
 | Tests | `__tests__/` additions | ✅ implemented |
 | README + demo | `README.md` | ⬜ pending |
@@ -657,6 +659,8 @@ Scoring stays separate.
 
 | Context | String |
 | --- | --- |
+| Schedule title | `Recordatorio` |
+| App reminder | `Notificación en la app` |
 | Photo empty | `Sin foto` |
 | Photo actions | `Tomar foto`, `Elegir de galería` |
 | Photo remove | `Quitar foto` |
@@ -667,7 +671,6 @@ Scoring stays separate.
 | Contact empty | `Sin contacto` |
 | Contact remove | `Quitar contacto` |
 | Contact action | `Elegir contacto` |
-| Calendar off | `Sin evento` |
 | Calendar on | `Evento en el calendario` |
 | Calendar helper | `Se crea al guardar la tarea` |
 | Calendar created | `Evento creado` |

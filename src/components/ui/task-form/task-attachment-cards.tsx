@@ -1,4 +1,3 @@
-import { useCalendarAttachment } from "@/hooks/task-form/use-calendar-attachment";
 import { useContactAttachment } from "@/hooks/task-form/use-contact-attachment";
 import { useTaskAttachments } from "@/hooks/task-form/use-task-attachments";
 import type {
@@ -6,7 +5,6 @@ import type {
   TaskFormState,
 } from "@/hooks/task-form/types/TaskForm";
 import type { Dispatch } from "react";
-import { CalendarCard } from "./calendar-card";
 import { ContactCard } from "./contact-card";
 import { LocationCard } from "./location-card";
 import { PhotoCard } from "./photo-card";
@@ -24,10 +22,6 @@ export function TaskAttachmentCards({
 }: Readonly<TaskAttachmentCardsProps>) {
   const attachments = useTaskAttachments({ dispatch });
   const contact = useContactAttachment({ dispatch });
-  const calendar = useCalendarAttachment({
-    dispatch,
-    enabled: state.calendarEnabled,
-  });
 
   return (
     <>
@@ -59,16 +53,6 @@ export function TaskAttachmentCards({
         onPickContact={contact.pickContact}
         onRemoveContact={contact.removeContact}
         onRetry={contact.pickContact}
-        onOpenSettings={attachments.openSettings}
-      />
-
-      <CalendarCard
-        enabled={state.calendarEnabled}
-        eventId={state.calendarEventId}
-        state={state.calendarState}
-        disabled={disabled}
-        onToggle={calendar.toggleCalendar}
-        onRetry={calendar.retryCalendar}
         onOpenSettings={attachments.openSettings}
       />
     </>

@@ -5,6 +5,7 @@ import type {
 } from "@/hooks/task-form/types/TaskForm";
 import { buildCalendarEventInput } from "@/hooks/task-form/utils/calendar-event";
 import { getFailureState } from "@/hooks/task-form/utils/device-action-state";
+import { shouldCreateCalendarEvent } from "@/hooks/task-form/utils/schedule-state";
 import type { TaskFields } from "@/hooks/task-form/utils/task-fields";
 import { createTaskEvent } from "@/services/calendar";
 import type { Dispatch } from "react";
@@ -42,9 +43,7 @@ export async function resolveCalendarAttachment(
   state: TaskFormState,
   dispatch: Dispatch<TaskFormAction>,
 ): Promise<CalendarFieldsResult> {
-  const shouldCreateCalendarEvent =
-    state.calendarEnabled && !state.calendarEventId;
-  if (shouldCreateCalendarEvent) {
+  if (shouldCreateCalendarEvent(state)) {
     return createCalendarFields(fields, state, dispatch);
   }
 

@@ -168,10 +168,11 @@ Task form:
 | Component | File | Notes |
 | --- | --- | --- |
 | `TaskForm` | `src/components/ui/task-form/task-form.tsx` | Loading spinner or not-found message, then content |
-| `TaskFormContent` | `src/components/ui/task-form/task-form-content.tsx` | Two fields, reminder card, cancel/save row |
-| `ReminderCard` | `src/components/ui/task-form/reminder-card.tsx` | `surface-container`, radius 8, padding 16 |
-| `ReminderOptions` | `src/components/ui/task-form/reminder-options/index.tsx` | Header plus mode-dependent body |
-| `ReminderHeader` | `.../reminder-header.tsx` | Bell icon, `Recordatorio`, native switch |
+| `TaskFormContent` | `src/components/ui/task-form/task-form-content.tsx` | Two fields, attachment cards, schedule card, cancel/save row |
+| `ScheduleCard` | `src/components/ui/task-form/schedule-card.tsx` | `surface-container`, radius 8, padding 16 |
+| `ScheduleHeader` | `.../reminder-options/schedule-header.tsx` | Title, two switches, calendar status, notice |
+| `ScheduleToggleRow` | `.../schedule-toggle-row.tsx` | Label plus native switch |
+| `ReminderOptions` | `.../reminder-options/index.tsx` | Mode-dependent body; visible when notification is on, or calendar is on with no existing event |
 | `ReminderModeSelector` | `.../reminder-mode-selector.tsx` | `Tiempo` / `Fecha y hora` chips |
 | `ReminderTimeOptions` | `.../reminder-time-options.tsx` | Preset chips and custom time |
 | `ReminderCustomTime` | `.../reminder-custom-time.tsx` | Hours, minutes, seconds fields |
@@ -242,8 +243,11 @@ ScrollView, 16 padding
   16 gap
   Título                           label + input
   Descripción                      label + multiline input (min 96)
-  ReminderCard
-    [bell] Recordatorio   [switch]
+  ScheduleCard
+    [bell] Recordatorio
+    Notificación en la app          [switch]
+    Evento en el calendario         [switch]
+    calendar status / notice
     Tiempo | Fecha y hora          two equal chips
     15m 30m 1h 2h                  wrap chips
     Personalizado
@@ -387,7 +391,7 @@ These are recorded as current state, not as approved design.
 
 ## 12. Parcial 2 UI status
 
-Status: `PhotoCard`, `LocationCard`, `ContactCard`, `CalendarCard`,
+Status: `PhotoCard`, `LocationCard`, `ContactCard`, `ScheduleCard`,
 `PermissionNotice`, and `TaskAttachments` are shipped. Implementation
 status is tracked in the project-brief §Parcial 2 acceptance checklist; scoring
 stays separate. Use the tokens in §3–§5, the type scale in §4, and the
@@ -404,7 +408,7 @@ primitives in §6. Do not add a new palette.
 
 ### 12.2 Task form order
 
-Add the device cards after `Descripción` and before `ReminderCard`:
+Add the device cards after `Descripción` and before `ScheduleCard`:
 
 ```text
 Foto
@@ -417,11 +421,13 @@ Ubicación
 Contacto
   [person] Contacto               [Elegir contacto]
   Sin contacto / name · phone
-Calendario
-  [calendar] Evento en el calendario   [switch]
-  Se crea al guardar la tarea
-  Evento creado (when set)
-Recordatorio (existing)
+Recordatorio
+  Notificación en la app          [switch]
+  Evento en el calendario         [switch]
+  calendar status / notice
+  Tiempo | Fecha y hora
+  presets / custom / native picker
+  hint
 ```
 
 Component names:
@@ -431,7 +437,8 @@ Component names:
 | `PhotoCard` | `src/components/ui/task-form/photo-card.tsx` | Shipped. 64 px thumbnail, two actions, remove |
 | `LocationCard` | `src/components/ui/task-form/location-card.tsx` | Shipped. Icon, value, `Usar mi ubicación` |
 | `ContactCard` | `src/components/ui/task-form/contact-card.tsx` | Shipped. Icon, name/phone, `Elegir contacto` |
-| `CalendarCard` | `src/components/ui/task-form/calendar-card.tsx` | Shipped. Icon, switch, helper, event state |
+| `ScheduleCard` | `src/components/ui/task-form/schedule-card.tsx` | Shipped. Two switches, shared schedule, hint |
+| `ScheduleHeader` | `src/components/ui/task-form/reminder-options/schedule-header.tsx` | Shipped. Title, switches, calendar status, notice |
 | `PermissionNotice` | `src/components/ui/permissions/permission-notice.tsx` | Shipped. Inline message, retry or settings |
 | `TaskAttachments` | `src/components/ui/home/home-task/task-attachments.tsx` | Shipped. Card thumbnail and meta row |
 
@@ -466,7 +473,7 @@ TaskCard
 | Pending | Action disabled; `ActivityIndicator` in the card value or action; card stays at full opacity |
 | Denied, can retry | `PermissionNotice` below the card value: `Permiso denegado. Podés volver a intentarlo.` + `Reintentar` |
 | Blocked | `PermissionNotice`: `Permiso denegado. Habilitalo en Ajustes.` + `Abrir ajustes` |
-| Granted, empty value | Normal empty copy (`Sin foto`, `Sin ubicación`, `Sin contacto`, `Sin evento`) |
+| Granted, empty value | Normal empty copy (`Sin foto`, `Sin ubicación`, `Sin contacto`) |
 | Granted, value set | Value row plus remove or change action |
 | Device error | `PermissionNotice` with the matching message from `SPEC.md` §15.8. |
 

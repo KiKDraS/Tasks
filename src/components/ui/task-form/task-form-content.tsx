@@ -3,11 +3,15 @@ import { TextField } from "@/components/ui/form/text-field";
 import { Spacing } from "@/constants/theme";
 import { ReminderSelection } from "@/context/tasks/types/Reminder";
 import { Task } from "@/context/tasks/types/Task";
+import { useCalendarAttachment } from "@/hooks/task-form/use-calendar-attachment";
 import { TASK_FORM_ACTION_TYPES } from "@/hooks/task-form/constants";
 import { useTaskForm } from "@/hooks/task-form/use-task-form";
+import { shouldShowScheduleOptions } from "@/hooks/task-form/utils/schedule-state";
+import { openAppSettings } from "@/services/permissions";
 import { router } from "expo-router";
+import { useCallback, useRef } from "react";
 import { StyleSheet, View } from "react-native";
-import { ReminderCard } from "./reminder-card";
+import { ScheduleCard } from "./schedule-card";
 import { TaskAttachmentCards } from "./task-attachment-cards";
 
 interface TaskFormContentProps {
@@ -17,8 +21,13 @@ interface TaskFormContentProps {
 export function TaskFormContent({ task }: Readonly<TaskFormContentProps>) {
   const { state, dispatch, handleSubmit, reminderLabel, isEditing } =
     useTaskForm(task);
+  const calendar = useCalendarAttachment({
+    dispatch,
+    enabled: state.calendarEnabled,
+  });
 
-  const showReminderError = state.reminderEnabled && !!state.reminderError;
+  const showReminderError =
+    shouldShowScheduleOptions(state) && !!state.reminderError;
   const hasPendingAttachment =
     state.photoState.status === "pending" ||
     state.locationState.status === "pending" ||
@@ -26,6 +35,7 @@ export function TaskFormContent({ task }: Readonly<TaskFormContentProps>) {
     state.calendarState.status === "pending";
   const isSubmitDisabled =
     showReminderError || !!state.titleError || hasPendingAttachment;
+  const submitLock = useRef(false);
 
   const setField = (field: "title" | "description", value: string) => {
     dispatch(
@@ -46,6 +56,27 @@ export function TaskFormContent({ task }: Readonly<TaskFormContentProps>) {
   const handleCancel = () => {
     router.back();
   };
+
+  const handleSubmitGuarded = async () => {
+    if (isSubmitDisabled || state.isSubmitting || submitLock.current) {
+      return;
+    }
+
+    submitLock.current = true;
+    try {
+      await handleSubmit();
+    } finally {
+      submitLock.current = false;
+    }
+  };
+
+  const handleOpenSettings = useCallback(() => {
+    void openAppSettings();
+  }, []);
+
+  const handleRetryCalendar = state.calendarEnabled
+    ? handleSubmitGuarded
+    : calendar.retryCalendar;
 
   return (
     <>
@@ -70,14 +101,21 @@ export function TaskFormContent({ task }: Readonly<TaskFormContentProps>) {
         disabled={state.isSubmitting}
       />
 
-      <ReminderCard
-        enabled={state.reminderEnabled}
+      <ScheduleCard
+        reminderEnabled={state.reminderEnabled}
+        calendarEnabled={state.calendarEnabled}
         reminder={state.reminder}
         reminderLabel={reminderLabel}
         error={state.reminderError}
-        disabled={!!task?.isComplete}
-        onToggle={handleReminderToggle}
+        disabled={!!task?.isComplete || state.isSubmitting}
+        calendarEventId={state.calendarEventId}
+        calendarState={state.calendarState}
+        onToggleReminder={handleReminderToggle}
+        onToggleCalendar={calendar.toggleCalendar}
         onSelect={handleReminderSelect}
+        onRetryCalendar={handleRetryCalendar}
+        onOpenSettings={handleOpenSettings}
+        retryDisabled={isSubmitDisabled || state.isSubmitting}
       />
 
       <View style={styles.actions}>
@@ -90,7 +128,7 @@ export function TaskFormContent({ task }: Readonly<TaskFormContentProps>) {
           Cancelar
         </FormButton>
         <FormButton
-          onPress={handleSubmit}
+          onPress={handleSubmitGuarded}
           loading={state.isSubmitting}
           disabled={isSubmitDisabled}
           style={styles.action}

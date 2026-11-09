@@ -57,6 +57,33 @@ beforeEach(() => {
   deleteTaskEventMock.mockResolvedValue(undefined);
 });
 
+async function submitWithSchedule(options: {
+  reminderEnabled: boolean;
+  calendarEnabled: boolean;
+}) {
+  const { result } = await renderHook(() => useTaskForm());
+
+  await act(async () => {
+    result.current.dispatch({
+      type: TASK_FORM_ACTION_TYPES.SET_TITLE,
+      payload: "Comprar pan",
+    });
+    if (!options.reminderEnabled) {
+      result.current.dispatch({ type: TASK_FORM_ACTION_TYPES.TOGGLE_REMINDER });
+    }
+    if (options.calendarEnabled) {
+      result.current.dispatch({
+        type: TASK_FORM_ACTION_TYPES.SET_CALENDAR_ENABLED,
+        payload: true,
+      });
+    }
+  });
+
+  await act(async () => {
+    await result.current.handleSubmit();
+  });
+}
+
 describe("useTaskForm calendar attachment", () => {
   test("creates the event, saves its id, and navigates back", async () => {
     createTaskEventMock.mockResolvedValue({
@@ -161,5 +188,66 @@ describe("useTaskForm calendar attachment", () => {
     expect(deleteTaskEventMock).toHaveBeenCalledWith("event-1");
     expect(deletePhotoMock).not.toHaveBeenCalled();
     expect(routerMock.back).toHaveBeenCalledTimes(1);
+  });
+
+  test("skips the event and saves no event id when both switches are off", async () => {
+    await submitWithSchedule({ reminderEnabled: false, calendarEnabled: false });
+
+    expect(createTaskEventMock).not.toHaveBeenCalled();
+    expect(resolveTaskNotificationMock).toHaveBeenCalledWith(
+      expect.objectContaining({ reminderEnabled: false }),
+    );
+    expect(saveTaskMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        fields: expect.objectContaining({ calendarEventId: null }),
+      }),
+    );
+  });
+
+  test("skips the event when only the app reminder is on", async () => {
+    await submitWithSchedule({ reminderEnabled: true, calendarEnabled: false });
+
+    expect(createTaskEventMock).not.toHaveBeenCalled();
+    expect(resolveTaskNotificationMock).toHaveBeenCalledWith(
+      expect.objectContaining({ reminderEnabled: true }),
+    );
+  });
+
+  test("creates the event when only the calendar is on", async () => {
+    createTaskEventMock.mockResolvedValue({
+      status: "granted",
+      value: { eventId: "event-1" },
+    });
+
+    await submitWithSchedule({ reminderEnabled: false, calendarEnabled: true });
+
+    expect(createTaskEventMock).toHaveBeenCalledTimes(1);
+    expect(resolveTaskNotificationMock).toHaveBeenCalledWith(
+      expect.objectContaining({ reminderEnabled: false }),
+    );
+    expect(saveTaskMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        fields: expect.objectContaining({ calendarEventId: "event-1" }),
+      }),
+    );
+  });
+
+  test("creates the event and schedules the notification when both are on", async () => {
+    createTaskEventMock.mockResolvedValue({
+      status: "granted",
+      value: { eventId: "event-2" },
+    });
+
+    await submitWithSchedule({ reminderEnabled: true, calendarEnabled: true });
+
+    expect(createTaskEventMock).toHaveBeenCalledTimes(1);
+    expect(resolveTaskNotificationMock).toHaveBeenCalledWith(
+      expect.objectContaining({ reminderEnabled: true }),
+    );
+    expect(saveTaskMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        fields: expect.objectContaining({ calendarEventId: "event-2" }),
+      }),
+    );
   });
 });

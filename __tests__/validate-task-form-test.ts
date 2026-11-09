@@ -34,6 +34,33 @@ describe("validateTaskForm", () => {
     expect(isValid).toBe(false);
   });
 
+  test("blocks submission when the calendar is enabled and the reminder is invalid", () => {
+    const { isValid } = validateTaskForm(
+      buildFormState({
+        title: "Comprar leche",
+        reminderEnabled: false,
+        calendarEnabled: true,
+        reminderError: TASK_FORM_MESSAGES.invalidReminderTime,
+      }),
+    );
+
+    expect(isValid).toBe(false);
+  });
+
+  test("accepts a calendar-only form with an existing event despite a stale reminder error", () => {
+    const { isValid } = validateTaskForm(
+      buildFormState({
+        title: "Comprar leche",
+        reminderEnabled: false,
+        calendarEnabled: true,
+        calendarEventId: "event-1",
+        reminderError: TASK_FORM_MESSAGES.invalidReminderTime,
+      }),
+    );
+
+    expect(isValid).toBe(true);
+  });
+
   test("accepts a complete form", () => {
     const { isValid } = validateTaskForm(
       buildFormState({ title: "Comprar leche" }),
