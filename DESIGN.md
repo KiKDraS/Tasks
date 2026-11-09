@@ -10,10 +10,10 @@ visual states only; §12 is the Parcial 2 target. Behavior lives in `SPEC.md`.
    Where Stitch and the code disagree, the code wins. The conflict table is in
    §10.
 3. `README.md` and the app UI are Spanish; this document is English.
-4. §12 is a target UI for Parcial 2, not shipped. Implementation status is
-   tracked in the project-brief §Parcial 2 acceptance checklist; scoring stays
-   separate. Where §12 and the code disagree, the code wins until the feature
-   lands.
+4. §12 tracks Parcial 2 UI status: all form and list attachment UI is shipped.
+   Implementation status is tracked in the project-brief §Parcial 2 acceptance
+   checklist; scoring stays separate. Where §12 and the code disagree, the code
+   wins until the feature lands.
 
 ## 2. Design intent
 
@@ -51,7 +51,7 @@ Rules of thumb:
 - Selected controls use `secondary-container` plus `on-secondary-container`.
 - Destructive affordances are the only place `error` appears.
 - Completed tasks switch from `surface` to `surface-variant` and their text to
-  `on-surface-variant` with a line-through
+  `secondary` with a line-through
   (`src/components/ui/home/home-task/task-text-styles.ts`).
 
 Navigation theme (`NavigationTheme`): light mode, primary `#091426`, background
@@ -187,7 +187,7 @@ Chrome:
 | `UserMenu` | `src/components/ui/header/user-menu.tsx` | Native menu, account row disabled, destructive sign-out |
 | `SplashScreenController` | `src/components/splash-screen-controller.tsx` | Splash is `#f7f9fb` with a 76 px icon |
 
-Parcial 2 target components are listed in §12.2; they are not shipped.
+Parcial 2 components are listed in §12.2; all form and list attachment components are shipped.
 
 ## 7. Screen layouts
 
@@ -265,7 +265,7 @@ The edit variant changes the title, subtitle, and primary button to
 | Button disabled | 50% opacity, no press |
 | Chip selected | `secondary-container` fill, `on-secondary-container` label |
 | Chip unselected | `surface-variant` fill, `on-surface-variant` label |
-| Task complete | `surface-variant` fill, 1 px border, no shadow, title and body `on-surface-variant` + line-through |
+| Task complete | `surface-variant` fill, 1 px border, no shadow, title and body `secondary` + line-through |
 | Reminder sent | Badge disappears once `scheduledAt` is in the past |
 | Reminder imminent | Badge reads `Recordatorio activo` under one minute |
 | Empty list | `No tasks found.` in default body style, top-left of the list area |
@@ -385,12 +385,13 @@ specific labels and touch targets.
 
 These are recorded as current state, not as approved design.
 
-## 12. Parcial 2 target UI (not implemented)
+## 12. Parcial 2 UI status
 
-Status: target only; no component below exists yet. Implementation status is
-tracked in the project-brief §Parcial 2 acceptance checklist; scoring stays
-separate. Use the tokens in §3–§5, the type scale in §4, and the primitives in
-§6. Do not add a new palette.
+Status: `PhotoCard`, `LocationCard`, `ContactCard`, `CalendarCard`,
+`PermissionNotice`, and `TaskAttachments` are shipped. Implementation
+status is tracked in the project-brief §Parcial 2 acceptance checklist; scoring
+stays separate. Use the tokens in §3–§5, the type scale in §4, and the
+primitives in §6. Do not add a new palette.
 
 ### 12.1 Intent
 
@@ -423,20 +424,20 @@ Calendario
 Recordatorio (existing)
 ```
 
-Component names (target):
+Component names:
 
 | Component | File | Notes |
 | --- | --- | --- |
-| `PhotoCard` | `src/components/ui/task-form/photo-card.tsx` | 64 px thumbnail, two actions, remove |
-| `LocationCard` | `src/components/ui/task-form/location-card.tsx` | Icon, value, `Usar mi ubicación` |
-| `ContactCard` | `src/components/ui/task-form/contact-card.tsx` | Icon, name/phone, `Elegir contacto` |
-| `CalendarCard` | `src/components/ui/task-form/calendar-card.tsx` | Icon, switch, helper, event state |
-| `PermissionNotice` | `src/components/ui/permissions/permission-notice.tsx` | Inline message, retry or settings |
-| `TaskAttachments` | `src/components/ui/home/home-task/task-attachments.tsx` | Card thumbnail and meta row |
+| `PhotoCard` | `src/components/ui/task-form/photo-card.tsx` | Shipped. 64 px thumbnail, two actions, remove |
+| `LocationCard` | `src/components/ui/task-form/location-card.tsx` | Shipped. Icon, value, `Usar mi ubicación` |
+| `ContactCard` | `src/components/ui/task-form/contact-card.tsx` | Shipped. Icon, name/phone, `Elegir contacto` |
+| `CalendarCard` | `src/components/ui/task-form/calendar-card.tsx` | Shipped. Icon, switch, helper, event state |
+| `PermissionNotice` | `src/components/ui/permissions/permission-notice.tsx` | Shipped. Inline message, retry or settings |
+| `TaskAttachments` | `src/components/ui/home/home-task/task-attachments.tsx` | Shipped. Card thumbnail and meta row |
 
 The cards reuse `ThemedText`, `HomeBadge`, and `AppTouchableOpacity`. Buttons
-inside cards use `label-md`; helper text uses `label-sm` and
-`on-surface-variant`.
+inside cards use `label-md`; helper text uses `label-sm` and `secondary` for
+contrast on `surface-container`.
 
 ### 12.3 Task card
 
@@ -452,7 +453,7 @@ TaskCard
 ```
 
 - Thumbnail 56×56, radius 6, `surface-variant` placeholder when empty.
-- Meta rows use `label-sm`, `on-surface-variant`, one line each with
+- Meta rows use `label-sm`, `secondary`, one line each with
   `numberOfLines={1}`.
 - Calendar indicator is a small icon plus `Evento`; no date duplication.
 - The card grows only when an attachment exists. Do not reserve empty space.
@@ -462,7 +463,7 @@ TaskCard
 
 | State | Treatment |
 | --- | --- |
-| Pending | Action disabled; `ActivityIndicator` in the card action; card stays at full opacity |
+| Pending | Action disabled; `ActivityIndicator` in the card value or action; card stays at full opacity |
 | Denied, can retry | `PermissionNotice` below the card value: `Permiso denegado. Podés volver a intentarlo.` + `Reintentar` |
 | Blocked | `PermissionNotice`: `Permiso denegado. Habilitalo en Ajustes.` + `Abrir ajustes` |
 | Granted, empty value | Normal empty copy (`Sin foto`, `Sin ubicación`, `Sin contacto`, `Sin evento`) |
@@ -500,8 +501,8 @@ Use `BaseIcon`; one icon per file. Existing `ReminderIcon` and
 - The photo thumbnail gets `accessibilityLabel="Foto de la tarea"`; decorative
   icons use `accessibilityElementsHidden` on iOS and
   `importantForAccessibility="no"` on Android.
-- Errors and permission notices are linked to the card value with
-  `accessibilityHint`; do not rely on color alone.
+- Errors and permission notices use the live region and iOS announcement;
+  do not rely on color alone.
 - Body text keeps the platform font scale. Fixed-height rows must not clip at
   large sizes; let the value wrap to two lines.
 

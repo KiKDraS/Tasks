@@ -1,18 +1,20 @@
 # SPEC — Tasks
 
 Behavior and architecture of the shipped app. §1–14 describe what the code
-does, not what it should do. §15 tracks shipped Parcial 2 task state and target
-device features. Every shipped statement cites the file that implements it.
+does, not what it should do. §15 tracks shipped Parcial 2 app features; README
+and demo delivery remain target. Every shipped statement cites the file that
+implements it.
 
 ## 1. Precedence
 
 1. The implementation (`src/`, `app.json`, `package.json`) is authoritative.
 2. `.opencode/docs/project-brief.md` records the assignments. Where the
    assignment and the code disagree, the code wins. The Parcial 1 exam was
-   already approved; Parcial 2 task state is implemented, device features
-   remain target.
-3. §15 records Parcial 2 status: shipped task state and device services, with
-   target device UI. Until an item exists in `src/`, the current code wins.
+   already approved; Parcial 2 app features are implemented; README and demo
+   delivery remain target.
+3. §15 records Parcial 2 status: app features are shipped; README and demo
+   delivery remain target. Until an item exists in `src/`, the current code
+   wins.
 4. Stitch project `Minimalist Reminder Todo App` is a visual reference only. It
    never overrides behavior or tokens; see `DESIGN.md` for the conflict table.
 
@@ -31,8 +33,8 @@ In scope:
 Out of scope: password recovery, profile editing, per-user task isolation,
 sharing, recurring tasks, priorities, categories, and server-side validation.
 
-Parcial 2 status is in §15. Task state and device services are shipped; device
-UI wiring is target.
+Parcial 2 status is in §15. App features are shipped; README and demo delivery
+are target.
 
 ## 3. Stack and runtime
 
@@ -325,8 +327,8 @@ Additional states:
 | --- | --- | --- |
 | Sign in | `src/app/index.tsx` | Brand title `Tasks`, subtitle, username, password with visibility toggle, submit, link to sign-up |
 | Sign up | `src/app/sign-up/index.tsx` | Same shell, username, password, confirmation, submit, link back |
-| Home | `src/app/(tabs)/index.tsx` | Header, `Mis tareas`, task list, floating add button |
-| Task form | `src/app/(tabs)/task-form/index.tsx` | `Nueva tarea` or `Editar tarea`, fields, reminder card, cancel/save |
+| Home | `src/app/(tabs)/index.tsx` | Header, `Mis tareas`, task list with attachment meta, floating add button |
+| Task form | `src/app/(tabs)/task-form/index.tsx` | `Nueva tarea` or `Editar tarea`, fields, photo/location/contact/calendar cards, reminder card, cancel/save |
 
 Shared layout shells:
 
@@ -345,21 +347,32 @@ in `package.json`.
 | File | Tests | Covers |
 | --- | --- | --- |
 | `__tests__/auth-form-reducer-test.ts` | 3 | Field updates, password visibility, error reset |
-| `__tests__/form-button-test.tsx` | 3 | Render, press, disabled behavior |
+| `__tests__/form-button-test.tsx` | 5 | Render, press, disabled, role, busy state |
 | `__tests__/generate-id-test.ts` | 1 | UUID shape |
 | `__tests__/validate-sign-up-form-test.ts` | 3 | Required fields and password mismatch |
 | `__tests__/validate-task-form-test.ts` | 3 | Title required, reminder validity |
 | `__tests__/tasks-storage-test.ts` | 9 | Parse, seed, and write task storage |
-| `__tests__/tasks-store-test.ts` | 8 | Hydrate, add, update, remove, toggle, clear notification |
+| `__tests__/tasks-store-test.ts` | 10 | Hydrate, add, update, remove, cleanup, toggle, clear notification |
 | `__tests__/permission-state-test.ts` | 4 | Granted, denied, blocked, undetermined |
 | `__tests__/reminder-date-test.ts` | 2 | Date identity, time offset |
 | `__tests__/media-service-test.ts` | 6 | Denied, cancelled, copy, errors, delete |
 | `__tests__/location-service-test.ts` | 5 | Denied, address, geocode fallback, error |
 | `__tests__/contacts-service-test.ts` | 5 | Denied, cancel, phone selection, error |
-| `__tests__/calendar-service-test.ts` | 8 | Permission, calendar fallback, create, delete |
+| `__tests__/calendar-service-test.ts` | 11 | Permission, fallback, create, delete, request |
 | `__tests__/reminder-notifications-test.ts` | 3 | DATE/TIME triggers, denied permission |
+| `__tests__/task-form-attachments-test.ts` | 24 | Failure states, prefill, reducer, fields, cleanup |
+| `__tests__/permission-notice-test.tsx` | 6 | Denied/blocked/error and hidden states |
+| `__tests__/photo-card-test.tsx` | 4 | Empty, actions, remove, denied notice |
+| `__tests__/location-card-test.tsx` | 5 | Empty, address, coords, pending, remove |
+| `__tests__/calendar-event-test.ts` | 3 | Date/time/disabled start and end |
+| `__tests__/contact-card-test.tsx` | 3 | Empty, filled, denied |
+| `__tests__/calendar-card-test.tsx` | 7 | Switch, event states, pending, denied, hidden helper |
+| `__tests__/resolve-calendar-attachment-test.ts` | 5 | Disabled, existing, create, denial, error |
+| `__tests__/use-task-form-calendar-test.ts` | 3 | Create, abort, toggle-off cleanup |
+| `__tests__/task-attachments-test.tsx` | 5 | Photo, location, contact, calendar, completed |
+| `__tests__/format-contact-label-test.ts` | 2 | Name only, name + phone |
 
-Total: 14 files, 63 tests. Auth context has no automated coverage. Manual checks: `.opencode/docs/project-brief.md`
+Total: 25 files, 137 tests. Auth context has no automated coverage. Manual checks: `.opencode/docs/project-brief.md`
 §Manual QA.
 
 Counts above describe the current suite. Remaining Parcial 2 target test
@@ -397,10 +410,10 @@ Parcial 2 traceability is in §15.7. Rows marked ✅ are shipped; ⬜ rows are t
 
 ## 15. Parcial 2 status
 
-Status: task state and device services are shipped; device UI wiring remains
+Status: all Parcial 2 app features are shipped; README and demo delivery remain
 target. `(target)` marks files that do not exist yet. Implementation status is
 tracked in the project-brief §Parcial 2 acceptance checklist; scoring stays
-separate. Update this section as each item lands.
+separate.
 
 ### 15.1 Stack additions
 
@@ -460,9 +473,10 @@ Target UI states:
 | `blocked` | `status === "denied"` and `!canAskAgain` | Inline message + `Abrir ajustes` (`Linking.openSettings()`) |
 | `error` | Device call throws | Inline message, retry allowed |
 
-The form keeps one state per resource. A denied permission never blocks saving
-the task; the task saves without that attachment. The message is inline, not a
-modal.
+The form keeps one state per resource. Photo, location, and contact denials
+save the task without that attachment. A calendar event failure keeps the form
+open with the inline notice so the user can retry or turn the calendar toggle
+off. Messages are inline, not modal.
 
 Target files: `src/services/permissions.ts` (shared result types),
 `src/utils/permission-state.ts` (pure status mapping),
@@ -574,7 +588,7 @@ Device services (shipped):
 | `src/services/media.ts` | `takePhoto()` / `pickPhoto()` return `DeviceResult<{ uri: string }>`; request permission, launch the picker, copy the asset into `task-photos` |
 | `src/services/location.ts` | `getCurrentLocation()` returns `DeviceResult<TaskLocation>`; request foreground permission, get position, reverse geocode with coordinate fallback |
 | `src/services/contacts.ts` | `pickContact()` returns `DeviceResult<TaskContact>`; request permission, open the native picker, keep first phone |
-| `src/services/calendar.ts` | `createTaskEvent(event)` returns `DeviceResult<{ eventId: string }>`; `deleteTaskEvent(id): Promise<void>`; default/first writable calendar |
+| `src/services/calendar.ts` | `requestCalendarPermission()` returns `DeviceResult<true>`; `createTaskEvent(event)` returns `DeviceResult<{ eventId: string }>`; `deleteTaskEvent(id): Promise<void>`; default/first writable calendar |
 | `src/services/permissions.ts` | `DeviceResult<T>`, `PermissionLike`, `isPermissionGranted`, `openAppSettings` |
 | `src/utils/reminder-date.ts` | Shared `getReminderDate` for notifications and calendar starts |
 
@@ -583,16 +597,17 @@ Device services (shipped):
 Create:
 
 1. The form validates the title and reminder as today.
-2. Photo, location, contact, and calendar are optional. Each action requests
-   permission on first use and stores the result in form state.
+2. Photo, location, contact, and calendar are wired in the form. Each action
+   requests permission on first use and stores the result in form state.
 3. `resolveTaskNotification` runs as today.
 4. When the calendar toggle is on, create the device event. The event start is
    the resolved reminder date, or one hour from now when no reminder is set;
    the end is one hour later. Title = task title, notes = description,
    location = address. Use `getDefaultCalendarAsync`; if it fails, use the
    first writable event calendar, otherwise return the device error.
-5. `addTask` writes the extended task. A denied device permission saves the
-   task without that attachment and shows the inline notice.
+5. `addTask` writes the extended task. Denied photo/location/contact
+   permissions save the task without that attachment. A calendar event failure
+   aborts the save and shows the inline notice.
 6. `router.back()` runs as today.
 
 Edit:
@@ -607,41 +622,36 @@ Edit:
 Complete / delete:
 
 - Completing a task cancels the notification as today. Attachments stay.
-- Deleting a task cancels the notification, best-effort deletes the photo file,
-  best-effort deletes the calendar event, then removes the task.
+- Deleting a task cancels the notification, removes the task, then best-effort
+  deletes the photo file and calendar event.
 - Deleting a task with a denied calendar permission still removes the task; the
   event cleanup is skipped.
 
 Permission denial messages are listed in §15.8.
 
-### 15.6 Target tests
+### 15.6 Tests
 
-Keep the 63 current tests. Add at least:
-
-| File | Tests | Covers |
-| --- | --- | --- |
-| `__tests__/task-attachments-test.tsx` | 2 | card renders photo/location/contact; empty attachments |
-
-Mock `expo-image-picker`, `expo-location`, `expo-contacts/legacy`,
+All Parcial 2 target tests are shipped; keep the 137 current tests. Mock
+`expo-image-picker`, `expo-location`, `expo-contacts/legacy`,
 `expo-calendar/legacy`, `expo-file-system`, and AsyncStorage. Run `pnpm test`.
 
 ### 15.7 Target traceability
 
 | Parcial 2 requirement | Target evidence | Status |
 | --- | --- | --- |
-| Permission states and denied message | `src/services/permissions.ts`, `src/utils/permission-state.ts`, `src/components/ui/permissions/permission-notice.tsx` | ⬜ pending |
-| Camera / gallery photo | `src/services/media.ts`, task-form photo card, task-card thumbnail | ⬜ pending |
-| GPS location | `src/services/location.ts`, task-form location card, task-card meta | ⬜ pending |
-| Contact | `src/services/contacts.ts`, task-form contact card, task-card meta | ⬜ pending |
-| Calendar event | `src/services/calendar.ts`, task-form calendar card | ⬜ pending |
+| Permission states and denied message | `src/services/permissions.ts`, `src/utils/permission-state.ts`, `src/components/ui/permissions/permission-notice.tsx` | ✅ implemented |
+| Camera / gallery photo | `src/services/media.ts`, `src/components/ui/task-form/photo-card.tsx`, `src/components/ui/home/home-task/task-attachments.tsx` | ✅ implemented |
+| GPS location | `src/services/location.ts`, `src/components/ui/task-form/location-card.tsx`, `src/components/ui/home/home-task/task-attachments.tsx` | ✅ implemented |
+| Contact | `src/services/contacts.ts`, `src/components/ui/task-form/contact-card.tsx` | ✅ implemented |
+| Calendar event | `src/services/calendar.ts`, `src/components/ui/task-form/calendar-card.tsx` | ✅ implemented |
 | Zustand global state | `src/stores/tasks/`, `src/hooks/tasks/use-hydrate-tasks.ts` | ✅ implemented |
-| Tests | `__tests__/` additions | ⬜ pending |
+| Tests | `__tests__/` additions | ✅ implemented |
 | README + demo | `README.md` | ⬜ pending |
 
-Device services are shipped; checklist rows remain pending until form/list
-wiring and denied-permission UI land. Implementation status is tracked in the
-project-brief §Parcial 2 acceptance checklist. ⬜ = pending implementation;
-✅ = implemented. Scoring stays separate.
+All Parcial 2 app features, tests, and cleanup are shipped; README and demo
+delivery remain pending. Implementation status is tracked in the project-brief
+§Parcial 2 acceptance checklist. ⬜ = pending implementation; ✅ = implemented.
+Scoring stays separate.
 
 ### 15.8 Target copy
 
@@ -653,12 +663,16 @@ project-brief §Parcial 2 acceptance checklist. ⬜ = pending implementation;
 | Location empty | `Sin ubicación` |
 | Location action | `Usar mi ubicación` |
 | Location loading | `Obteniendo ubicación...` |
+| Location remove | `Quitar ubicación` |
 | Contact empty | `Sin contacto` |
+| Contact remove | `Quitar contacto` |
 | Contact action | `Elegir contacto` |
 | Calendar off | `Sin evento` |
 | Calendar on | `Evento en el calendario` |
 | Calendar helper | `Se crea al guardar la tarea` |
 | Calendar created | `Evento creado` |
+| Calendar pending | `Verificando permiso...` |
+| Calendar will remove | `Se quitará al guardar la tarea` |
 | Permission denied (retry) | `Permiso denegado. Podés volver a intentarlo.` |
 | Retry action | `Reintentar` |
 | Permission blocked | `Permiso denegado. Habilitalo en Ajustes.` |

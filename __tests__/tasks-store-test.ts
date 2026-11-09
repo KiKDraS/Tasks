@@ -1,5 +1,7 @@
 import { Task } from "@/context/tasks/types/Task";
 import { cancelTaskReminder } from "@/context/tasks/utils/notifications";
+import { deleteTaskEvent } from "@/services/calendar";
+import { deletePhoto } from "@/services/media";
 import { readOrSeedTasks, writeTasks } from "@/services/tasks-storage";
 import { useTasksStore } from "@/stores/tasks/tasks-store";
 import { generateId } from "@/utils/id";
@@ -7,6 +9,12 @@ import { generateId } from "@/utils/id";
 jest.mock("@/services/tasks-storage", () => ({
   readOrSeedTasks: jest.fn(),
   writeTasks: jest.fn(),
+}));
+jest.mock("@/services/media", () => ({
+  deletePhoto: jest.fn(),
+}));
+jest.mock("@/services/calendar", () => ({
+  deleteTaskEvent: jest.fn(),
 }));
 jest.mock("@/context/tasks/utils/notifications", () => ({
   cancelTaskReminder: jest.fn(),
@@ -17,6 +25,8 @@ jest.mock("@/utils/id", () => ({
 
 const readOrSeedTasksMock = jest.mocked(readOrSeedTasks);
 const writeTasksMock = jest.mocked(writeTasks);
+const deletePhotoMock = jest.mocked(deletePhoto);
+const deleteTaskEventMock = jest.mocked(deleteTaskEvent);
 const cancelTaskReminderMock = jest.mocked(cancelTaskReminder);
 const generateIdMock = jest.mocked(generateId);
 
@@ -38,6 +48,7 @@ beforeEach(() => {
   jest.clearAllMocks();
   readOrSeedTasksMock.mockResolvedValue([]);
   writeTasksMock.mockResolvedValue();
+  deleteTaskEventMock.mockResolvedValue();
   cancelTaskReminderMock.mockResolvedValue();
   generateIdMock.mockReturnValue("generated-id");
   useTasksStore.setState({ tasks: [], isLoading: true });
@@ -110,6 +121,41 @@ describe("removeTask", () => {
     expect(cancelTaskReminderMock).toHaveBeenCalledWith(NOTIFICATION.id);
     expect(writeTasksMock).toHaveBeenCalledWith([other]);
     expect(useTasksStore.getState().tasks).toEqual([other]);
+    expect(deletePhotoMock).not.toHaveBeenCalled();
+    expect(deleteTaskEventMock).not.toHaveBeenCalled();
+  });
+
+  test("cleans up the photo and calendar event after the write", async () => {
+    const task = buildTask({
+      id: "task-1",
+      photoUri: "file:///photo.jpg",
+      calendarEventId: "event-1",
+    });
+    useTasksStore.setState({ tasks: [task], isLoading: false });
+
+    await useTasksStore.getState().removeTask(task.id as string);
+
+    expect(writeTasksMock).toHaveBeenCalledWith([]);
+    expect(deletePhotoMock).toHaveBeenCalledWith("file:///photo.jpg");
+    expect(deleteTaskEventMock).toHaveBeenCalledWith("event-1");
+    expect(writeTasksMock.mock.invocationCallOrder[0]).toBeLessThan(
+      deletePhotoMock.mock.invocationCallOrder[0],
+    );
+    expect(deletePhotoMock.mock.invocationCallOrder[0]).toBeLessThan(
+      deleteTaskEventMock.mock.invocationCallOrder[0],
+    );
+  });
+
+  test("does nothing when the task is not found", async () => {
+    const task = buildTask({ id: "task-1" });
+    useTasksStore.setState({ tasks: [task], isLoading: false });
+
+    await useTasksStore.getState().removeTask("unknown-id");
+
+    expect(writeTasksMock).not.toHaveBeenCalled();
+    expect(useTasksStore.getState().tasks).toEqual([task]);
+    expect(deletePhotoMock).not.toHaveBeenCalled();
+    expect(deleteTaskEventMock).not.toHaveBeenCalled();
   });
 });
 

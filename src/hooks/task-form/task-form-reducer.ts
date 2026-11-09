@@ -23,6 +23,15 @@ export const initialTaskFormState: TaskFormState = {
   titleError: null,
   reminderError: null,
   isSubmitting: false,
+  photoUri: null,
+  location: null,
+  contact: null,
+  calendarEnabled: false,
+  calendarEventId: null,
+  photoState: { status: "idle" },
+  locationState: { status: "idle" },
+  contactState: { status: "idle" },
+  calendarState: { status: "idle" },
 };
 
 function getPendingReminder(task: Task): ReminderSelection | null {
@@ -38,6 +47,10 @@ function getPendingReminder(task: Task): ReminderSelection | null {
 
 export function taskFormStateFromTask(task: Task): TaskFormState {
   const pendingReminder = getPendingReminder(task);
+  const photoUri = task.photoUri ?? null;
+  const location = task.location ?? null;
+  const contact = task.contact ?? null;
+  const calendarEventId = task.calendarEventId ?? null;
 
   return {
     title: task.title,
@@ -47,6 +60,15 @@ export function taskFormStateFromTask(task: Task): TaskFormState {
     titleError: null,
     reminderError: null,
     isSubmitting: false,
+    photoUri,
+    location,
+    contact,
+    calendarEnabled: calendarEventId !== null,
+    calendarEventId,
+    photoState: photoUri ? { status: "granted" } : { status: "idle" },
+    locationState: location ? { status: "granted" } : { status: "idle" },
+    contactState: contact ? { status: "granted" } : { status: "idle" },
+    calendarState: calendarEventId ? { status: "granted" } : { status: "idle" },
   };
 }
 
@@ -74,6 +96,24 @@ export function taskFormReducer(
       return { ...state, titleError: action.payload };
     case TASK_FORM_ACTION_TYPES.SET_SUBMITTING:
       return { ...state, isSubmitting: action.payload };
+    case TASK_FORM_ACTION_TYPES.SET_PHOTO:
+      return { ...state, photoUri: action.payload };
+    case TASK_FORM_ACTION_TYPES.SET_LOCATION:
+      return { ...state, location: action.payload };
+    case TASK_FORM_ACTION_TYPES.SET_CONTACT:
+      return { ...state, contact: action.payload };
+    case TASK_FORM_ACTION_TYPES.SET_CONTACT_STATE:
+      return { ...state, contactState: action.payload };
+    case TASK_FORM_ACTION_TYPES.SET_CALENDAR_ENABLED:
+      return { ...state, calendarEnabled: action.payload };
+    case TASK_FORM_ACTION_TYPES.SET_CALENDAR_EVENT:
+      return { ...state, calendarEventId: action.payload };
+    case TASK_FORM_ACTION_TYPES.SET_CALENDAR_STATE:
+      return { ...state, calendarState: action.payload };
+    case TASK_FORM_ACTION_TYPES.SET_PHOTO_STATE:
+      return { ...state, photoState: action.payload };
+    case TASK_FORM_ACTION_TYPES.SET_LOCATION_STATE:
+      return { ...state, locationState: action.payload };
     default:
       return state;
   }

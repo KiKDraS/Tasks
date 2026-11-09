@@ -8,6 +8,7 @@ import { useTaskForm } from "@/hooks/task-form/use-task-form";
 import { router } from "expo-router";
 import { StyleSheet, View } from "react-native";
 import { ReminderCard } from "./reminder-card";
+import { TaskAttachmentCards } from "./task-attachment-cards";
 
 interface TaskFormContentProps {
   task?: Task;
@@ -18,7 +19,13 @@ export function TaskFormContent({ task }: Readonly<TaskFormContentProps>) {
     useTaskForm(task);
 
   const showReminderError = state.reminderEnabled && !!state.reminderError;
-  const isSubmitDisabled = showReminderError || !!state.titleError;
+  const hasPendingAttachment =
+    state.photoState.status === "pending" ||
+    state.locationState.status === "pending" ||
+    state.contactState.status === "pending" ||
+    state.calendarState.status === "pending";
+  const isSubmitDisabled =
+    showReminderError || !!state.titleError || hasPendingAttachment;
 
   const setField = (field: "title" | "description", value: string) => {
     dispatch(
@@ -55,6 +62,12 @@ export function TaskFormContent({ task }: Readonly<TaskFormContentProps>) {
         onChangeText={(value) => setField("description", value)}
         placeholder="Detalles de la tarea"
         multiline
+      />
+
+      <TaskAttachmentCards
+        state={state}
+        dispatch={dispatch}
+        disabled={state.isSubmitting}
       />
 
       <ReminderCard
