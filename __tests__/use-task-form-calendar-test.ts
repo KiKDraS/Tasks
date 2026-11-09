@@ -286,7 +286,7 @@ describe("useTaskForm calendar attachment", () => {
 
     const result = await submitWithReminder({ task });
 
-    expect(result.current.state.reminderEnabled).toBe(true);
+    expect(result.current.state.reminderEnabled).toBe(false);
     expect(createTaskEventMock).not.toHaveBeenCalled();
     expect(resolveTaskNotificationMock).toHaveBeenCalledWith(
       expect.objectContaining({ reminderEnabled: false }),
@@ -295,6 +295,7 @@ describe("useTaskForm calendar attachment", () => {
       expect.objectContaining({
         task,
         fields: expect.objectContaining({ calendarEventId: "event-1" }),
+        notification: null,
       }),
     );
     expect(deleteTaskEventMock).not.toHaveBeenCalled();

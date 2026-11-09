@@ -125,6 +125,32 @@ describe("taskFormStateFromTask", () => {
     });
   });
 
+  test("disables the reminder but keeps the calendar event when the notification expired", () => {
+    const scheduledAt = new Date(Date.now() - 60 * 60 * 1000).toISOString();
+    const state = taskFormStateFromTask(
+      buildTask({
+        notification: { id: "notification-1", scheduledAt },
+        calendarEventId: "event-1",
+      }),
+    );
+
+    expect(state.reminderEnabled).toBe(false);
+    expect(state.calendarEventId).toBe("event-1");
+    expect(state.reminder).toEqual({
+      type: REMINDER_TYPES.TIME,
+      seconds: expect.any(Number),
+    });
+  });
+
+  test("disables the reminder but keeps the calendar event when there is no notification", () => {
+    const state = taskFormStateFromTask(
+      buildTask({ notification: null, calendarEventId: "event-1" }),
+    );
+
+    expect(state.reminderEnabled).toBe(false);
+    expect(state.calendarEventId).toBe("event-1");
+  });
+
   test("leaves attachments empty when the task has none", () => {
     const state = taskFormStateFromTask(buildTask());
 
@@ -264,6 +290,27 @@ describe("taskFormReducer attachments", () => {
       status: "denied",
       canAskAgain: true,
     });
+  });
+
+  test("TOGGLE_REMINDER marks the reminder as toggled off when disabling", () => {
+    const state = taskFormReducer(initialTaskFormState, {
+      type: TASK_FORM_ACTION_TYPES.TOGGLE_REMINDER,
+    });
+
+    expect(state.reminderEnabled).toBe(false);
+    expect(state.reminderToggledOff).toBe(true);
+  });
+
+  test("TOGGLE_REMINDER clears the toggled-off flag when enabling again", () => {
+    const disabled = taskFormReducer(initialTaskFormState, {
+      type: TASK_FORM_ACTION_TYPES.TOGGLE_REMINDER,
+    });
+    const state = taskFormReducer(disabled, {
+      type: TASK_FORM_ACTION_TYPES.TOGGLE_REMINDER,
+    });
+
+    expect(state.reminderEnabled).toBe(true);
+    expect(state.reminderToggledOff).toBe(false);
   });
 });
 

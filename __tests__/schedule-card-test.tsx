@@ -218,10 +218,22 @@ describe("<ScheduleCard />", () => {
     expect(getByText(message)).toBeTruthy();
   });
 
-  test("warns the event will be removed when disabled with an event id", async () => {
-    const { getByText } = await renderCard({ calendarEventId: "event-1" });
+  test("warns the event will be removed when it will be deleted", async () => {
+    const { getByText } = await renderCard({
+      calendarEventId: "event-1",
+      eventWillBeRemoved: true,
+    });
 
     expect(getByText("Se quitará al guardar")).toBeTruthy();
+  });
+
+  test("shows the event as added when it will be kept", async () => {
+    const { getByText } = await renderCard({
+      calendarEventId: "event-1",
+      eventWillBeRemoved: false,
+    });
+
+    expect(getByText("Evento agregado")).toBeTruthy();
   });
 
   test("disables the switch when the card is disabled", async () => {

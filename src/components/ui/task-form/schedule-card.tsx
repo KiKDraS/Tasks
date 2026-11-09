@@ -18,6 +18,7 @@ interface ScheduleCardProps {
   isComplete?: boolean;
   calendarEventId: string | null;
   calendarState: DeviceActionState;
+  eventWillBeRemoved?: boolean;
   onToggleReminder: () => void;
   onSelect: (reminder: ReminderSelection) => void;
   onRetryCalendar: () => void;
@@ -34,6 +35,7 @@ export function ScheduleCard({
   isComplete = false,
   calendarEventId,
   calendarState,
+  eventWillBeRemoved = false,
   onToggleReminder,
   onSelect,
   onRetryCalendar,
@@ -63,6 +65,7 @@ export function ScheduleCard({
         disabled={disabled}
         calendarEventId={calendarEventId}
         calendarState={calendarState}
+        eventWillBeRemoved={eventWillBeRemoved}
         onToggleReminder={onToggleReminder}
         onRetryCalendar={onRetryCalendar}
         onOpenSettings={onOpenSettings}

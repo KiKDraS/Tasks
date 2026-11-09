@@ -17,6 +17,8 @@ export function OptionChip({
 }: Readonly<OptionChipProps>) {
   return (
     <AppTouchableOpacity
+      accessibilityRole="button"
+      accessibilityState={{ selected }}
       onPress={onPress}
       style={[styles.chip, selected && styles.chipSelected, style]}
     >

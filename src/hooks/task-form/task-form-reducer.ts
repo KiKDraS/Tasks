@@ -20,6 +20,7 @@ export const initialTaskFormState: TaskFormState = {
   title: "",
   description: "",
   reminderEnabled: true,
+  reminderToggledOff: false,
   reminder: createDefaultTimeReminder(),
   titleError: null,
   reminderError: null,
@@ -55,7 +56,8 @@ export function taskFormStateFromTask(task: Task): TaskFormState {
   return {
     title: task.title,
     description: task.description,
-    reminderEnabled: pendingReminder !== null || !!task.calendarEventId,
+    reminderEnabled: pendingReminder !== null,
+    reminderToggledOff: false,
     reminder: pendingReminder ?? createDefaultTimeReminder(),
     titleError: null,
     reminderError: null,
@@ -81,8 +83,15 @@ export function taskFormReducer(
       return { ...state, title: action.payload, titleError: null };
     case TASK_FORM_ACTION_TYPES.SET_DESCRIPTION:
       return { ...state, description: action.payload };
-    case TASK_FORM_ACTION_TYPES.TOGGLE_REMINDER:
-      return { ...state, reminderEnabled: !state.reminderEnabled };
+    case TASK_FORM_ACTION_TYPES.TOGGLE_REMINDER: {
+      const nextEnabled = !state.reminderEnabled;
+
+      return {
+        ...state,
+        reminderEnabled: nextEnabled,
+        reminderToggledOff: !nextEnabled,
+      };
+    }
     case TASK_FORM_ACTION_TYPES.SET_REMINDER: {
       const isInvalidTimeReminder =
         action.payload.type === REMINDER_TYPES.TIME &&

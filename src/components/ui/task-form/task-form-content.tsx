@@ -21,6 +21,10 @@ export function TaskFormContent({ task }: Readonly<TaskFormContentProps>) {
   const { requestPermission } = useSchedulePermission({ dispatch });
 
   const showReminderError = state.reminderEnabled && !!state.reminderError;
+  const eventWillBeRemoved =
+    state.reminderToggledOff &&
+    !!state.calendarEventId &&
+    !state.reminderEnabled;
   const hasPendingAttachment =
     state.photoState.status === "pending" ||
     state.locationState.status === "pending" ||
@@ -110,6 +114,7 @@ export function TaskFormContent({ task }: Readonly<TaskFormContentProps>) {
         isComplete={!!task?.isComplete}
         calendarEventId={state.calendarEventId}
         calendarState={state.calendarState}
+        eventWillBeRemoved={eventWillBeRemoved}
         onToggleReminder={handleReminderToggle}
         onSelect={handleReminderSelect}
         onRetryCalendar={requestPermission}

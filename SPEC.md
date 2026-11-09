@@ -269,6 +269,17 @@ saves the task without a reminder
 (`src/hooks/task-form/utils/resolve-task-notification.ts`,
 `src/context/tasks/constants/index.ts`).
 
+Expiry:
+
+- `hydrate` clears every notification whose `scheduledAt <= now`; it writes only
+  when something changed (`src/stores/tasks/tasks-store.ts`).
+- The Home clock tick calls `clearExpiredNotifications(now)`, so the reminder
+  becomes unset while the app is open
+  (`src/components/ui/home/home-tasks-list.tsx`).
+- A null `notification` means the reminder is unset and the badge disappears.
+- The calendar event is preserved when the notification expires. It is deleted
+  only when the user explicitly turns the reminder off.
+
 Cancellation points:
 
 - Saving an edit, before scheduling the replacement.
@@ -352,7 +363,7 @@ in `package.json`.
 | `__tests__/validate-sign-up-form-test.ts` | 3 | Required fields and password mismatch |
 | `__tests__/validate-task-form-test.ts` | 4 | Title required, schedule validity |
 | `__tests__/tasks-storage-test.ts` | 9 | Parse, seed, and write task storage |
-| `__tests__/tasks-store-test.ts` | 11 | Hydrate, add, update, remove, multi-photo cleanup, toggle, clear notification |
+| `__tests__/tasks-store-test.ts` | 18 | Hydrate, expiry, failure, concurrency, add, update, remove, cleanup, toggle |
 | `__tests__/permission-state-test.ts` | 4 | Granted, denied, blocked, undetermined |
 | `__tests__/reminder-date-test.ts` | 2 | Date identity, time offset |
 | `__tests__/media-service-test.ts` | 10 | Multi-pick, denied, cancelled, copy, errors, delete |
@@ -360,23 +371,27 @@ in `package.json`.
 | `__tests__/contacts-service-test.ts` | 5 | Denied, cancel, phone selection, error |
 | `__tests__/calendar-service-test.ts` | 11 | Permission, fallback, create, delete, request |
 | `__tests__/reminder-notifications-test.ts` | 3 | DATE/TIME triggers, denied permission |
-| `__tests__/task-form-attachments-test.ts` | 29 | Multi-photo, legacy prefill, reducer, fields, cleanup |
+| `__tests__/task-form-attachments-test.ts` | 33 | Multi-photo, legacy prefill, reducer, fields, cleanup, toggle intent, expiry |
 | `__tests__/permission-notice-test.tsx` | 6 | Denied/blocked/error and hidden states |
 | `__tests__/photo-card-test.tsx` | 7 | Empty, multiple, per-photo remove, pending, denied |
 | `__tests__/location-card-test.tsx` | 5 | Empty, address, coords, pending, remove |
 | `__tests__/calendar-event-test.ts` | 3 | Date/time/disabled start and end |
 | `__tests__/contact-card-test.tsx` | 3 | Empty, filled, denied |
-| `__tests__/schedule-card-test.tsx` | 15 | Reminder switch, calendar states, hints, notice, disabled, completed |
-| `__tests__/resolve-calendar-attachment-test.ts` | 5 | Disabled, existing, create, denial, error |
+| `__tests__/schedule-card-test.tsx` | 16 | Reminder switch, calendar states, hints, notice, disabled, completed |
+| `__tests__/resolve-calendar-attachment-test.ts` | 6 | Disabled, preserve, remove, create, denial, error |
 | `__tests__/use-task-form-calendar-test.ts` | 7 | Reminder on/off, failure save, cleanup, completed, alert order |
 | `__tests__/task-form-content-test.tsx` | 5 | Reminder toggle, permission retry, disabled |
 | `__tests__/use-schedule-permission-test.ts` | 4 | Granted, denied, blocked, error |
+| `__tests__/clear-expired-notifications-test.ts` | 2 | Past cleared, future untouched |
+| `__tests__/task-mutation-queue-test.ts` | 2 | Serial order, best-effort write |
+| `__tests__/option-chip-test.tsx` | 3 | Role, selected state, press |
+| `__tests__/reminder-options-test.tsx` | 2 | Disabled subtree hidden, enabled accessible |
 | `__tests__/use-photo-attachment-test.ts` | 4 | Camera, gallery, retry, remove |
 | `__tests__/use-task-form-photo-cleanup-test.ts` | 2 | Cleanup after save, failure |
 | `__tests__/task-attachments-test.tsx` | 8 | Photo count, location, contact, calendar, completed |
 | `__tests__/format-contact-label-test.ts` | 2 | Name only, name + phone |
 
-Total: 29 files, 181 tests. Auth context has no automated coverage. Manual checks: `.opencode/docs/project-brief.md`
+Total: 33 files, 203 tests. Auth context has no automated coverage. Manual checks: `.opencode/docs/project-brief.md`
 §Manual QA.
 
 Counts above describe the current suite. Remaining Parcial 2 target test
@@ -560,6 +575,7 @@ type TasksState = {
   removeTask: (id: string) => Promise<void>;
   toggleComplete: (id: string) => Promise<void>;
   clearSentNotification: (notificationId: string) => Promise<void>;
+  clearExpiredNotifications: (now?: Date) => Promise<void>;
 };
 ```
 
@@ -639,7 +655,7 @@ Permission denial messages are listed in §15.8.
 
 ### 15.6 Tests
 
-All Parcial 2 target tests are shipped; keep the 181 current tests. Mock
+All Parcial 2 target tests are shipped; keep the 203 current tests. Mock
 `expo-image-picker`, `expo-location`, `expo-contacts/legacy`,
 `expo-calendar/legacy`, `expo-file-system`, and AsyncStorage. Run `pnpm test`.
 

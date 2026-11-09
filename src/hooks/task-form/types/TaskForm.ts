@@ -6,6 +6,7 @@ export type TaskFormState = {
   title: string;
   description: string;
   reminderEnabled: boolean;
+  reminderToggledOff: boolean;
   reminder: ReminderSelection;
   titleError: string | null;
   reminderError: string | null;

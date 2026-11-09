@@ -36,6 +36,8 @@ export function ReminderOptions({
 
   return (
     <View
+      accessibilityElementsHidden={disabled}
+      importantForAccessibility={disabled ? "no-hide-descendants" : "auto"}
       pointerEvents={disabled ? "none" : "auto"}
       style={[styles.container, disabled && styles.disabled]}
     >
