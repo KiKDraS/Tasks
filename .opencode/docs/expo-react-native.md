@@ -48,7 +48,7 @@ Docs: https://docs.expo.dev/eas/index.md
   - `src/components/ui/` — reusable UI, including `FormButton`, `TextField`, `OptionChip`, `TaskCheckbox`.
   - `src/context/` — auth session provider; task domain types, seeds, and utils.
   - `src/stores/` — Zustand task store and selectors.
-  - `src/services/` — task storage adapter; device APIs (target).
+  - `src/services/` — task storage adapter and device services.
   - `src/hooks/` — form, auth, task, and storage hooks.
   - `src/constants/` — theme, routes, storage keys, time.
   - `src/utils/` — id, date, delay.

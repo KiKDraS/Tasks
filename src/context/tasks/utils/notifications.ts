@@ -1,6 +1,6 @@
 import * as Notifications from "expo-notifications";
 import { Platform } from "react-native";
-import { SECOND_MS } from "@/constants/time";
+import { getReminderDate } from "@/utils/reminder-date";
 import { NOTIFICATION_COPY, NOTIFICATION_DATA_KEYS } from "../constants";
 import { REMINDER_TYPES, ReminderSelection } from "../types/Reminder";
 import { TaskNotification } from "../types/Task";
@@ -25,12 +25,6 @@ async function ensureAndroidChannel(): Promise<void> {
     name: NOTIFICATION_COPY.channelName,
     importance: Notifications.AndroidImportance.HIGH,
   });
-}
-
-function getScheduledAt(reminder: ReminderSelection): Date {
-  return reminder.type === REMINDER_TYPES.DATE
-    ? reminder.date
-    : new Date(Date.now() + reminder.seconds * SECOND_MS);
 }
 
 function getNotificationTrigger(
@@ -73,7 +67,7 @@ export async function scheduleTaskReminder(options: {
     return null;
   }
 
-  const scheduledAt = getScheduledAt(options.reminder);
+  const scheduledAt = getReminderDate(options.reminder);
   const trigger = getNotificationTrigger(options.reminder, scheduledAt);
 
   const id = await Notifications.scheduleNotificationAsync({
