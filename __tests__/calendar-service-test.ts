@@ -4,6 +4,7 @@ import { Platform } from "react-native";
 import {
   createTaskEvent,
   deleteTaskEvent,
+  requestCalendarPermission,
   type TaskCalendarEvent,
 } from "@/services/calendar";
 import { DEVICE_MESSAGES } from "@/services/constants/device-messages";
@@ -170,6 +171,39 @@ describe("createTaskEvent", () => {
       "android",
       expect.objectContaining({ title: "Comprar pan" }),
     );
+  });
+});
+
+describe("requestCalendarPermission", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  test("returns granted when the calendar permission is granted", async () => {
+    permissionMock.mockResolvedValue(permission("granted"));
+
+    await expect(requestCalendarPermission()).resolves.toEqual({
+      status: "granted",
+      value: true,
+    });
+  });
+
+  test("returns denied with canAskAgain when the permission is denied", async () => {
+    permissionMock.mockResolvedValue(permission("denied", false));
+
+    await expect(requestCalendarPermission()).resolves.toEqual({
+      status: "denied",
+      canAskAgain: false,
+    });
+  });
+
+  test("returns calendarError when the permission request throws", async () => {
+    permissionMock.mockRejectedValue(new Error("permission failed"));
+
+    await expect(requestCalendarPermission()).resolves.toEqual({
+      status: "error",
+      message: DEVICE_MESSAGES.calendarError,
+    });
   });
 });
 

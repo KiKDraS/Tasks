@@ -1,6 +1,6 @@
 # Tasks
 
-Expo/React Native school project for ISTEA Parcial 1 + 2. Parcial 1 is shipped and approved. Parcial 2 task state (Zustand) is shipped; device resources (camera, gallery, location, contacts, calendar) remain target.
+Expo/React Native school project for ISTEA Parcial 1 + 2. Parcial 1 is shipped and approved. Parcial 2 task state, device services, and form attachment cards are shipped; task-list attachments and task-delete cleanup remain target.
 
 ## Project structure
 

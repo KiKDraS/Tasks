@@ -1,4 +1,4 @@
-import type { TaskLocation } from "@/context/tasks/types/Task";
+import type { TaskContact, TaskLocation } from "@/context/tasks/types/Task";
 import type { TaskFormState } from "@/hooks/task-form/types/TaskForm";
 
 export type TaskFields = {
@@ -6,6 +6,8 @@ export type TaskFields = {
   description: string;
   photoUri: string | null;
   location: TaskLocation | null;
+  contact: TaskContact | null;
+  calendarEventId: string | null;
 };
 
 export const buildTaskFields = (state: TaskFormState): TaskFields => ({
@@ -13,4 +15,6 @@ export const buildTaskFields = (state: TaskFormState): TaskFields => ({
   description: state.description.trim(),
   photoUri: state.photoUri,
   location: state.location,
+  contact: state.contact,
+  calendarEventId: state.calendarEventId,
 });
