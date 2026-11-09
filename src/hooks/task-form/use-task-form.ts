@@ -5,11 +5,13 @@ import {
   taskFormReducer,
   taskFormStateFromTask,
 } from "@/hooks/task-form/task-form-reducer";
+import { getPhotoToDelete } from "@/hooks/task-form/utils/photo-cleanup";
 import { formatReminderLabel } from "@/hooks/task-form/utils/reminder";
 import { resolveTaskNotification } from "@/hooks/task-form/utils/resolve-task-notification";
 import { saveTask } from "@/hooks/task-form/utils/save-task";
 import { buildTaskFields } from "@/hooks/task-form/utils/task-fields";
 import { validateTaskForm } from "@/hooks/task-form/utils/validate-task-form";
+import { deletePhoto } from "@/services/media";
 import { useTasksStore } from "@/stores/tasks/tasks-store";
 import { router } from "expo-router";
 import { useCallback, useReducer } from "react";
@@ -43,6 +45,11 @@ export function useTaskForm(task?: Task) {
       previousNotification: task?.notification ?? null,
     });
     await saveTask({ task, fields, notification, addTask, updateTask });
+
+    const photoToDelete = getPhotoToDelete(task, state.photoUri);
+    if (photoToDelete) {
+      deletePhoto(photoToDelete);
+    }
 
     dispatch({ type: TASK_FORM_ACTION_TYPES.SET_SUBMITTING, payload: false });
     router.back();
