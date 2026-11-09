@@ -9,6 +9,7 @@ import { deleteTaskEvent } from "@/services/calendar";
 import { deletePhoto } from "@/services/media";
 import { readOrSeedTasks, writeTasks } from "@/services/tasks-storage";
 import { generateId } from "@/utils/id";
+import { getTaskPhotoUris } from "@/utils/task-photos";
 
 export interface TasksState {
   tasks: Task[];
@@ -83,9 +84,8 @@ export const useTasksStore = create<TasksState>()((set, get) => ({
     await writeTasks(nextTasks);
     set({ tasks: nextTasks });
 
-    if (task.photoUri) {
-      deletePhoto(task.photoUri);
-    }
+    const photosToDelete = getTaskPhotoUris(task);
+    photosToDelete.forEach((uri) => deletePhoto(uri));
 
     if (task.calendarEventId) {
       await deleteTaskEvent(task.calendarEventId);

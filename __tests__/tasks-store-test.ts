@@ -125,10 +125,10 @@ describe("removeTask", () => {
     expect(deleteTaskEventMock).not.toHaveBeenCalled();
   });
 
-  test("cleans up the photo and calendar event after the write", async () => {
+  test("cleans up every photo and the calendar event after the write", async () => {
     const task = buildTask({
       id: "task-1",
-      photoUri: "file:///photo.jpg",
+      photoUris: ["file:///photo-1.jpg", "file:///photo-2.jpg"],
       calendarEventId: "event-1",
     });
     useTasksStore.setState({ tasks: [task], isLoading: false });
@@ -136,13 +136,32 @@ describe("removeTask", () => {
     await useTasksStore.getState().removeTask(task.id as string);
 
     expect(writeTasksMock).toHaveBeenCalledWith([]);
-    expect(deletePhotoMock).toHaveBeenCalledWith("file:///photo.jpg");
+    expect(deletePhotoMock).toHaveBeenCalledTimes(2);
+    expect(deletePhotoMock).toHaveBeenNthCalledWith(1, "file:///photo-1.jpg");
+    expect(deletePhotoMock).toHaveBeenNthCalledWith(2, "file:///photo-2.jpg");
     expect(deleteTaskEventMock).toHaveBeenCalledWith("event-1");
     expect(writeTasksMock.mock.invocationCallOrder[0]).toBeLessThan(
       deletePhotoMock.mock.invocationCallOrder[0],
     );
     expect(deletePhotoMock.mock.invocationCallOrder[0]).toBeLessThan(
       deleteTaskEventMock.mock.invocationCallOrder[0],
+    );
+  });
+
+  test("cleans up the legacy photoUri after the write", async () => {
+    const task = buildTask({
+      id: "task-1",
+      photoUri: "file:///legacy.jpg",
+    });
+    useTasksStore.setState({ tasks: [task], isLoading: false });
+
+    await useTasksStore.getState().removeTask(task.id as string);
+
+    expect(writeTasksMock).toHaveBeenCalledWith([]);
+    expect(deletePhotoMock).toHaveBeenCalledWith("file:///legacy.jpg");
+    expect(deleteTaskEventMock).not.toHaveBeenCalled();
+    expect(writeTasksMock.mock.invocationCallOrder[0]).toBeLessThan(
+      deletePhotoMock.mock.invocationCallOrder[0],
     );
   });
 

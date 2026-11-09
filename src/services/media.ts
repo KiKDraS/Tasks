@@ -8,10 +8,19 @@ import { generateId } from "@/utils/id";
 const PHOTOS_DIRECTORY = "task-photos";
 const DEFAULT_EXTENSION = ".jpg";
 
-const PHOTO_OPTIONS: ImagePicker.ImagePickerOptions = {
+const CAMERA_OPTIONS: ImagePicker.ImagePickerOptions = {
   mediaTypes: ["images"],
   allowsEditing: true,
   aspect: [4, 3],
+  quality: 0.6,
+};
+
+const GALLERY_OPTIONS: ImagePicker.ImagePickerOptions = {
+  mediaTypes: ["images"],
+  allowsMultipleSelection: true,
+  orderedSelection: true,
+  selectionLimit: 0,
+  allowsEditing: false,
   quality: 0.6,
 };
 
@@ -28,22 +37,44 @@ async function copyToDocuments(uri: string): Promise<string> {
   return destination.uri;
 }
 
-async function savePhoto(
+async function savePhotos(
   result: ImagePicker.ImagePickerResult,
-): Promise<DeviceResult<{ uri: string }>> {
-  const asset = result.assets?.[0];
-  if (result.canceled || !asset) {
+): Promise<DeviceResult<{ uris: string[] }>> {
+  const assets = result.assets ?? [];
+  if (result.canceled || assets.length === 0) {
     return { status: "cancelled" };
   }
 
-  const uri = await copyToDocuments(asset.uri);
+  const outcomes = await Promise.allSettled(
+    assets.map((asset) => copyToDocuments(asset.uri)),
+  );
+  const savedUris = outcomes.flatMap((outcome) =>
+    outcome.status === "fulfilled" ? [outcome.value] : [],
+  );
+  const hasFailure = outcomes.some((outcome) => outcome.status === "rejected");
 
-  return { status: "granted", value: { uri } };
+  if (hasFailure) {
+    savedUris.forEach(deletePhoto);
+    throw new Error("Failed to copy photos");
+  }
+
+  return { status: "granted", value: { uris: savedUris } };
 }
 
-function deniedResult(permission: {
+async function savePhoto(
+  result: ImagePicker.ImagePickerResult,
+): Promise<DeviceResult<{ uri: string }>> {
+  const saved = await savePhotos(result);
+  if (saved.status !== "granted") {
+    return saved;
+  }
+
+  return { status: "granted", value: { uri: saved.value.uris[0] } };
+}
+
+function deniedResult<T>(permission: {
   canAskAgain: boolean;
-}): DeviceResult<{ uri: string }> {
+}): DeviceResult<T> {
   return { status: "denied", canAskAgain: permission.canAskAgain };
 }
 
@@ -54,7 +85,7 @@ export async function takePhoto(): Promise<DeviceResult<{ uri: string }>> {
       return deniedResult(permission);
     }
 
-    const result = await ImagePicker.launchCameraAsync(PHOTO_OPTIONS);
+    const result = await ImagePicker.launchCameraAsync(CAMERA_OPTIONS);
 
     return await savePhoto(result);
   } catch {
@@ -62,7 +93,7 @@ export async function takePhoto(): Promise<DeviceResult<{ uri: string }>> {
   }
 }
 
-export async function pickPhoto(): Promise<DeviceResult<{ uri: string }>> {
+export async function pickPhotos(): Promise<DeviceResult<{ uris: string[] }>> {
   try {
     const permission =
       await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -70,9 +101,9 @@ export async function pickPhoto(): Promise<DeviceResult<{ uri: string }>> {
       return deniedResult(permission);
     }
 
-    const result = await ImagePicker.launchImageLibraryAsync(PHOTO_OPTIONS);
+    const result = await ImagePicker.launchImageLibraryAsync(GALLERY_OPTIONS);
 
-    return await savePhoto(result);
+    return await savePhotos(result);
   } catch {
     return { status: "error", message: DEVICE_MESSAGES.mediaError };
   }

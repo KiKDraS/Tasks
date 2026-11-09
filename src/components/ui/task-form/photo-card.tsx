@@ -1,4 +1,5 @@
 import CameraIcon from "@/components/icons/CameraIcon";
+import CloseIcon from "@/components/icons/CloseIcon";
 import { ThemedText } from "@/components/themed-text";
 import { AppTouchableOpacity } from "@/components/ui/app-touchable-opacity";
 import { FormButton } from "@/components/ui/form/form-button";
@@ -10,58 +11,74 @@ import { ActivityIndicator, StyleSheet, View } from "react-native";
 import { AttachmentCard } from "./attachment-card";
 
 interface PhotoCardProps {
-  photoUri: string | null;
+  photoUris: string[];
   state: DeviceActionState;
   disabled?: boolean;
   onTakePhoto: () => void;
-  onPickPhoto: () => void;
-  onRemovePhoto: () => void;
+  onPickPhotos: () => void;
+  onRemovePhoto: (uri: string) => void;
   onRetry: () => void;
   onOpenSettings: () => void;
 }
 
 export function PhotoCard({
-  photoUri,
+  photoUris,
   state,
   disabled,
   onTakePhoto,
-  onPickPhoto,
+  onPickPhotos,
   onRemovePhoto,
   onRetry,
   onOpenSettings,
 }: Readonly<PhotoCardProps>) {
   const isPending = state.status === "pending";
   const isDisabled = !!disabled || isPending;
+  const hasPhotos = photoUris.length > 0;
 
   return (
     <AttachmentCard
       icon={<CameraIcon size={20} color={Colors["on-surface"]} />}
-      title="Foto"
+      title="Fotos"
     >
-      <View style={styles.valueRow}>
-        {photoUri ? (
-          <Image
-            source={{ uri: photoUri }}
-            style={styles.thumbnail}
-            contentFit="cover"
-            accessible
-            accessibilityRole="image"
-            accessibilityLabel="Foto de la tarea"
-          />
-        ) : (
-          <View
-            style={styles.placeholder}
-            accessibilityElementsHidden
-            importantForAccessibility="no"
-          />
-        )}
-        {!photoUri && (
-          <ThemedText type="body-md" color="secondary">
-            Sin foto
-          </ThemedText>
-        )}
-        {isPending && <ActivityIndicator color={Colors.primary} />}
-      </View>
+      {hasPhotos ? (
+        <View style={styles.grid}>
+          {photoUris.map((uri, index) => (
+            <View key={uri} style={styles.thumbnailWrapper}>
+              <Image
+                source={{ uri }}
+                style={styles.thumbnail}
+                contentFit="cover"
+                accessible
+                accessibilityRole="image"
+                accessibilityLabel={`Foto ${index + 1} de la tarea`}
+              />
+              <AppTouchableOpacity
+                onPress={() => onRemovePhoto(uri)}
+                disabled={isDisabled}
+                accessibilityRole="button"
+                accessibilityLabel={`Quitar foto ${index + 1}`}
+                accessibilityState={{ disabled: isDisabled }}
+                style={styles.removeButton}
+              >
+                <View style={styles.removeCircle}>
+                  <CloseIcon size={16} color={Colors["on-primary"]} />
+                </View>
+              </AppTouchableOpacity>
+            </View>
+          ))}
+        </View>
+      ) : (
+        <ThemedText type="body-md" color="secondary">
+          Sin fotos
+        </ThemedText>
+      )}
+
+      {isPending && (
+        <ActivityIndicator
+          color={Colors.primary}
+          accessibilityLabel="Cargando fotos"
+        />
+      )}
 
       <View style={styles.actions}>
         <FormButton
@@ -73,27 +90,13 @@ export function PhotoCard({
         </FormButton>
         <FormButton
           variant="surface"
-          onPress={onPickPhoto}
+          onPress={onPickPhotos}
           disabled={isDisabled}
           style={styles.action}
         >
           Elegir de galería
         </FormButton>
       </View>
-
-      {photoUri && (
-        <AppTouchableOpacity
-          onPress={onRemovePhoto}
-          disabled={isDisabled}
-          accessibilityRole="button"
-          accessibilityLabel="Quitar foto"
-          style={styles.remove}
-        >
-          <ThemedText type="label-md" color="error">
-            Quitar foto
-          </ThemedText>
-        </AppTouchableOpacity>
-      )}
 
       <PermissionNotice
         state={state}
@@ -105,10 +108,14 @@ export function PhotoCard({
 }
 
 const styles = StyleSheet.create({
-  valueRow: {
+  grid: {
     flexDirection: "row",
-    alignItems: "center",
+    flexWrap: "wrap",
     gap: Spacing["space-md"],
+  },
+  thumbnailWrapper: {
+    width: 64,
+    height: 64,
   },
   thumbnail: {
     width: 64,
@@ -116,11 +123,22 @@ const styles = StyleSheet.create({
     borderRadius: Rounded.md,
     backgroundColor: Colors["surface-variant"],
   },
-  placeholder: {
-    width: 64,
-    height: 64,
-    borderRadius: Rounded.md,
-    backgroundColor: Colors["surface-variant"],
+  removeButton: {
+    position: "absolute",
+    top: 0,
+    right: 0,
+    width: 44,
+    height: 44,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  removeCircle: {
+    width: 28,
+    height: 28,
+    borderRadius: Rounded.full,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: Colors.error,
   },
   actions: {
     flexDirection: "row",
@@ -128,10 +146,5 @@ const styles = StyleSheet.create({
   },
   action: {
     flex: 1,
-  },
-  remove: {
-    alignSelf: "flex-start",
-    justifyContent: "center",
-    minHeight: 44,
   },
 });

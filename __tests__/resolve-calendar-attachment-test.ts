@@ -14,6 +14,7 @@ const createTaskEventMock = jest.mocked(createTaskEvent);
 const FIELDS: TaskFields = {
   title: "Comprar pan",
   description: "Ir al almacén",
+  photoUris: [],
   photoUri: null,
   location: null,
   contact: null,

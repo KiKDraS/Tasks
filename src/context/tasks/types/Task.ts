@@ -21,6 +21,7 @@ export type Task = {
   description: string;
   isComplete?: boolean;
   notification: TaskNotification | null;
+  photoUris?: string[];
   photoUri?: string | null;
   location?: TaskLocation | null;
   contact?: TaskContact | null;

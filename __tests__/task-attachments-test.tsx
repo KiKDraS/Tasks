@@ -11,31 +11,14 @@ jest.mock("@/components/icons/ContactIcon", () => ({
   __esModule: true,
   default: () => null,
 }));
+jest.mock("@/components/icons/GalleryIcon", () => ({
+  __esModule: true,
+  default: () => null,
+}));
 jest.mock("@/components/icons/LocationIcon", () => ({
   __esModule: true,
   default: () => null,
 }));
-
-jest.mock("expo-image", () => {
-  const { createElement } = jest.requireActual("react");
-  const { View } = jest.requireActual("react-native");
-
-  return {
-    Image: ({
-      accessibilityLabel,
-      style,
-    }: {
-      accessibilityLabel?: string;
-      style?: unknown;
-    }) =>
-      createElement(View, {
-        accessible: true,
-        accessibilityRole: "image",
-        accessibilityLabel,
-        style,
-      }),
-  };
-});
 
 const buildTask = (overrides: Partial<Task> = {}): Task => ({
   id: "task-1",
@@ -55,9 +38,13 @@ describe("<TaskAttachments />", () => {
     expect(toJSON()).toBeNull();
   });
 
-  test("renders the photo, address, contact, and calendar attachments", async () => {
+  test("renders the photo count with the address, contact, and calendar meta", async () => {
     const task = buildTask({
-      photoUri: "file:///photo.jpg",
+      photoUris: [
+        "file:///photo-1.jpg",
+        "file:///photo-2.jpg",
+        "file:///photo-3.jpg",
+      ],
       location: {
         latitude: -34.6037,
         longitude: -58.3816,
@@ -71,14 +58,50 @@ describe("<TaskAttachments />", () => {
       calendarEventId: "event-1",
     });
 
-    const { getByLabelText, getByText } = await render(
+    const { getByText, queryByRole } = await render(
       <TaskAttachments task={task} isComplete={false} />,
     );
 
-    expect(getByLabelText("Foto de la tarea")).toBeTruthy();
+    expect(getByText("3 fotos")).toBeTruthy();
     expect(getByText("Av. Corrientes 1234")).toBeTruthy();
     expect(getByText("Ana Pérez · 11 5555-1111")).toBeTruthy();
     expect(getByText("Evento")).toBeTruthy();
+    expect(queryByRole("image")).toBeNull();
+  });
+
+  test("uses the singular count for one photo", async () => {
+    const task = buildTask({ photoUris: ["file:///photo-1.jpg"] });
+
+    const { getByText } = await render(
+      <TaskAttachments task={task} isComplete={false} />,
+    );
+
+    expect(getByText("1 foto")).toBeTruthy();
+  });
+
+  test("counts a legacy photoUri as one photo", async () => {
+    const task = buildTask({ photoUri: "file:///legacy.jpg" });
+
+    const { getByText, queryByRole } = await render(
+      <TaskAttachments task={task} isComplete={false} />,
+    );
+
+    expect(getByText("1 foto")).toBeTruthy();
+    expect(queryByRole("image")).toBeNull();
+  });
+
+  test("renders only the count row when the task has photos and no other meta", async () => {
+    const task = buildTask({
+      photoUris: ["file:///photo-1.jpg", "file:///photo-2.jpg"],
+    });
+
+    const { getByText, queryByRole, queryByText } = await render(
+      <TaskAttachments task={task} isComplete={false} />,
+    );
+
+    expect(getByText("2 fotos")).toBeTruthy();
+    expect(queryByText("Evento")).toBeNull();
+    expect(queryByRole("image")).toBeNull();
   });
 
   test("falls back to coordinates when the location has no address", async () => {
@@ -105,7 +128,7 @@ describe("<TaskAttachments />", () => {
     expect(getByText("Ana Pérez")).toBeTruthy();
   });
 
-  test("applies the completed treatment to the photo and text", async () => {
+  test("applies the completed treatment to the meta labels", async () => {
     const task = buildTask({
       photoUri: "file:///photo.jpg",
       contact: {
@@ -115,13 +138,15 @@ describe("<TaskAttachments />", () => {
       },
     });
 
-    const { getByLabelText, getByText } = await render(
+    const { getByText } = await render(
       <TaskAttachments task={task} isComplete />,
     );
 
+    expect(getByText("1 foto")).toHaveStyle({
+      textDecorationLine: "line-through",
+    });
     expect(getByText("Ana Pérez · 11 5555-1111")).toHaveStyle({
       textDecorationLine: "line-through",
     });
-    expect(getByLabelText("Foto de la tarea")).toHaveStyle({ opacity: 0.6 });
   });
 });

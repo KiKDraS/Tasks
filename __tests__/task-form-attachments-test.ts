@@ -11,9 +11,11 @@ import {
   taskFormStateFromTask,
 } from "@/hooks/task-form/task-form-reducer";
 import { getFailureState } from "@/hooks/task-form/utils/device-action-state";
-import { getPhotoToDelete } from "@/hooks/task-form/utils/photo-cleanup";
 import { buildTaskFields } from "@/hooks/task-form/utils/task-fields";
 import { formatLocationLabel } from "@/utils/location";
+import { getPhotosToDelete } from "@/utils/task-photos";
+
+const PHOTOS = ["file:///photo-1.jpg", "file:///photo-2.jpg"];
 
 const LOCATION: TaskLocation = {
   latitude: -34.603712,
@@ -74,15 +76,24 @@ describe("formatLocationLabel", () => {
 });
 
 describe("taskFormStateFromTask", () => {
-  test("prefills the photo, location, and granted states", () => {
+  test("prefills the photo list, location, and granted states", () => {
     const state = taskFormStateFromTask(
-      buildTask({ photoUri: "file:///photo.jpg", location: LOCATION }),
+      buildTask({ photoUris: PHOTOS, location: LOCATION }),
     );
 
-    expect(state.photoUri).toBe("file:///photo.jpg");
+    expect(state.photoUris).toEqual(PHOTOS);
     expect(state.location).toEqual(LOCATION);
     expect(state.photoState).toEqual({ status: "granted" });
     expect(state.locationState).toEqual({ status: "granted" });
+  });
+
+  test("prefills a legacy photoUri as a one-photo list", () => {
+    const state = taskFormStateFromTask(
+      buildTask({ photoUri: "file:///legacy.jpg" }),
+    );
+
+    expect(state.photoUris).toEqual(["file:///legacy.jpg"]);
+    expect(state.photoState).toEqual({ status: "granted" });
   });
 
   test("prefills the contact and granted state", () => {
@@ -117,7 +128,7 @@ describe("taskFormStateFromTask", () => {
   test("leaves attachments empty when the task has none", () => {
     const state = taskFormStateFromTask(buildTask());
 
-    expect(state.photoUri).toBeNull();
+    expect(state.photoUris).toEqual([]);
     expect(state.location).toBeNull();
     expect(state.contact).toBeNull();
     expect(state.calendarEventId).toBeNull();
@@ -129,13 +140,61 @@ describe("taskFormStateFromTask", () => {
 });
 
 describe("taskFormReducer attachments", () => {
-  test("SET_PHOTO stores the photo uri", () => {
+  test("ADD_PHOTOS appends the new photos and grants the state", () => {
     const state = taskFormReducer(initialTaskFormState, {
-      type: TASK_FORM_ACTION_TYPES.SET_PHOTO,
-      payload: "file:///photo.jpg",
+      type: TASK_FORM_ACTION_TYPES.ADD_PHOTOS,
+      payload: PHOTOS,
     });
 
-    expect(state.photoUri).toBe("file:///photo.jpg");
+    expect(state.photoUris).toEqual(PHOTOS);
+    expect(state.photoState).toEqual({ status: "granted" });
+  });
+
+  test("ADD_PHOTOS appends to the photos already in the form", () => {
+    const withFirstPhoto = taskFormReducer(initialTaskFormState, {
+      type: TASK_FORM_ACTION_TYPES.ADD_PHOTOS,
+      payload: [PHOTOS[0]],
+    });
+    const state = taskFormReducer(withFirstPhoto, {
+      type: TASK_FORM_ACTION_TYPES.ADD_PHOTOS,
+      payload: [PHOTOS[1]],
+    });
+
+    expect(state.photoUris).toEqual(PHOTOS);
+  });
+
+  test("REMOVE_PHOTO removes the matching uri and keeps the state granted", () => {
+    const state = taskFormReducer(
+      {
+        ...initialTaskFormState,
+        photoUris: PHOTOS,
+        photoState: { status: "granted" },
+      },
+      {
+        type: TASK_FORM_ACTION_TYPES.REMOVE_PHOTO,
+        payload: PHOTOS[0],
+      },
+    );
+
+    expect(state.photoUris).toEqual([PHOTOS[1]]);
+    expect(state.photoState).toEqual({ status: "granted" });
+  });
+
+  test("REMOVE_PHOTO returns to idle when the last photo is removed", () => {
+    const state = taskFormReducer(
+      {
+        ...initialTaskFormState,
+        photoUris: [PHOTOS[0]],
+        photoState: { status: "granted" },
+      },
+      {
+        type: TASK_FORM_ACTION_TYPES.REMOVE_PHOTO,
+        payload: PHOTOS[0],
+      },
+    );
+
+    expect(state.photoUris).toEqual([]);
+    expect(state.photoState).toEqual({ status: "idle" });
   });
 
   test("SET_LOCATION stores the location", () => {
@@ -209,19 +268,20 @@ describe("taskFormReducer attachments", () => {
 });
 
 describe("buildTaskFields", () => {
-  test("carries the photo uri and location into the saved fields", () => {
+  test("carries the photo list and location into the saved fields", () => {
     const fields = buildTaskFields({
       ...initialTaskFormState,
       title: "  Comprar pan  ",
       description: "  Ir al almacén ",
-      photoUri: "file:///photo.jpg",
+      photoUris: PHOTOS,
       location: LOCATION,
     });
 
     expect(fields).toEqual({
       title: "Comprar pan",
       description: "Ir al almacén",
-      photoUri: "file:///photo.jpg",
+      photoUris: PHOTOS,
+      photoUri: null,
       location: LOCATION,
       contact: null,
       calendarEventId: null,
@@ -240,26 +300,33 @@ describe("buildTaskFields", () => {
   });
 });
 
-describe("getPhotoToDelete", () => {
-  test("returns the old photo when it changes", () => {
-    expect(
-      getPhotoToDelete(
-        buildTask({ photoUri: "file:///old.jpg" }),
-        "file:///new.jpg",
-      ),
-    ).toBe("file:///old.jpg");
+describe("getPhotosToDelete", () => {
+  test("returns every removed photo", () => {
+    const task = buildTask({
+      photoUris: [PHOTOS[0], PHOTOS[1], "file:///photo-3.jpg"],
+    });
+
+    expect(getPhotosToDelete(task, [PHOTOS[0]])).toEqual([
+      PHOTOS[1],
+      "file:///photo-3.jpg",
+    ]);
   });
 
-  test("returns null when the photo is unchanged", () => {
+  test("counts the legacy photoUri as a removable photo", () => {
     expect(
-      getPhotoToDelete(
-        buildTask({ photoUri: "file:///photo.jpg" }),
-        "file:///photo.jpg",
-      ),
-    ).toBeNull();
+      getPhotosToDelete(buildTask({ photoUri: "file:///legacy.jpg" }), []),
+    ).toEqual(["file:///legacy.jpg"]);
   });
 
-  test("returns null when there is no previous photo", () => {
-    expect(getPhotoToDelete(buildTask(), "file:///new.jpg")).toBeNull();
+  test("returns no photos when the list is unchanged", () => {
+    const task = buildTask({ photoUris: PHOTOS });
+
+    expect(getPhotosToDelete(task, [PHOTOS[1], PHOTOS[0]])).toEqual([]);
+  });
+
+  test("keeps the legacy photo when it is still in the next list", () => {
+    const task = buildTask({ photoUri: "file:///legacy.jpg" });
+
+    expect(getPhotosToDelete(task, ["file:///legacy.jpg"])).toEqual([]);
   });
 });

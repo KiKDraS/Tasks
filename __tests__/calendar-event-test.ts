@@ -10,6 +10,7 @@ const NOW = new Date("2026-05-10T18:00:00.000Z");
 const FIELDS: TaskFields = {
   title: "Comprar pan",
   description: "Ir al almacén",
+  photoUris: [],
   photoUri: null,
   location: {
     latitude: -34.603712,

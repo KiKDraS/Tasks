@@ -1,7 +1,8 @@
+import { randomUUID } from "expo-crypto";
 import * as ImagePicker from "expo-image-picker";
 
 import { DEVICE_MESSAGES } from "@/services/constants/device-messages";
-import { deletePhoto, pickPhoto, takePhoto } from "@/services/media";
+import { deletePhoto, pickPhotos, takePhoto } from "@/services/media";
 
 const mockCopy = jest.fn<Promise<void>, []>();
 const mockDelete = jest.fn<void, []>();
@@ -65,8 +66,9 @@ const galleryPermissionMock = jest.mocked(
 );
 const launchCameraMock = jest.mocked(ImagePicker.launchCameraAsync);
 const launchGalleryMock = jest.mocked(ImagePicker.launchImageLibraryAsync);
+const randomUUIDMock = jest.mocked(randomUUID);
 
-const permission = (
+const cameraPermission = (
   status: "granted" | "denied",
   canAskAgain = true,
 ): ImagePicker.CameraPermissionResponse =>
@@ -77,14 +79,33 @@ const permission = (
     expires: "never",
   }) as unknown as ImagePicker.CameraPermissionResponse;
 
-const success = (uri: string): ImagePicker.ImagePickerSuccessResult => ({
+const galleryPermission = (
+  status: "granted" | "denied",
+  canAskAgain = true,
+): ImagePicker.MediaLibraryPermissionResponse =>
+  ({
+    status,
+    canAskAgain,
+    granted: status === "granted",
+    expires: "never",
+    accessPrivileges: "all",
+  }) as unknown as ImagePicker.MediaLibraryPermissionResponse;
+
+const success = (
+  ...uris: string[]
+): ImagePicker.ImagePickerSuccessResult => ({
   canceled: false,
-  assets: [{ uri, width: 100, height: 100 }],
+  assets: uris.map((uri) => ({ uri, width: 100, height: 100 })),
 });
 
 const cancelled: ImagePicker.ImagePickerCanceledResult = {
   canceled: true,
   assets: null,
+};
+
+const emptySuccess: ImagePicker.ImagePickerSuccessResult = {
+  canceled: false,
+  assets: [],
 };
 
 describe("takePhoto", () => {
@@ -94,7 +115,7 @@ describe("takePhoto", () => {
   });
 
   test("returns denied with canAskAgain when camera permission is denied", async () => {
-    cameraPermissionMock.mockResolvedValue(permission("denied", false));
+    cameraPermissionMock.mockResolvedValue(cameraPermission("denied", false));
 
     await expect(takePhoto()).resolves.toEqual({
       status: "denied",
@@ -105,7 +126,7 @@ describe("takePhoto", () => {
   });
 
   test("copies the camera asset into the documents task-photos directory", async () => {
-    cameraPermissionMock.mockResolvedValue(permission("granted"));
+    cameraPermissionMock.mockResolvedValue(cameraPermission("granted"));
     launchCameraMock.mockResolvedValue(success("file:///cache/camera.jpg"));
 
     await expect(takePhoto()).resolves.toEqual({
@@ -116,7 +137,7 @@ describe("takePhoto", () => {
   });
 
   test("returns mediaError when the camera picker throws", async () => {
-    cameraPermissionMock.mockResolvedValue(permission("granted"));
+    cameraPermissionMock.mockResolvedValue(cameraPermission("granted"));
     launchCameraMock.mockRejectedValue(new Error("camera failed"));
 
     await expect(takePhoto()).resolves.toEqual({
@@ -126,26 +147,82 @@ describe("takePhoto", () => {
   });
 });
 
-describe("pickPhoto", () => {
+describe("pickPhotos", () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockCopy.mockResolvedValue(undefined);
   });
 
-  test("returns cancelled when the gallery picker is cancelled", async () => {
-    galleryPermissionMock.mockResolvedValue(permission("granted"));
-    launchGalleryMock.mockResolvedValue(cancelled);
+  test("returns denied with canAskAgain when gallery permission is denied", async () => {
+    galleryPermissionMock.mockResolvedValue(galleryPermission("denied", false));
 
-    await expect(pickPhoto()).resolves.toEqual({ status: "cancelled" });
+    await expect(pickPhotos()).resolves.toEqual({
+      status: "denied",
+      canAskAgain: false,
+    });
+    expect(launchGalleryMock).not.toHaveBeenCalled();
     expect(mockCopy).not.toHaveBeenCalled();
   });
 
-  test("returns mediaError when copying the picked file throws", async () => {
-    galleryPermissionMock.mockResolvedValue(permission("granted"));
+  test("returns cancelled when the gallery picker is cancelled", async () => {
+    galleryPermissionMock.mockResolvedValue(galleryPermission("granted"));
+    launchGalleryMock.mockResolvedValue(cancelled);
+
+    await expect(pickPhotos()).resolves.toEqual({ status: "cancelled" });
+    expect(mockCopy).not.toHaveBeenCalled();
+  });
+
+  test("returns cancelled when the gallery returns an empty asset list", async () => {
+    galleryPermissionMock.mockResolvedValue(galleryPermission("granted"));
+    launchGalleryMock.mockResolvedValue(emptySuccess);
+
+    await expect(pickPhotos()).resolves.toEqual({ status: "cancelled" });
+    expect(mockCopy).not.toHaveBeenCalled();
+  });
+
+  test("copies every gallery asset into the documents task-photos directory", async () => {
+    galleryPermissionMock.mockResolvedValue(galleryPermission("granted"));
+    launchGalleryMock.mockResolvedValue(
+      success("file:///cache/gallery-1.jpg", "file:///cache/gallery-2.jpg"),
+    );
+    randomUUIDMock
+      .mockReturnValueOnce("photo-1")
+      .mockReturnValueOnce("photo-2");
+
+    await expect(pickPhotos()).resolves.toEqual({
+      status: "granted",
+      value: {
+        uris: [
+          "file:///documents/task-photos/photo-1.jpg",
+          "file:///documents/task-photos/photo-2.jpg",
+        ],
+      },
+    });
+    expect(mockCopy).toHaveBeenCalledTimes(2);
+    expect(launchGalleryMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        allowsMultipleSelection: true,
+        selectionLimit: 0,
+      }),
+    );
+  });
+
+  test("returns mediaError when copying a picked file throws", async () => {
+    galleryPermissionMock.mockResolvedValue(galleryPermission("granted"));
     launchGalleryMock.mockResolvedValue(success("file:///cache/gallery.jpg"));
     mockCopy.mockRejectedValueOnce(new Error("disk full"));
 
-    await expect(pickPhoto()).resolves.toEqual({
+    await expect(pickPhotos()).resolves.toEqual({
+      status: "error",
+      message: DEVICE_MESSAGES.mediaError,
+    });
+  });
+
+  test("returns mediaError when the gallery picker throws", async () => {
+    galleryPermissionMock.mockResolvedValue(galleryPermission("granted"));
+    launchGalleryMock.mockRejectedValue(new Error("gallery failed"));
+
+    await expect(pickPhotos()).resolves.toEqual({
       status: "error",
       message: DEVICE_MESSAGES.mediaError,
     });

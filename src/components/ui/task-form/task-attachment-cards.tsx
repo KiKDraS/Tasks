@@ -26,11 +26,11 @@ export function TaskAttachmentCards({
   return (
     <>
       <PhotoCard
-        photoUri={state.photoUri}
+        photoUris={state.photoUris}
         state={state.photoState}
         disabled={disabled}
         onTakePhoto={attachments.takePhoto}
-        onPickPhoto={attachments.pickPhoto}
+        onPickPhotos={attachments.pickPhotos}
         onRemovePhoto={attachments.removePhoto}
         onRetry={attachments.retryPhoto}
         onOpenSettings={attachments.openSettings}
