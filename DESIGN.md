@@ -467,7 +467,7 @@ TaskCard
 | Blocked | `PermissionNotice`: `Permiso denegado. Habilitalo en Ajustes.` + `Abrir ajustes` |
 | Granted, empty value | Normal empty copy (`Sin foto`, `Sin ubicación`, `Sin contacto`, `Sin evento`) |
 | Granted, value set | Value row plus remove or change action |
-| Device error | `PermissionNotice` with `No pudimos completar la acción. Intentá de nuevo.` |
+| Device error | `PermissionNotice` with the matching message from `SPEC.md` §15.8. |
 
 `PermissionNotice` uses `label-sm` and `error` for the message, and a
 `FormButton` `variant="surface"` for the action. It is not a modal.

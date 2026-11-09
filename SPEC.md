@@ -11,8 +11,8 @@ device features. Every shipped statement cites the file that implements it.
    assignment and the code disagree, the code wins. The Parcial 1 exam was
    already approved; Parcial 2 task state is implemented, device features
    remain target.
-3. §15 records Parcial 2 status: shipped task state and target device features.
-   Until an item exists in `src/`, the current code wins.
+3. §15 records Parcial 2 status: shipped task state and device services, with
+   target device UI. Until an item exists in `src/`, the current code wins.
 4. Stitch project `Minimalist Reminder Todo App` is a visual reference only. It
    never overrides behavior or tokens; see `DESIGN.md` for the conflict table.
 
@@ -31,7 +31,8 @@ In scope:
 Out of scope: password recovery, profile editing, per-user task isolation,
 sharing, recurring tasks, priorities, categories, and server-side validation.
 
-Parcial 2 status is in §15. Task state is shipped; device features are target.
+Parcial 2 status is in §15. Task state and device services are shipped; device
+UI wiring is target.
 
 ## 3. Stack and runtime
 
@@ -351,9 +352,14 @@ in `package.json`.
 | `__tests__/tasks-storage-test.ts` | 9 | Parse, seed, and write task storage |
 | `__tests__/tasks-store-test.ts` | 8 | Hydrate, add, update, remove, toggle, clear notification |
 | `__tests__/permission-state-test.ts` | 4 | Granted, denied, blocked, undetermined |
+| `__tests__/reminder-date-test.ts` | 2 | Date identity, time offset |
+| `__tests__/media-service-test.ts` | 6 | Denied, cancelled, copy, errors, delete |
+| `__tests__/location-service-test.ts` | 5 | Denied, address, geocode fallback, error |
+| `__tests__/contacts-service-test.ts` | 5 | Denied, cancel, phone selection, error |
+| `__tests__/calendar-service-test.ts` | 8 | Permission, calendar fallback, create, delete |
+| `__tests__/reminder-notifications-test.ts` | 3 | DATE/TIME triggers, denied permission |
 
-Total: 8 files, 34 tests. Auth context, notifications, and date helpers have no
-automated coverage. Manual checks: `.opencode/docs/project-brief.md`
+Total: 14 files, 63 tests. Auth context has no automated coverage. Manual checks: `.opencode/docs/project-brief.md`
 §Manual QA.
 
 Counts above describe the current suite. Remaining Parcial 2 target test
@@ -391,10 +397,10 @@ Parcial 2 traceability is in §15.7. Rows marked ✅ are shipped; ⬜ rows are t
 
 ## 15. Parcial 2 status
 
-Status: task state (Phase 1) is shipped in `src/stores/tasks/`; device features
-remain target. `(target)` marks files that do not exist yet. Implementation
-status is tracked in the project-brief §Parcial 2 acceptance checklist; scoring
-stays separate. Update this section as each item lands.
+Status: task state and device services are shipped; device UI wiring remains
+target. `(target)` marks files that do not exist yet. Implementation status is
+tracked in the project-brief §Parcial 2 acceptance checklist; scoring stays
+separate. Update this section as each item lands.
 
 ### 15.1 Stack additions
 
@@ -561,15 +567,16 @@ type DeviceResult<T> =
   | { status: "error"; message: string };
 ```
 
-Device services (target):
+Device services (shipped):
 
 | File | Contract |
 | --- | --- |
-| `src/services/media.ts` | `takePhoto()` / `pickPhoto()` return `{ status, uri? }`; request permission, launch the picker, copy the asset into the document directory |
-| `src/services/location.ts` | `getCurrentLocation()` returns `{ status, location? }`; request foreground permission, get position, reverse geocode |
-| `src/services/contacts.ts` | `pickContact()` returns `{ status, contact? }`; request permission, open the native picker |
-| `src/services/calendar.ts` | `createTaskEvent(task)` / `deleteTaskEvent(id)` return `{ status, eventId? }`; request permission, use the default calendar |
-| `src/services/permissions.ts` | Shared `DeviceResult<T>` and permission state types |
+| `src/services/media.ts` | `takePhoto()` / `pickPhoto()` return `DeviceResult<{ uri: string }>`; request permission, launch the picker, copy the asset into `task-photos` |
+| `src/services/location.ts` | `getCurrentLocation()` returns `DeviceResult<TaskLocation>`; request foreground permission, get position, reverse geocode with coordinate fallback |
+| `src/services/contacts.ts` | `pickContact()` returns `DeviceResult<TaskContact>`; request permission, open the native picker, keep first phone |
+| `src/services/calendar.ts` | `createTaskEvent(event)` returns `DeviceResult<{ eventId: string }>`; `deleteTaskEvent(id): Promise<void>`; default/first writable calendar |
+| `src/services/permissions.ts` | `DeviceResult<T>`, `PermissionLike`, `isPermissionGranted`, `openAppSettings` |
+| `src/utils/reminder-date.ts` | Shared `getReminderDate` for notifications and calendar starts |
 
 ### 15.5 Target task flows
 
@@ -609,7 +616,7 @@ Permission denial messages are listed in §15.8.
 
 ### 15.6 Target tests
 
-Keep the 34 current tests. Add at least:
+Keep the 63 current tests. Add at least:
 
 | File | Tests | Covers |
 | --- | --- | --- |
@@ -631,8 +638,10 @@ Mock `expo-image-picker`, `expo-location`, `expo-contacts/legacy`,
 | Tests | `__tests__/` additions | ⬜ pending |
 | README + demo | `README.md` | ⬜ pending |
 
-Implementation status is tracked in the project-brief §Parcial 2 acceptance
-checklist. ⬜ = pending implementation; ✅ = implemented. Scoring stays separate.
+Device services are shipped; checklist rows remain pending until form/list
+wiring and denied-permission UI land. Implementation status is tracked in the
+project-brief §Parcial 2 acceptance checklist. ⬜ = pending implementation;
+✅ = implemented. Scoring stays separate.
 
 ### 15.8 Target copy
 
@@ -654,6 +663,10 @@ checklist. ⬜ = pending implementation; ✅ = implemented. Scoring stays separa
 | Retry action | `Reintentar` |
 | Permission blocked | `Permiso denegado. Habilitalo en Ajustes.` |
 | Settings action | `Abrir ajustes` |
-| Device error | `No pudimos completar la acción. Intentá de nuevo.` |
+| Media error | `No pudimos usar la cámara o la galería. Intentá de nuevo.` |
+| Location error | `No pudimos obtener tu ubicación. Intentá de nuevo.` |
+| Contacts error | `No pudimos acceder a tus contactos. Intentá de nuevo.` |
+| Calendar error | `No pudimos acceder a tu calendario. Intentá de nuevo.` |
+| Calendar missing | `No encontramos un calendario editable. Creá uno en tu calendario e intentá de nuevo.` |
 
 Copy rules: Spanish rioplatense, `vos`, sentence case, no terminal period.
