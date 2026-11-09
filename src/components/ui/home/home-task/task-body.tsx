@@ -5,6 +5,7 @@ import { Task } from "@/context/tasks/types/Task";
 import { getNotificationBadgeLabel } from "@/context/tasks/utils/notification-badge";
 import { StyleSheet, View } from "react-native";
 import { HomeBadge } from "../home-badge";
+import { TaskAttachments } from "./task-attachments";
 import { taskTextStyles } from "./task-text-styles";
 
 interface TaskBodyProps {
@@ -25,6 +26,7 @@ export function TaskBody({ task, isComplete, now }: Readonly<TaskBodyProps>) {
       >
         {task.description}
       </ThemedText>
+      <TaskAttachments task={task} isComplete={isComplete} />
       {hasNotificationBadge && (
         <HomeBadge>
           <ReminderNotificationIcon size={11} color={Colors["on-surface"]} />

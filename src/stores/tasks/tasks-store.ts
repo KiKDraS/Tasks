@@ -5,6 +5,8 @@ import { Task } from "@/context/tasks/types/Task";
 import { findTaskById } from "@/context/tasks/utils/find-task-by-id";
 import { getNotificationToCancel } from "@/context/tasks/utils/get-notification-to-cancel";
 import { cancelTaskReminder } from "@/context/tasks/utils/notifications";
+import { deleteTaskEvent } from "@/services/calendar";
+import { deletePhoto } from "@/services/media";
 import { readOrSeedTasks, writeTasks } from "@/services/tasks-storage";
 import { generateId } from "@/utils/id";
 
@@ -66,16 +68,28 @@ export const useTasksStore = create<TasksState>()((set, get) => ({
     set({ tasks: nextTasks });
   },
   removeTask: async (id) => {
-    const pendingNotification = findTaskById(get().tasks, id)?.notification;
+    const task = findTaskById(get().tasks, id);
 
-    if (pendingNotification) {
-      await cancelTaskReminder(pendingNotification.id);
+    if (!task) {
+      return;
+    }
+
+    if (task.notification) {
+      await cancelTaskReminder(task.notification.id);
     }
 
     const nextTasks = get().tasks.filter((task) => task.id !== id);
 
     await writeTasks(nextTasks);
     set({ tasks: nextTasks });
+
+    if (task.photoUri) {
+      deletePhoto(task.photoUri);
+    }
+
+    if (task.calendarEventId) {
+      await deleteTaskEvent(task.calendarEventId);
+    }
   },
   toggleComplete: async (id) => {
     const task = findTaskById(get().tasks, id);

@@ -5,6 +5,7 @@ import { FormButton } from "@/components/ui/form/form-button";
 import { PermissionNotice } from "@/components/ui/permissions/permission-notice";
 import { Colors } from "@/constants/theme";
 import type { TaskContact } from "@/context/tasks/types/Task";
+import { formatContactLabel } from "@/utils/contact";
 import type { DeviceActionState } from "@/utils/permission-state";
 import { StyleSheet } from "react-native";
 import { AttachmentCard } from "./attachment-card";
@@ -17,16 +18,6 @@ interface ContactCardProps {
   onRemoveContact: () => void;
   onRetry: () => void;
   onOpenSettings: () => void;
-}
-
-function getContactLabel(contact: TaskContact | null): string {
-  if (!contact) {
-    return "Sin contacto";
-  }
-
-  return contact.phoneNumber
-    ? `${contact.name} · ${contact.phoneNumber}`
-    : contact.name;
 }
 
 export function ContactCard({
@@ -47,7 +38,7 @@ export function ContactCard({
       title="Contacto"
     >
       <ThemedText type="body-md" color="secondary">
-        {getContactLabel(contact)}
+        {contact ? formatContactLabel(contact) : "Sin contacto"}
       </ThemedText>
 
       <FormButton
