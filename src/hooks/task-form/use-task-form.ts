@@ -1,5 +1,8 @@
 import { Task, TaskNotification } from "@/context/tasks/types/Task";
-import { TASK_FORM_ACTION_TYPES } from "@/hooks/task-form/constants";
+import {
+  TASK_FORM_ACTION_TYPES,
+  TASK_FORM_MESSAGES,
+} from "@/hooks/task-form/constants";
 import {
   initialTaskFormState,
   taskFormReducer,
@@ -7,7 +10,6 @@ import {
 } from "@/hooks/task-form/task-form-reducer";
 import type { TaskFormState } from "@/hooks/task-form/types/TaskForm";
 import type { DeviceFailure } from "@/hooks/task-form/utils/device-action-state";
-import { getPhotoToDelete } from "@/hooks/task-form/utils/photo-cleanup";
 import { formatReminderLabel } from "@/hooks/task-form/utils/reminder";
 import { resolveCalendarAttachment } from "@/hooks/task-form/utils/resolve-calendar-attachment";
 import { resolveTaskNotification } from "@/hooks/task-form/utils/resolve-task-notification";
@@ -21,6 +23,7 @@ import { deleteTaskEvent } from "@/services/calendar";
 import { DEVICE_MESSAGES } from "@/services/constants/device-messages";
 import { deletePhoto } from "@/services/media";
 import { useTasksStore } from "@/stores/tasks/tasks-store";
+import { getPhotosToDelete } from "@/utils/task-photos";
 import { router } from "expo-router";
 import { useCallback, useReducer } from "react";
 import { Alert } from "react-native";
@@ -29,10 +32,8 @@ async function cleanupReplacedAttachments(
   task: Task | undefined,
   state: TaskFormState,
 ): Promise<void> {
-  const photoToDelete = getPhotoToDelete(task, state.photoUri);
-  if (photoToDelete) {
-    deletePhoto(photoToDelete);
-  }
+  const photosToDelete = getPhotosToDelete(task, state.photoUris);
+  photosToDelete.forEach((uri) => deletePhoto(uri));
 
   const calendarEventToDelete = state.reminderEnabled
     ? null
@@ -112,24 +113,32 @@ export function useTaskForm(task?: Task) {
 
     dispatch({ type: TASK_FORM_ACTION_TYPES.SET_SUBMITTING, payload: true });
 
-    const { fields, failure } = await resolveCalendarAttachment(
-      buildTaskFields(state),
-      state,
-      dispatch,
-    );
-    const notification = await persistTask({
-      task,
-      state,
-      fields,
-      addTask,
-      updateTask,
-    });
+    try {
+      const { fields, failure } = await resolveCalendarAttachment(
+        buildTaskFields(state),
+        state,
+        dispatch,
+      );
+      const notification = await persistTask({
+        task,
+        state,
+        fields,
+        addTask,
+        updateTask,
+      });
 
-    dispatch({ type: TASK_FORM_ACTION_TYPES.SET_SUBMITTING, payload: false });
-    router.back();
+      dispatch({ type: TASK_FORM_ACTION_TYPES.SET_SUBMITTING, payload: false });
+      router.back();
 
-    if (failure) {
-      showCalendarFailureAlert(failure, notification);
+      if (failure) {
+        showCalendarFailureAlert(failure, notification);
+      }
+    } catch {
+      dispatch({ type: TASK_FORM_ACTION_TYPES.SET_SUBMITTING, payload: false });
+      Alert.alert(
+        TASK_FORM_MESSAGES.saveFailureTitle,
+        TASK_FORM_MESSAGES.saveFailureMessage,
+      );
     }
   }, [addTask, task, updateTask, state]);
 

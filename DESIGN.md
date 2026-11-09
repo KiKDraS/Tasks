@@ -400,8 +400,8 @@ primitives in §6. Do not add a new palette.
 - Attachments are compact rows, not a second visual system.
 - One `surface-container` card per device resource, radius 8, padding 16,
   20 px internal gap. The reminder card keeps the same treatment.
-- Photo is the only visual element; location, contact, and calendar are text
-  rows with an icon.
+- Photo thumbnails appear only in the form; location, contact, and calendar are
+  text rows with an icon. The task list shows a photo count, not the image.
 - No map, no full-screen photo viewer, no new navigation destinations.
 
 ### 12.2 Task form order
@@ -409,10 +409,10 @@ primitives in §6. Do not add a new palette.
 Add the device cards after `Descripción` and before `ScheduleCard`:
 
 ```text
-Foto
-  [thumbnail 64] Sin foto
+Fotos
+  [thumbnail 64] [thumbnail 64] ... / Sin fotos
   [Tomar foto] [Elegir de galería]
-  Quitar foto (only when set)
+  per-photo Quitar foto
 Ubicación
   [pin] Ubicación                 [Usar mi ubicación]
   Sin ubicación / address / coords
@@ -431,13 +431,13 @@ Component names:
 
 | Component | File | Notes |
 | --- | --- | --- |
-| `PhotoCard` | `src/components/ui/task-form/photo-card.tsx` | Shipped. 64 px thumbnail, two actions, remove |
+| `PhotoCard` | `src/components/ui/task-form/photo-card.tsx` | Shipped. 64 px thumbnail grid, add, per-photo remove |
 | `LocationCard` | `src/components/ui/task-form/location-card.tsx` | Shipped. Icon, value, `Usar mi ubicación` |
 | `ContactCard` | `src/components/ui/task-form/contact-card.tsx` | Shipped. Icon, name/phone, `Elegir contacto` |
 | `ScheduleCard` | `src/components/ui/task-form/schedule-card.tsx` | Shipped. Reminder switch, shared schedule, hint |
 | `ScheduleHeader` | `src/components/ui/task-form/reminder-options/schedule-header.tsx` | Shipped. Reminder switch, calendar status, notice |
 | `PermissionNotice` | `src/components/ui/permissions/permission-notice.tsx` | Shipped. Inline message, retry or settings |
-| `TaskAttachments` | `src/components/ui/home/home-task/task-attachments.tsx` | Shipped. Card thumbnail and meta row |
+| `TaskAttachments` | `src/components/ui/home/home-task/task-attachments.tsx` | Shipped. Photo count and meta rows; no image |
 
 The cards reuse `ThemedText`, `HomeBadge`, and `AppTouchableOpacity`. Buttons
 inside cards use `label-md`; helper text uses `label-sm` and `secondary` for
@@ -450,13 +450,14 @@ TaskCard
   [checkbox] Title                  [edit] [delete]
   description
   TaskAttachments
-    [photo 56]  [pin] address
-                [person] name · phone
-                [calendar] Evento
+    [gallery] N fotos
+    [pin] address
+    [person] name · phone
+    [calendar] Evento
   reminder badge (existing)
 ```
 
-- Thumbnail 56×56, radius 6, `surface-variant` placeholder when empty.
+- Photo row is count-only; no thumbnail or image is rendered in the list.
 - Meta rows use `label-sm`, `secondary`, one line each with
   `numberOfLines={1}`.
 - Calendar indicator is a small icon plus `Evento`; no date duplication.
@@ -470,7 +471,7 @@ TaskCard
 | Pending | Action disabled; `ActivityIndicator` in the card value or action; card stays at full opacity |
 | Denied, can retry | `PermissionNotice` below the card value: `Permiso denegado. Podés volver a intentarlo.` + `Reintentar` |
 | Blocked | `PermissionNotice`: `Permiso denegado. Habilitalo en Ajustes.` + `Abrir ajustes` |
-| Granted, empty value | Normal empty copy (`Sin foto`, `Sin ubicación`, `Sin contacto`) |
+| Granted, empty value | Normal empty copy (`Sin fotos`, `Sin ubicación`, `Sin contacto`) |
 | Granted, value set | Value row plus remove or change action |
 | Device error | `PermissionNotice` with the matching message from `SPEC.md` §15.8. |
 
@@ -484,11 +485,11 @@ Add these wrappers under `src/components/icons/`:
 | Component | iOS | Android | Size |
 | --- | --- | --- | --- |
 | `CameraIcon` | `camera` | `photo_camera` | 20 |
-| `GalleryIcon` | `photo.on.rectangle` | `photo_library` | 20 |
+| `GalleryIcon` | `photo.on.rectangle` | `photo_library` | 14 |
 | `LocationIcon` | `mappin.and.ellipse` | `location_on` | 20 |
 | `ContactIcon` | `person.crop.circle` | `person` | 20 |
 | `CalendarIcon` | `calendar` | `calendar_month` | 20 |
-| `CloseIcon` | `xmark` | `close` | 18 |
+| `CloseIcon` | `xmark` | `close` | 16 |
 
 Use `BaseIcon`; one icon per file. Existing `ReminderIcon` and
 `SchedulingIcon` keep their current sizes.
@@ -496,15 +497,14 @@ Use `BaseIcon`; one icon per file. Existing `ReminderIcon` and
 ### 12.6 Accessibility
 
 - Every icon-only action gets an `accessibilityLabel`: `Tomar foto`,
-  `Elegir de galería`, `Quitar foto`, `Usar mi ubicación`, `Elegir contacto`,
+  `Elegir de galería`, `Quitar foto N`, `Usar mi ubicación`, `Elegir contacto`,
   `Crear evento`.
 - Every action target is at least 44×44 (iOS) / 48×48 (Android); pad the icon
   wrappers, do not enlarge the glyph.
 - `PermissionNotice` uses `accessibilityLiveRegion="polite"` on Android and
   announces once on iOS when the state changes.
-- The photo thumbnail gets `accessibilityLabel="Foto de la tarea"`; decorative
-  icons use `accessibilityElementsHidden` on iOS and
-  `importantForAccessibility="no"` on Android.
+- Form photo thumbnails are labelled (`Foto N de la tarea`) and each remove button
+  is labelled `Quitar foto N`; the list count row is labelled `N fotos`.
 - Errors and permission notices use the live region and iOS announcement;
   do not rely on color alone.
 - Body text keeps the platform font scale. Fixed-height rows must not clip at

@@ -2,7 +2,7 @@ import { TASK_FORM_ACTION_TYPES } from "@/hooks/task-form/constants";
 import type { TaskFormAction } from "@/hooks/task-form/types/TaskForm";
 import { getFailureState } from "@/hooks/task-form/utils/device-action-state";
 import {
-  pickPhoto as pickPhotoFromLibrary,
+  pickPhotos as pickPhotosFromLibrary,
   takePhoto as capturePhoto,
 } from "@/services/media";
 import type { DeviceResult } from "@/services/permissions";
@@ -15,15 +15,35 @@ const PHOTO_SOURCES = {
 
 type PhotoSource = (typeof PHOTO_SOURCES)[keyof typeof PHOTO_SOURCES];
 
+type PhotoRequester = () => Promise<DeviceResult<string[]>>;
+
 interface UsePhotoAttachmentOptions {
   dispatch: Dispatch<TaskFormAction>;
 }
 
 export interface PhotoAttachmentActions {
   takePhoto: () => Promise<void>;
-  pickPhoto: () => Promise<void>;
-  removePhoto: () => void;
+  pickPhotos: () => Promise<void>;
+  removePhoto: (uri: string) => void;
   retryPhoto: () => Promise<void>;
+}
+
+async function requestCameraPhoto(): Promise<DeviceResult<string[]>> {
+  const result = await capturePhoto();
+  if (result.status !== "granted") {
+    return result;
+  }
+
+  return { status: "granted", value: [result.value.uri] };
+}
+
+async function requestLibraryPhotos(): Promise<DeviceResult<string[]>> {
+  const result = await pickPhotosFromLibrary();
+  if (result.status !== "granted") {
+    return result;
+  }
+
+  return { status: "granted", value: result.value.uris };
 }
 
 export function usePhotoAttachment({
@@ -31,21 +51,13 @@ export function usePhotoAttachment({
 }: Readonly<UsePhotoAttachmentOptions>): PhotoAttachmentActions {
   const lastPhotoSource = useRef<PhotoSource>(PHOTO_SOURCES.CAMERA);
 
-  const commitPhoto = useCallback(
-    (uri: string) => {
-      dispatch({ type: TASK_FORM_ACTION_TYPES.SET_PHOTO, payload: uri });
-      dispatch({
-        type: TASK_FORM_ACTION_TYPES.SET_PHOTO_STATE,
-        payload: { status: "granted" },
-      });
-    },
-    [dispatch],
-  );
-
   const applyPhotoResult = useCallback(
-    (result: DeviceResult<{ uri: string }>) => {
+    (result: DeviceResult<string[]>) => {
       if (result.status === "granted") {
-        commitPhoto(result.value.uri);
+        dispatch({
+          type: TASK_FORM_ACTION_TYPES.ADD_PHOTOS,
+          payload: result.value,
+        });
         return;
       }
 
@@ -54,45 +66,46 @@ export function usePhotoAttachment({
         payload: getFailureState(result),
       });
     },
-    [commitPhoto, dispatch],
+    [dispatch],
   );
 
   const runPhotoAction = useCallback(
-    async (requestPhoto: () => Promise<DeviceResult<{ uri: string }>>) => {
+    async (requestPhotos: PhotoRequester, source: PhotoSource) => {
+      lastPhotoSource.current = source;
       dispatch({
         type: TASK_FORM_ACTION_TYPES.SET_PHOTO_STATE,
         payload: { status: "pending" },
       });
-      applyPhotoResult(await requestPhoto());
+
+      applyPhotoResult(await requestPhotos());
     },
     [applyPhotoResult, dispatch],
   );
 
   const takePhoto = useCallback(async (): Promise<void> => {
-    lastPhotoSource.current = PHOTO_SOURCES.CAMERA;
-    await runPhotoAction(capturePhoto);
+    await runPhotoAction(requestCameraPhoto, PHOTO_SOURCES.CAMERA);
   }, [runPhotoAction]);
 
-  const pickPhoto = useCallback(async (): Promise<void> => {
-    lastPhotoSource.current = PHOTO_SOURCES.LIBRARY;
-    await runPhotoAction(pickPhotoFromLibrary);
+  const pickPhotos = useCallback(async (): Promise<void> => {
+    await runPhotoAction(requestLibraryPhotos, PHOTO_SOURCES.LIBRARY);
   }, [runPhotoAction]);
 
   const retryPhoto = useCallback(async (): Promise<void> => {
-    const requestPhoto =
-      lastPhotoSource.current === PHOTO_SOURCES.CAMERA
-        ? capturePhoto
-        : pickPhotoFromLibrary;
-    await runPhotoAction(requestPhoto);
+    const source = lastPhotoSource.current;
+    const requestPhotos =
+      source === PHOTO_SOURCES.CAMERA
+        ? requestCameraPhoto
+        : requestLibraryPhotos;
+
+    await runPhotoAction(requestPhotos, source);
   }, [runPhotoAction]);
 
-  const removePhoto = useCallback(() => {
-    dispatch({ type: TASK_FORM_ACTION_TYPES.SET_PHOTO, payload: null });
-    dispatch({
-      type: TASK_FORM_ACTION_TYPES.SET_PHOTO_STATE,
-      payload: { status: "idle" },
-    });
-  }, [dispatch]);
+  const removePhoto = useCallback(
+    (uri: string) => {
+      dispatch({ type: TASK_FORM_ACTION_TYPES.REMOVE_PHOTO, payload: uri });
+    },
+    [dispatch],
+  );
 
-  return { takePhoto, pickPhoto, removePhoto, retryPhoto };
+  return { takePhoto, pickPhotos, removePhoto, retryPhoto };
 }

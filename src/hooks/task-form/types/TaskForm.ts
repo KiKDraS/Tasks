@@ -10,7 +10,7 @@ export type TaskFormState = {
   titleError: string | null;
   reminderError: string | null;
   isSubmitting: boolean;
-  photoUri: string | null;
+  photoUris: string[];
   location: TaskLocation | null;
   contact: TaskContact | null;
   calendarEventId: string | null;
@@ -27,7 +27,8 @@ export type TaskFormAction =
   | { type: "SET_REMINDER"; payload: ReminderSelection }
   | { type: "SET_TITLE_ERROR"; payload: string | null }
   | { type: "SET_SUBMITTING"; payload: boolean }
-  | { type: "SET_PHOTO"; payload: string | null }
+  | { type: "ADD_PHOTOS"; payload: string[] }
+  | { type: "REMOVE_PHOTO"; payload: string }
   | { type: "SET_LOCATION"; payload: TaskLocation | null }
   | { type: "SET_CONTACT"; payload: TaskContact | null }
   | { type: "SET_CONTACT_STATE"; payload: DeviceActionState }

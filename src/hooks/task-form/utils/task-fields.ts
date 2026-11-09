@@ -4,7 +4,8 @@ import type { TaskFormState } from "@/hooks/task-form/types/TaskForm";
 export type TaskFields = {
   title: string;
   description: string;
-  photoUri: string | null;
+  photoUris: string[];
+  photoUri: null;
   location: TaskLocation | null;
   contact: TaskContact | null;
   calendarEventId: string | null;
@@ -13,7 +14,8 @@ export type TaskFields = {
 export const buildTaskFields = (state: TaskFormState): TaskFields => ({
   title: state.title.trim(),
   description: state.description.trim(),
-  photoUri: state.photoUri,
+  photoUris: state.photoUris,
+  photoUri: null,
   location: state.location,
   contact: state.contact,
   calendarEventId: state.calendarEventId,

@@ -327,7 +327,7 @@ Additional states:
 | --- | --- | --- |
 | Sign in | `src/app/index.tsx` | Brand title `Tasks`, subtitle, username, password with visibility toggle, submit, link to sign-up |
 | Sign up | `src/app/sign-up/index.tsx` | Same shell, username, password, confirmation, submit, link back |
-| Home | `src/app/(tabs)/index.tsx` | Header, `Mis tareas`, task list with attachment meta, floating add button |
+| Home | `src/app/(tabs)/index.tsx` | Header, `Mis tareas`, task list with photo count and attachment meta, floating add button |
 | Task form | `src/app/(tabs)/task-form/index.tsx` | `Nueva tarea` or `Editar tarea`, fields, photo/location/contact cards, combined schedule card, cancel/save |
 
 Shared layout shells:
@@ -352,17 +352,17 @@ in `package.json`.
 | `__tests__/validate-sign-up-form-test.ts` | 3 | Required fields and password mismatch |
 | `__tests__/validate-task-form-test.ts` | 4 | Title required, schedule validity |
 | `__tests__/tasks-storage-test.ts` | 9 | Parse, seed, and write task storage |
-| `__tests__/tasks-store-test.ts` | 10 | Hydrate, add, update, remove, cleanup, toggle, clear notification |
+| `__tests__/tasks-store-test.ts` | 11 | Hydrate, add, update, remove, multi-photo cleanup, toggle, clear notification |
 | `__tests__/permission-state-test.ts` | 4 | Granted, denied, blocked, undetermined |
 | `__tests__/reminder-date-test.ts` | 2 | Date identity, time offset |
-| `__tests__/media-service-test.ts` | 6 | Denied, cancelled, copy, errors, delete |
+| `__tests__/media-service-test.ts` | 10 | Multi-pick, denied, cancelled, copy, errors, delete |
 | `__tests__/location-service-test.ts` | 5 | Denied, address, geocode fallback, error |
 | `__tests__/contacts-service-test.ts` | 5 | Denied, cancel, phone selection, error |
 | `__tests__/calendar-service-test.ts` | 11 | Permission, fallback, create, delete, request |
 | `__tests__/reminder-notifications-test.ts` | 3 | DATE/TIME triggers, denied permission |
-| `__tests__/task-form-attachments-test.ts` | 24 | Failure states, prefill, reducer, fields, cleanup |
+| `__tests__/task-form-attachments-test.ts` | 29 | Multi-photo, legacy prefill, reducer, fields, cleanup |
 | `__tests__/permission-notice-test.tsx` | 6 | Denied/blocked/error and hidden states |
-| `__tests__/photo-card-test.tsx` | 4 | Empty, actions, remove, denied notice |
+| `__tests__/photo-card-test.tsx` | 7 | Empty, multiple, per-photo remove, pending, denied |
 | `__tests__/location-card-test.tsx` | 5 | Empty, address, coords, pending, remove |
 | `__tests__/calendar-event-test.ts` | 3 | Date/time/disabled start and end |
 | `__tests__/contact-card-test.tsx` | 3 | Empty, filled, denied |
@@ -371,10 +371,12 @@ in `package.json`.
 | `__tests__/use-task-form-calendar-test.ts` | 7 | Reminder on/off, failure save, cleanup, completed, alert order |
 | `__tests__/task-form-content-test.tsx` | 5 | Reminder toggle, permission retry, disabled |
 | `__tests__/use-schedule-permission-test.ts` | 4 | Granted, denied, blocked, error |
-| `__tests__/task-attachments-test.tsx` | 5 | Photo, location, contact, calendar, completed |
+| `__tests__/use-photo-attachment-test.ts` | 4 | Camera, gallery, retry, remove |
+| `__tests__/use-task-form-photo-cleanup-test.ts` | 2 | Cleanup after save, failure |
+| `__tests__/task-attachments-test.tsx` | 8 | Photo count, location, contact, calendar, completed |
 | `__tests__/format-contact-label-test.ts` | 2 | Name only, name + phone |
 
-Total: 27 files, 159 tests. Auth context has no automated coverage. Manual checks: `.opencode/docs/project-brief.md`
+Total: 29 files, 181 tests. Auth context has no automated coverage. Manual checks: `.opencode/docs/project-brief.md`
 §Manual QA.
 
 Counts above describe the current suite. Remaining Parcial 2 target test
@@ -509,16 +511,18 @@ type Task = {
   description: string;
   isComplete?: boolean;
   notification: TaskNotification | null;
-  photoUri?: string | null;
+  photoUris?: string[];
+  photoUri?: string | null; // legacy single-photo field
   location?: TaskLocation | null;
   contact?: TaskContact | null;
   calendarEventId?: string | null;
 };
 ```
 
-- `photoUri` points to a file copied into the app document directory, not the
-  picker cache URI. Removing or replacing a photo best-effort deletes the old
-  file.
+- `photoUris` points to files copied into the app document directory, not the
+  picker cache URIs. Legacy `photoUri` is read as a one-item array and cleared on
+  save. Removing, replacing, or deleting a task best-effort deletes files no
+  longer referenced.
 - `location.address` is best effort from `Location.reverseGeocodeAsync`; the
   coordinates are always stored.
 - `contact` stores only the ID, display name, and first phone number.
@@ -588,7 +592,7 @@ Device services (shipped):
 
 | File | Contract |
 | --- | --- |
-| `src/services/media.ts` | `takePhoto()` / `pickPhoto()` return `DeviceResult<{ uri: string }>`; request permission, launch the picker, copy the asset into `task-photos` |
+| `src/services/media.ts` | `takePhoto()` returns `DeviceResult<{ uri: string }>`; `pickPhotos()` returns `DeviceResult<{ uris: string[] }>`; copy each asset into `task-photos` |
 | `src/services/location.ts` | `getCurrentLocation()` returns `DeviceResult<TaskLocation>`; request foreground permission, get position, reverse geocode with coordinate fallback |
 | `src/services/contacts.ts` | `pickContact()` returns `DeviceResult<TaskContact>`; request permission, open the native picker, keep first phone |
 | `src/services/calendar.ts` | `requestCalendarPermission()` returns `DeviceResult<true>`; `createTaskEvent(event)` returns `DeviceResult<{ eventId: string }>`; `deleteTaskEvent(id): Promise<void>`; default/first writable calendar |
@@ -600,8 +604,9 @@ Device services (shipped):
 Create:
 
 1. The form validates the title and shared schedule when the reminder is on.
-2. Photo, location, and contact are wired in the form. The reminder switch uses
-   one shared date/time selection for both the app notification and the calendar
+2. Photo, location, and contact are wired in the form. Gallery can append
+   multiple photos; camera adds one per capture. The reminder switch uses one
+   shared date/time selection for both the app notification and the calendar
    event. Enabling the reminder requests calendar permission.
 3. `resolveTaskNotification` runs when the reminder is on.
 4. When the reminder is on, create the device event from the shared schedule.
@@ -626,7 +631,7 @@ Complete / delete:
 
 - Completing a task cancels the notification as today. Attachments stay.
 - Deleting a task cancels the notification, removes the task, then best-effort
-  deletes the photo file and calendar event.
+  deletes all photo files and the calendar event.
 - Deleting a task with a denied calendar permission still removes the task; the
   event cleanup is skipped.
 
@@ -634,7 +639,7 @@ Permission denial messages are listed in §15.8.
 
 ### 15.6 Tests
 
-All Parcial 2 target tests are shipped; keep the 159 current tests. Mock
+All Parcial 2 target tests are shipped; keep the 181 current tests. Mock
 `expo-image-picker`, `expo-location`, `expo-contacts/legacy`,
 `expo-calendar/legacy`, `expo-file-system`, and AsyncStorage. Run `pnpm test`.
 
@@ -643,7 +648,7 @@ All Parcial 2 target tests are shipped; keep the 159 current tests. Mock
 | Parcial 2 requirement | Target evidence | Status |
 | --- | --- | --- |
 | Permission states and denied message | `src/services/permissions.ts`, `src/utils/permission-state.ts`, `src/components/ui/permissions/permission-notice.tsx` | ✅ implemented |
-| Camera / gallery photo | `src/services/media.ts`, `src/components/ui/task-form/photo-card.tsx`, `src/components/ui/home/home-task/task-attachments.tsx` | ✅ implemented |
+| Camera / gallery photo | `src/services/media.ts`, `src/components/ui/task-form/photo-card.tsx`, `src/components/ui/home/home-task/task-attachments.tsx`; form is the detail view; list shows count, not image | ✅ implemented |
 | GPS location | `src/services/location.ts`, `src/components/ui/task-form/location-card.tsx`, `src/components/ui/home/home-task/task-attachments.tsx` | ✅ implemented |
 | Contact | `src/services/contacts.ts`, `src/components/ui/task-form/contact-card.tsx` | ✅ implemented |
 | Calendar event | `src/services/calendar.ts`, `src/components/ui/task-form/schedule-card.tsx` | ✅ implemented |
@@ -661,9 +666,12 @@ Scoring stays separate.
 | Context | String |
 | --- | --- |
 | Schedule title | `Recordatorio` |
-| Photo empty | `Sin foto` |
+| Photo card title | `Fotos` |
+| Photo empty | `Sin fotos` |
 | Photo actions | `Tomar foto`, `Elegir de galería` |
-| Photo remove | `Quitar foto` |
+| Photo remove | `Quitar foto N` |
+| Photo count | `1 foto`, `N fotos` |
+| Photo loading | `Cargando fotos` |
 | Location empty | `Sin ubicación` |
 | Location action | `Usar mi ubicación` |
 | Location loading | `Obteniendo ubicación...` |

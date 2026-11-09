@@ -1,12 +1,13 @@
 import CalendarIcon from "@/components/icons/CalendarIcon";
 import ContactIcon from "@/components/icons/ContactIcon";
+import GalleryIcon from "@/components/icons/GalleryIcon";
 import LocationIcon from "@/components/icons/LocationIcon";
 import { ThemedText } from "@/components/themed-text";
-import { Colors, Rounded, Spacing } from "@/constants/theme";
+import { Colors, Spacing } from "@/constants/theme";
 import type { Task } from "@/context/tasks/types/Task";
 import { formatContactLabel } from "@/utils/contact";
 import { formatLocationLabel } from "@/utils/location";
-import { Image } from "expo-image";
+import { getTaskPhotoUris } from "@/utils/task-photos";
 import type { ReactNode } from "react";
 import { StyleSheet, View } from "react-native";
 import { taskTextStyles } from "./task-text-styles";
@@ -52,76 +53,52 @@ export function TaskAttachments({
   task,
   isComplete,
 }: Readonly<TaskAttachmentsProps>) {
-  const hasAttachments =
-    !!task.photoUri ||
-    !!task.location ||
-    !!task.contact ||
-    !!task.calendarEventId;
+  const photoCount = getTaskPhotoUris(task).length;
+  const hasPhotos = photoCount > 0;
+  const hasMeta = !!task.location || !!task.contact || !!task.calendarEventId;
 
-  if (!hasAttachments) {
+  if (!hasPhotos && !hasMeta) {
     return null;
   }
 
-  const hasMeta = !!task.location || !!task.contact || !!task.calendarEventId;
+  const photoLabel = `${photoCount} foto${photoCount === 1 ? "" : "s"}`;
 
   return (
-    <View style={styles.container}>
-      {task.photoUri && (
-        <Image
-          source={{ uri: task.photoUri }}
-          style={[styles.photo, isComplete && styles.completePhoto]}
-          contentFit="cover"
-          accessible
-          accessibilityRole="image"
-          accessibilityLabel="Foto de la tarea"
+    <View style={styles.meta}>
+      {hasPhotos && (
+        <TaskAttachmentMeta
+          icon={<GalleryIcon size={14} color={Colors.secondary} />}
+          label={photoLabel}
+          isComplete={isComplete}
         />
       )}
-      {hasMeta && (
-        <View style={styles.meta}>
-          {task.location && (
-            <TaskAttachmentMeta
-              icon={<LocationIcon size={14} color={Colors.secondary} />}
-              label={formatLocationLabel(task.location)}
-              isComplete={isComplete}
-            />
-          )}
-          {task.contact && (
-            <TaskAttachmentMeta
-              icon={<ContactIcon size={14} color={Colors.secondary} />}
-              label={formatContactLabel(task.contact)}
-              isComplete={isComplete}
-            />
-          )}
-          {task.calendarEventId && (
-            <TaskAttachmentMeta
-              icon={<CalendarIcon size={14} color={Colors.secondary} />}
-              label="Evento"
-              isComplete={isComplete}
-            />
-          )}
-        </View>
+      {task.location && (
+        <TaskAttachmentMeta
+          icon={<LocationIcon size={14} color={Colors.secondary} />}
+          label={formatLocationLabel(task.location)}
+          isComplete={isComplete}
+        />
+      )}
+      {task.contact && (
+        <TaskAttachmentMeta
+          icon={<ContactIcon size={14} color={Colors.secondary} />}
+          label={formatContactLabel(task.contact)}
+          isComplete={isComplete}
+        />
+      )}
+      {task.calendarEventId && (
+        <TaskAttachmentMeta
+          icon={<CalendarIcon size={14} color={Colors.secondary} />}
+          label="Evento"
+          isComplete={isComplete}
+        />
       )}
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flexDirection: "row",
-    alignItems: "flex-start",
-    gap: Spacing["space-md"],
-  },
-  photo: {
-    width: 56,
-    height: 56,
-    borderRadius: Rounded.md,
-    backgroundColor: Colors["surface-variant"],
-  },
-  completePhoto: {
-    opacity: 0.6,
-  },
   meta: {
-    flex: 1,
     gap: Spacing["space-xs"],
   },
   metaRow: {
