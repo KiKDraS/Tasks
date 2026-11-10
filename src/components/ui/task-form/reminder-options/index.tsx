@@ -53,6 +53,7 @@ export function ReminderOptions({
           onAndroidPickerChange={setAndroidPicker}
           onDateChange={handleDateChange}
           onTimeChange={handleTimeChange}
+          disabled={disabled}
         />
       )}
     </View>
