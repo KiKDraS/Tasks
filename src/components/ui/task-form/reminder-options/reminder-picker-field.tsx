@@ -2,7 +2,7 @@ import { ThemedText } from "@/components/themed-text";
 import { AppTouchableOpacity } from "@/components/ui/app-touchable-opacity";
 import { Colors, Rounded, Spacing } from "@/constants/theme";
 import { PropsWithChildren } from "react";
-import { StyleSheet } from "react-native";
+import { StyleSheet, View } from "react-native";
 
 interface ReminderPickerFieldProps extends PropsWithChildren {
   label: string;
@@ -17,24 +17,27 @@ export function ReminderPickerField({
   children,
 }: Readonly<ReminderPickerFieldProps>) {
   return (
-    <AppTouchableOpacity style={styles.field} onPress={onPress}>
-      <ThemedText type="label-sm" color="on-surface-variant">
-        {label}
-      </ThemedText>
-      <ThemedText type="label-md">{value}</ThemedText>
+    <View style={styles.field}>
+      <AppTouchableOpacity style={styles.fieldContent} onPress={onPress}>
+        <ThemedText type="label-sm" color="on-surface-variant">
+          {label}
+        </ThemedText>
+        <ThemedText type="label-md">{value}</ThemedText>
+      </AppTouchableOpacity>
       {children}
-    </AppTouchableOpacity>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   field: {
     flex: 1,
-    position: "relative",
     overflow: "hidden",
-    gap: Spacing["space-xs"],
-    padding: Spacing["space-md"],
     borderRadius: Rounded.md,
     backgroundColor: Colors["surface-variant"],
+  },
+  fieldContent: {
+    gap: Spacing["space-xs"],
+    padding: Spacing["space-md"],
   },
 });
