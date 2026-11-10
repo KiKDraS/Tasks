@@ -9,6 +9,7 @@ import { openAppSettings } from "@/services/permissions";
 import { closeTaskForm } from "@/utils/task-form-navigation";
 import { useCallback, useRef } from "react";
 import { ScheduleCard } from "./schedule-card";
+import { ShareHistoryCard } from "./share-history-card";
 import { TaskAttachmentCards } from "./task-attachment-cards";
 import { TaskFormActions } from "./task-form-actions";
 
@@ -122,6 +123,8 @@ export function TaskFormContent({ task }: Readonly<TaskFormContentProps>) {
         onOpenSettings={handleOpenSettings}
         retryDisabled={state.isSubmitting}
       />
+
+      {isEditing && <ShareHistoryCard shares={task?.shares ?? []} />}
 
       <TaskFormActions
         isEditing={isEditing}

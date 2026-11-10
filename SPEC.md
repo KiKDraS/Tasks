@@ -343,8 +343,8 @@ Additional states:
 | --- | --- | --- |
 | Sign in | `src/app/index.tsx` | Brand title `Tasks`, subtitle, username, password with visibility toggle, submit, link to sign-up |
 | Sign up | `src/app/sign-up/index.tsx` | Same shell, username, password, confirmation, submit, link back |
-| Home | `src/app/(tabs)/index.tsx` | Header, `Mis tareas`, task list with photo count and attachment meta, floating add button |
-| Task form | `src/app/(tabs)/task-form/index.tsx` | `Ninguna tarea seleccionada` placeholder, or `Nueva tarea` / `Editar tarea` with fields, photo/location cards, combined schedule card, share when editing, cancel/save |
+| Home | `src/app/(tabs)/index.tsx` | Header, `Mis tareas`, task list with photo count, attachment meta, newest share status, floating add button |
+| Task form | `src/app/(tabs)/task-form/index.tsx` | `Ninguna tarea seleccionada` placeholder, or `Nueva tarea` / `Editar tarea` with fields, photo/location cards, combined schedule card, share history when editing, share action, cancel/save |
 
 Shared layout shells:
 
@@ -368,7 +368,7 @@ in `package.json`.
 | `__tests__/validate-sign-up-form-test.ts` | 3 | Required fields and password mismatch |
 | `__tests__/validate-task-form-test.ts` | 4 | Title required, schedule validity |
 | `__tests__/tasks-storage-test.ts` | 9 | Parse, seed, and write task storage |
-| `__tests__/tasks-store-test.ts` | 18 | Hydrate, expiry, failure, concurrency, add, update, remove, cleanup, toggle |
+| `__tests__/tasks-store-test.ts` | 23 | Hydrate, expiry, failure, concurrency, add, update, remove, cleanup, toggle, share history |
 | `__tests__/permission-state-test.ts` | 4 | Granted, denied, blocked, undetermined |
 | `__tests__/reminder-date-test.ts` | 2 | Date identity, time offset |
 | `__tests__/media-service-test.ts` | 10 | Multi-pick, denied, cancelled, copy, errors, delete |
@@ -384,7 +384,7 @@ in `package.json`.
 | `__tests__/schedule-card-test.tsx` | 16 | Reminder switch, calendar states, hints, notice, disabled, completed |
 | `__tests__/resolve-calendar-attachment-test.ts` | 6 | Disabled, preserve, remove, create, denial, error |
 | `__tests__/use-task-form-calendar-test.ts` | 7 | Reminder on/off, failure save, cleanup, completed, alert order |
-| `__tests__/task-form-content-test.tsx` | 5 | Reminder toggle, permission retry, disabled |
+| `__tests__/task-form-content-test.tsx` | 7 | Reminder toggle, permission retry, disabled, share history |
 | `__tests__/use-schedule-permission-test.ts` | 4 | Granted, denied, blocked, error |
 | `__tests__/clear-expired-notifications-test.ts` | 2 | Past cleared, future untouched |
 | `__tests__/task-mutation-queue-test.ts` | 2 | Serial order, best-effort write |
@@ -393,16 +393,18 @@ in `package.json`.
 | `__tests__/no-task-selected-test.tsx` | 2 | Copy, create params |
 | `__tests__/task-form-screen-test.tsx` | 3 | Placeholder, create, edit |
 | `__tests__/share-task-test.ts` | 4 | Message fields, recipient prefix |
-| `__tests__/use-share-task-test.ts` | 11 | Menu, native share, contact, denials, errors |
+| `__tests__/use-share-task-test.ts` | 17 | Menu, native share, contact, denials, errors, history recording |
 | `__tests__/task-actions-test.tsx` | 1 | Share action |
 | `__tests__/task-form-actions-test.tsx` | 3 | Share in edit mode, edit/create actions |
 | `__tests__/close-task-form-test.ts` | 2 | Clear params and go back; placeholder navigate |
 | `__tests__/home-add-button-test.tsx` | 1 | Create params, accessible label |
 | `__tests__/use-photo-attachment-test.ts` | 4 | Camera, gallery, retry, remove |
 | `__tests__/use-task-form-photo-cleanup-test.ts` | 2 | Cleanup after save, failure |
-| `__tests__/task-attachments-test.tsx` | 7 | Photo count, location, calendar, completed |
+| `__tests__/task-attachments-test.tsx` | 11 | Photo count, location, calendar, newest share, completed |
+| `__tests__/share-history-test.ts` | 16 | Target labels, share labels, activity map, dates |
+| `__tests__/share-history-card-test.tsx` | 2 | Empty state, newest-first rows |
 
-Total: 39 files, 221 tests. Auth context has no automated coverage. Manual checks: `.opencode/docs/project-brief.md`
+Total: 41 files, 256 tests. Auth context has no automated coverage. Manual checks: `.opencode/docs/project-brief.md`
 §Manual QA.
 
 Counts above describe the current suite. Remaining Parcial 2 target test
@@ -526,6 +528,15 @@ type TaskLocation = {
   address?: string;
 };
 
+type TaskShareMethod = "contact" | "share";
+
+type TaskShare = {
+  method: TaskShareMethod;
+  recipientName?: string;
+  activityType?: string; // iOS only
+  sharedAt: string; // ISO timestamp
+};
+
 type Task = {
   id?: string;
   title: string;
@@ -536,6 +547,7 @@ type Task = {
   photoUri?: string | null; // legacy single-photo field
   location?: TaskLocation | null;
   calendarEventId?: string | null;
+  shares?: TaskShare[];
 };
 ```
 
@@ -547,6 +559,8 @@ type Task = {
   coordinates are always stored.
 - `calendarEventId` is the device event ID returned by
   `Calendar.createEventAsync`; the event is not duplicated in AsyncStorage.
+- `shares` is append-only, oldest first. Only the recipient display name and
+  optional iOS activity type are stored; no contact ID or phone number.
 - The storage key stays `tasks` with the same bare-array JSON format. No
   migration is required.
 
@@ -664,7 +678,22 @@ Share:
   (`src/hooks/tasks/use-share-task.ts`).
 - `Compartir con contacto` opens the `expo-contacts/legacy` picker, prefixes
   `Para <name>:` to the message, then opens the native share sheet. No contact
-  is stored on the task.
+  ID or phone is stored on the task.
+- A successful share (`Share.sharedAction`) appends a `TaskShare`:
+  - `method`: `contact` for the contact flow, `share` for the plain flow.
+  - `recipientName`: selected contact name, contact flow only.
+  - `activityType`: iOS `ShareAction.activityType` when reported; omitted on
+    Android.
+  - `sharedAt`: current ISO timestamp.
+- `dismissedAction`, share errors, picker cancellation, and permission denial
+  append nothing.
+- The Home card shows the newest share: `Compartida con <name> · <target>` or
+  `Compartida · <target>` when iOS reports a target;
+  `Compartida con <name> · Contacto` for contact shares without a target;
+  `Compartida` for plain shares without a target
+  (`src/utils/share-history.ts`, `src/components/ui/home/home-task/task-attachments.tsx`).
+- The edit form shows the full history newest first in `Historial de envíos`
+  (`src/components/ui/task-form/share-history-card.tsx`).
 - Share is available from each Home card action row and from the edit form
   action row.
 
@@ -672,7 +701,7 @@ Permission denial messages are listed in §15.8.
 
 ### 15.6 Tests
 
-All Parcial 2 target tests are shipped; keep the 221 current tests. Mock
+All Parcial 2 target tests are shipped; keep the 256 current tests. Mock
 `expo-image-picker`, `expo-location`, `expo-contacts/legacy`,
 `expo-calendar/legacy`, `expo-file-system`, and AsyncStorage. Run `pnpm test`.
 
@@ -683,7 +712,7 @@ All Parcial 2 target tests are shipped; keep the 221 current tests. Mock
 | Permission states and denied message | `src/services/permissions.ts`, `src/utils/permission-state.ts`, `src/components/ui/permissions/permission-notice.tsx` | ✅ implemented |
 | Camera / gallery photo | `src/services/media.ts`, `src/components/ui/task-form/photo-card.tsx`, `src/components/ui/home/home-task/task-attachments.tsx`; form is the detail view; list shows count, not image | ✅ implemented |
 | GPS location | `src/services/location.ts`, `src/components/ui/task-form/location-card.tsx`, `src/components/ui/home/home-task/task-attachments.tsx` | ✅ implemented |
-| Contact share target | `src/services/contacts.ts`, `src/hooks/tasks/use-share-task.ts`, `src/components/ui/home/home-task/task-actions.tsx`, `src/components/ui/task-form/task-form-actions.tsx` | ✅ implemented |
+| Contact share target + history | `src/services/contacts.ts`, `src/hooks/tasks/use-share-task.ts`, `src/utils/share-history.ts`, `src/components/ui/task-form/share-history-card.tsx`, `src/components/ui/home/home-task/task-actions.tsx`, `src/components/ui/task-form/task-form-actions.tsx` | ✅ implemented |
 | Calendar event | `src/services/calendar.ts`, `src/components/ui/task-form/schedule-card.tsx` | ✅ implemented |
 | Zustand global state | `src/stores/tasks/`, `src/hooks/tasks/use-hydrate-tasks.ts` | ✅ implemented |
 | Tests | `__tests__/` additions | ✅ implemented |
@@ -731,6 +760,11 @@ Scoring stays separate.
 | Task form empty body | `Elegí una tarea de la lista o creá una nueva.` |
 | Task form empty action | `Crear tarea` |
 | Share menu title | `Compartir tarea` |
+| Share history title | `Historial de envíos` |
+| Share status | `Compartida` |
+| Share status with recipient | `Compartida con <name>` |
+| Share method fallback | `Contacto` |
+| Share target | Friendly activity name, when reported |
 | Share action | `Compartir` |
 | Share with contact action | `Compartir con contacto` |
 | Share cancel | `Cancelar` |

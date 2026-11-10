@@ -1,7 +1,9 @@
 import { PERMISSION_NOTICE_COPY } from "@/components/ui/permissions/constants";
 import type { Task } from "@/context/tasks/types/Task";
+import { recordTaskShareAfterShare } from "@/hooks/tasks/utils/record-task-share";
 import { pickContact, type ContactSummary } from "@/services/contacts";
 import { openAppSettings, type DeviceResult } from "@/services/permissions";
+import { useTasksStore } from "@/stores/tasks/tasks-store";
 import { shareTask } from "@/utils/share-task";
 import { useCallback } from "react";
 import { Alert } from "react-native";
@@ -69,17 +71,23 @@ export interface ShareTaskActions {
 }
 
 export function useShareTask(task?: Task): ShareTaskActions {
+  const recordTaskShare = useTasksStore((state) => state.recordTaskShare);
+
   const share = useCallback(async (): Promise<void> => {
     if (!task) {
       return;
     }
 
     try {
-      await shareTask(task);
+      const result = await shareTask(task);
+
+      await recordTaskShareAfterShare(recordTaskShare, task, result, {
+        method: "share",
+      });
     } catch {
       showShareFailure();
     }
-  }, [task]);
+  }, [recordTaskShare, task]);
 
   const shareWithContact = useCallback(async (): Promise<void> => {
     if (!task) {
@@ -93,14 +101,19 @@ export function useShareTask(task?: Task): ShareTaskActions {
     }
 
     try {
-      await shareTask(task, {
+      const shareResult = await shareTask(task, {
         title: result.value.name,
+        recipientName: result.value.name,
+      });
+
+      await recordTaskShareAfterShare(recordTaskShare, task, shareResult, {
+        method: "contact",
         recipientName: result.value.name,
       });
     } catch {
       showShareFailure();
     }
-  }, [task]);
+  }, [recordTaskShare, task]);
 
   const openShareMenu = useCallback(() => {
     Alert.alert(SHARE_ALERTS.menuTitle, undefined, [

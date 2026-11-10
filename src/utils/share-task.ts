@@ -1,7 +1,7 @@
 import type { Task } from "@/context/tasks/types/Task";
 import { formatLocationLabel } from "@/utils/location";
 import { getTaskPhotoUris } from "@/utils/task-photos";
-import { Share } from "react-native";
+import { Share, type ShareAction } from "react-native";
 
 export interface ShareTaskOptions {
   title?: string;
@@ -28,11 +28,11 @@ export function buildTaskShareMessage(
   return recipientName ? `Para ${recipientName}:\n\n${message}` : message;
 }
 
-export async function shareTask(
+export function shareTask(
   task: Task,
   options?: ShareTaskOptions,
-): Promise<void> {
-  await Share.share({
+): Promise<ShareAction> {
+  return Share.share({
     message: buildTaskShareMessage(task, options?.recipientName),
     title: options?.title ?? task.title,
   });

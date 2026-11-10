@@ -1,12 +1,13 @@
 import { create } from "zustand";
 
 import { TASKS_DB } from "@/context/tasks/data/tasks-seed";
-import { Task } from "@/context/tasks/types/Task";
+import { Task, TaskShare } from "@/context/tasks/types/Task";
 import { clearExpiredTaskNotifications } from "@/context/tasks/utils/clear-expired-notifications";
 import { findTaskById } from "@/context/tasks/utils/find-task-by-id";
 import { cancelTaskReminder } from "@/context/tasks/utils/notifications";
 import { readOrSeedTasks, writeTasks } from "@/services/tasks-storage";
 import { deleteTaskAttachments } from "@/stores/tasks/delete-task-attachments";
+import { recordTaskShare } from "@/stores/tasks/record-task-share";
 import { resolveTaskUpdate } from "@/stores/tasks/resolve-task-update";
 import {
   enqueueTaskMutation,
@@ -22,6 +23,7 @@ export interface TasksState {
   updateTask: (task: Task) => Promise<void>;
   removeTask: (id: string) => Promise<void>;
   toggleComplete: (id: string) => Promise<void>;
+  recordTaskShare: (id: string, share: TaskShare) => Promise<void>;
   clearSentNotification: (notificationId: string) => Promise<void>;
   clearExpiredNotifications: (now?: Date) => Promise<void>;
 }
@@ -31,8 +33,11 @@ export const useTasksStore = create<TasksState>()((set, get) => {
     const { tasks } = get();
     const currentTask = findTaskById(tasks, updatedTask.id);
     const nextTask = await resolveTaskUpdate(updatedTask, currentTask);
+    const taskWithShares = currentTask
+      ? { ...nextTask, shares: currentTask.shares ?? nextTask.shares }
+      : nextTask;
     const nextTasks = tasks.map((task) =>
-      task.id === updatedTask.id ? nextTask : task,
+      task.id === updatedTask.id ? taskWithShares : task,
     );
 
     await writeTasks(nextTasks);
@@ -100,6 +105,14 @@ export const useTasksStore = create<TasksState>()((set, get) => {
         }
 
         await applyUpdateTask({ ...task, isComplete: !task.isComplete });
+      }),
+    recordTaskShare: (id, share) =>
+      enqueueTaskMutation(async () => {
+        const nextTasks = await recordTaskShare(get().tasks, id, share);
+
+        if (nextTasks) {
+          set({ tasks: nextTasks });
+        }
       }),
     clearSentNotification: (notificationId) =>
       enqueueTaskMutation(async () => {

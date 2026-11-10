@@ -1,6 +1,6 @@
 import { waitFor } from "@testing-library/react-native";
 
-import { Task } from "@/context/tasks/types/Task";
+import { Task, TaskShare } from "@/context/tasks/types/Task";
 import { cancelTaskReminder } from "@/context/tasks/utils/notifications";
 import { deleteTaskEvent } from "@/services/calendar";
 import { deletePhoto } from "@/services/media";
@@ -174,6 +174,25 @@ describe("updateTask", () => {
       { ...task, isComplete: true, notification: null },
     ]);
   });
+
+  test("keeps a share recorded after a stale form snapshot", async () => {
+    const share: TaskShare = {
+      method: "share",
+      activityType: "com.apple.UIKit.activity.Mail",
+      sharedAt: "2026-11-08T10:00:00.000Z",
+    };
+    const staleSnapshot = buildTask({ id: "task-1" });
+    useTasksStore.setState({ tasks: [staleSnapshot], isLoading: false });
+
+    await useTasksStore.getState().recordTaskShare("task-1", share);
+    await useTasksStore
+      .getState()
+      .updateTask({ ...staleSnapshot, title: "updated" });
+
+    expect(useTasksStore.getState().tasks).toEqual([
+      { ...staleSnapshot, title: "updated", shares: [share] },
+    ]);
+  });
 });
 
 describe("removeTask", () => {
@@ -280,6 +299,76 @@ describe("clearSentNotification", () => {
 
     expect(writeTasksMock).not.toHaveBeenCalled();
     expect(useTasksStore.getState().tasks).toEqual([task]);
+  });
+});
+
+describe("recordTaskShare", () => {
+  const FIRST_SHARE: TaskShare = {
+    method: "share",
+    activityType: "com.apple.UIKit.activity.Mail",
+    sharedAt: "2026-11-08T10:00:00.000Z",
+  };
+  const SECOND_SHARE: TaskShare = {
+    method: "contact",
+    recipientName: "Ana Pérez",
+    activityType: "net.whatsapp.WhatsApp",
+    sharedAt: "2026-11-09T14:30:00.000Z",
+  };
+
+  test("appends the share to an existing task and persists", async () => {
+    const task = buildTask({ shares: [FIRST_SHARE] });
+    const other = buildTask({ id: "task-2", title: "Otra tarea" });
+    useTasksStore.setState({ tasks: [task, other], isLoading: false });
+
+    await useTasksStore.getState().recordTaskShare("task-1", SECOND_SHARE);
+
+    const expected = [{ ...task, shares: [FIRST_SHARE, SECOND_SHARE] }, other];
+    expect(writeTasksMock).toHaveBeenCalledWith(expected);
+    expect(useTasksStore.getState().tasks).toEqual(expected);
+  });
+
+  test("appends a second share to the history", async () => {
+    const task = buildTask();
+    useTasksStore.setState({ tasks: [task], isLoading: false });
+
+    await useTasksStore.getState().recordTaskShare("task-1", FIRST_SHARE);
+    await useTasksStore.getState().recordTaskShare("task-1", SECOND_SHARE);
+
+    const expected = {
+      ...task,
+      shares: [FIRST_SHARE, SECOND_SHARE],
+    };
+    expect(useTasksStore.getState().tasks).toEqual([expected]);
+    expect(writeTasksMock).toHaveBeenLastCalledWith([expected]);
+  });
+
+  test("does nothing when the task is not found", async () => {
+    const task = buildTask();
+    useTasksStore.setState({ tasks: [task], isLoading: false });
+
+    await useTasksStore
+      .getState()
+      .recordTaskShare("unknown-id", SECOND_SHARE);
+
+    expect(writeTasksMock).not.toHaveBeenCalled();
+    expect(useTasksStore.getState().tasks).toEqual([task]);
+  });
+
+  test("keeps the share in memory when the write fails", async () => {
+    const task = buildTask();
+    useTasksStore.setState({ tasks: [task], isLoading: false });
+    writeTasksMock.mockRejectedValueOnce(new Error("write failed"));
+
+    await expect(
+      useTasksStore.getState().recordTaskShare("task-1", SECOND_SHARE),
+    ).resolves.toBeUndefined();
+
+    expect(writeTasksMock).toHaveBeenCalledWith([
+      { ...task, shares: [SECOND_SHARE] },
+    ]);
+    expect(useTasksStore.getState().tasks).toEqual([
+      { ...task, shares: [SECOND_SHARE] },
+    ]);
   });
 });
 

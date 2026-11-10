@@ -7,6 +7,8 @@ import { useShareTask } from "@/hooks/tasks/use-share-task";
 import { DEVICE_MESSAGES } from "@/services/constants/device-messages";
 import { pickContact } from "@/services/contacts";
 import { openAppSettings } from "@/services/permissions";
+import { writeTasks } from "@/services/tasks-storage";
+import { useTasksStore } from "@/stores/tasks/tasks-store";
 
 jest.mock("@/services/contacts", () => ({
   pickContact: jest.fn(),
@@ -14,6 +16,11 @@ jest.mock("@/services/contacts", () => ({
 
 jest.mock("@/services/permissions", () => ({
   openAppSettings: jest.fn(),
+}));
+
+jest.mock("@/services/tasks-storage", () => ({
+  readOrSeedTasks: jest.fn(),
+  writeTasks: jest.fn(),
 }));
 
 const TASK: Task = {
@@ -28,6 +35,7 @@ const MESSAGE =
 
 const pickContactMock = jest.mocked(pickContact);
 const openAppSettingsMock = jest.mocked(openAppSettings);
+const writeTasksMock = jest.mocked(writeTasks);
 const alertSpy = jest.spyOn(Alert, "alert").mockImplementation(() => {});
 const shareSpy = jest.spyOn(Share, "share");
 
@@ -38,6 +46,8 @@ function getMenuButtons(): AlertButton[] {
 beforeEach(() => {
   jest.clearAllMocks();
   shareSpy.mockResolvedValue({ action: Share.sharedAction });
+  writeTasksMock.mockResolvedValue();
+  useTasksStore.setState({ tasks: [TASK], isLoading: false });
 });
 
 describe("useShareTask", () => {
@@ -228,5 +238,133 @@ describe("useShareTask", () => {
     });
 
     expect(pickContactMock).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe("useShareTask share history", () => {
+  test("records a plain share with its activity type", async () => {
+    shareSpy.mockResolvedValueOnce({
+      action: Share.sharedAction,
+      activityType: "com.apple.UIKit.activity.Mail",
+    });
+
+    const { result } = await renderHook(() => useShareTask(TASK));
+
+    await act(async () => {
+      await result.current.share();
+    });
+
+    expect(useTasksStore.getState().tasks[0].shares).toEqual([
+      {
+        method: "share",
+        activityType: "com.apple.UIKit.activity.Mail",
+        sharedAt: expect.any(String),
+      },
+    ]);
+    expect(writeTasksMock).toHaveBeenCalledTimes(1);
+  });
+
+  test("records a contact share with the recipient", async () => {
+    pickContactMock.mockResolvedValue({
+      status: "granted",
+      value: { id: "contact-1", name: "Ana Pérez" },
+    });
+    shareSpy.mockResolvedValueOnce({
+      action: Share.sharedAction,
+      activityType: "net.whatsapp.WhatsApp",
+    });
+
+    const { result } = await renderHook(() => useShareTask(TASK));
+
+    await act(async () => {
+      await result.current.shareWithContact();
+    });
+
+    expect(useTasksStore.getState().tasks[0].shares).toEqual([
+      {
+        method: "contact",
+        recipientName: "Ana Pérez",
+        activityType: "net.whatsapp.WhatsApp",
+        sharedAt: expect.any(String),
+      },
+    ]);
+  });
+
+  test("records nothing when the share is dismissed", async () => {
+    shareSpy.mockResolvedValueOnce({ action: Share.dismissedAction });
+
+    const { result } = await renderHook(() => useShareTask(TASK));
+
+    await act(async () => {
+      await result.current.share();
+    });
+
+    expect(useTasksStore.getState().tasks).toEqual([TASK]);
+    expect(writeTasksMock).not.toHaveBeenCalled();
+  });
+
+  test("records nothing and alerts when the share fails", async () => {
+    shareSpy.mockRejectedValueOnce(new Error("share failed"));
+
+    const { result } = await renderHook(() => useShareTask(TASK));
+
+    await act(async () => {
+      await result.current.share();
+    });
+
+    expect(alertSpy).toHaveBeenCalledWith(
+      "No se pudo compartir",
+      "Intentá de nuevo.",
+      [{ text: "Entendido" }],
+    );
+    expect(useTasksStore.getState().tasks).toEqual([TASK]);
+    expect(writeTasksMock).not.toHaveBeenCalled();
+  });
+
+  test("keeps the share when recording the history fails", async () => {
+    const originalRecordTaskShare = useTasksStore.getState().recordTaskShare;
+    const recordTaskShareMock = jest
+      .fn()
+      .mockRejectedValue(new Error("write failed"));
+    useTasksStore.setState({ recordTaskShare: recordTaskShareMock });
+
+    try {
+      const { result } = await renderHook(() => useShareTask(TASK));
+
+      await act(async () => {
+        await result.current.share();
+      });
+
+      expect(shareSpy).toHaveBeenCalledTimes(1);
+      expect(recordTaskShareMock).toHaveBeenCalledTimes(1);
+      expect(alertSpy).not.toHaveBeenCalledWith(
+        "No se pudo compartir",
+        expect.anything(),
+        expect.anything(),
+      );
+      expect(useTasksStore.getState().tasks).toEqual([TASK]);
+    } finally {
+      await act(async () => {
+        useTasksStore.setState({ recordTaskShare: originalRecordTaskShare });
+      });
+    }
+  });
+
+  test("records nothing when the task has no id", async () => {
+    shareSpy.mockResolvedValueOnce({
+      action: Share.sharedAction,
+      activityType: "com.apple.UIKit.activity.Mail",
+    });
+
+    const { result } = await renderHook(() =>
+      useShareTask({ ...TASK, id: undefined }),
+    );
+
+    await act(async () => {
+      await result.current.share();
+    });
+
+    expect(useTasksStore.getState().tasks).toEqual([TASK]);
+    expect(writeTasksMock).not.toHaveBeenCalled();
   });
 });

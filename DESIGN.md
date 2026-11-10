@@ -389,8 +389,8 @@ These are recorded as current state, not as approved design.
 
 ## 12. Parcial 2 UI status
 
-Status: `PhotoCard`, `LocationCard`, `ScheduleCard`, `NoTaskSelected`,
-`PermissionNotice`, and `TaskAttachments` are shipped. Implementation
+Status: `PhotoCard`, `LocationCard`, `ScheduleCard`, `ShareHistoryCard`,
+`NoTaskSelected`, `PermissionNotice`, and `TaskAttachments` are shipped. Implementation
 status is tracked in the project-brief §Parcial 2 acceptance checklist; scoring
 stays separate. Use the tokens in §3–§5, the type scale in §4, and the
 primitives in §6. Do not add a new palette.
@@ -400,8 +400,8 @@ primitives in §6. Do not add a new palette.
 - Attachments are compact rows, not a second visual system.
 - One `surface-container` card per device resource, radius 8, padding 16,
   20 px internal gap. The reminder card keeps the same treatment.
-- Photo thumbnails appear only in the form; location and calendar are text rows
-  with an icon. The task list shows a photo count, not the image.
+- Photo thumbnails appear only in the form; location, calendar, and share are
+  text rows with an icon. The task list shows a photo count, not the image.
 - No map, no full-screen photo viewer, no new navigation destinations.
 
 ### 12.2 Task form order
@@ -422,6 +422,9 @@ Recordatorio
   Tiempo | Fecha y hora
   presets / custom / native picker
   hint
+Historial de envíos
+  Compartida con name · target       date
+  ...
 Acciones
   [share] Compartir (solo al editar)  Cancelar  Guardar
 ```
@@ -439,6 +442,7 @@ Component names:
 | `ScheduleCard` | `src/components/ui/task-form/schedule-card.tsx` | Shipped. Reminder switch, shared schedule, hint |
 | `TaskFormActions` | `src/components/ui/task-form/task-form-actions.tsx` | Shipped. Share in edit mode, cancel, save |
 | `NoTaskSelected` | `src/components/ui/task-form/no-task-selected.tsx` | Shipped. Empty tab title, body, `Crear tarea` |
+| `ShareHistoryCard` | `src/components/ui/task-form/share-history-card.tsx` | Shipped. Full share history, newest first |
 | `ScheduleHeader` | `src/components/ui/task-form/reminder-options/schedule-header.tsx` | Shipped. Reminder switch, calendar status, notice |
 | `PermissionNotice` | `src/components/ui/permissions/permission-notice.tsx` | Shipped. Inline message, retry or settings |
 | `TaskAttachments` | `src/components/ui/home/home-task/task-attachments.tsx` | Shipped. Photo count and meta rows; no image |
@@ -457,6 +461,7 @@ TaskCard
     [gallery] N fotos
     [pin] address
     [calendar] Evento
+    [share] Compartida con name · target / Compartida
   reminder badge (existing)
 ```
 
@@ -464,6 +469,9 @@ TaskCard
 - Meta rows use `label-sm`, `secondary`, one line each with
   `numberOfLines={1}`.
 - Calendar indicator is a small icon plus `Evento`; no date duplication.
+- Share row shows only the newest history entry; full history is in the edit
+  form. Target app is shown when iOS reports it. Contact shares without a target
+  show `Contacto`; plain shares without a target show only `Compartida`.
 - The card grows only when an attachment exists. Do not reserve empty space.
 - The photo is not tappable in this target; there is no viewer.
 
@@ -512,6 +520,7 @@ Use `BaseIcon`; one icon per file. Existing `ReminderIcon` and
   do not rely on color alone.
 - Body text keeps the platform font scale. Fixed-height rows must not clip at
   large sizes; let the value wrap to two lines.
+- Share history rows keep the date untruncated and let the label wrap.
 
 ### 12.7 Copy
 

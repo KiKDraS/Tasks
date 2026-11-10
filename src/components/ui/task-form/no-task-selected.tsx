@@ -13,10 +13,14 @@ export function NoTaskSelected() {
 
   return (
     <ThemedView style={styles.container}>
-      <ThemedText type="display" accessibilityRole="header">
+      <ThemedText type="display" accessibilityRole="header" style={styles.text}>
         Ninguna tarea seleccionada
       </ThemedText>
-      <ThemedText type="body-md" color="on-surface-variant">
+      <ThemedText
+        type="body-md"
+        color="on-surface-variant"
+        style={styles.text}
+      >
         Elegí una tarea de la lista o creá una nueva.
       </ThemedText>
       <FormButton onPress={createTask} style={styles.action}>
@@ -31,10 +35,13 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: Spacing.gutter,
     justifyContent: "center",
+    alignItems: "center",
     gap: Spacing.gutter,
   },
+  text: {
+    textAlign: "center",
+  },
   action: {
-    alignSelf: "flex-start",
     paddingHorizontal: Spacing["space-lg"],
   },
 });
