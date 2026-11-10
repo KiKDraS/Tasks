@@ -102,9 +102,8 @@ src/
 __tests__/        Jest + React Native Testing Library
 ```
 
-El comportamiento y el modelo de datos están especificados en
-[SPEC.md](https://github.com/KiKDraS/Tasks/blob/main/SPEC.md). El sistema visual
-está en [DESIGN.md](https://github.com/KiKDraS/Tasks/blob/main/DESIGN.md).
+El comportamiento y el modelo de datos están especificados en `SPEC.md`. El
+sistema visual está en `DESIGN.md`.
 
 ## Tests
 
