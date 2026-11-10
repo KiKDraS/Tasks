@@ -38,7 +38,8 @@ pnpm dlx expo run:android
 > **Development build obligatorio para las funciones del dispositivo.** Cámara,
 > galería, ubicación, contactos, calendario y notificaciones usan módulos nativos
 > con permisos propios. Expo Go no alcanza para probarlos ni para validar los
-> permisos: usá un development build en simulador, emulador o dispositivo.
+> permisos: usá un development build, y un dispositivo físico para cámara y
+> notificaciones.
 
 Usuario de prueba (seed): `Ana` / `1234`, o creá una cuenta desde el registro.
 
@@ -104,12 +105,6 @@ __tests__/        Jest + React Native Testing Library
 
 El comportamiento y el modelo de datos están especificados en `SPEC.md`. El
 sistema visual está en `DESIGN.md`.
-
-## Tests
-
-La suite cubre componentes reutilizables, validaciones, storage, store de
-Zustand, servicios del dispositivo (media, ubicación, contactos, calendario,
-notificaciones) y el formulario de tareas: **29 suites, 181 tests**.
 
 ## Video DEMO
 
