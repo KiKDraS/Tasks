@@ -177,7 +177,8 @@ Task form:
 | `ReminderTimeOptions` | `.../reminder-time-options.tsx` | Preset chips and custom time |
 | `ReminderCustomTime` | `.../reminder-custom-time.tsx` | Hours, minutes, seconds fields |
 | `ReminderDateOptions` | `.../reminder-date-options.tsx` | Date and time picker fields |
-| `ReminderPickerField` | `.../reminder-picker-field.tsx` | Filled field showing the formatted value |
+| `ReminderPickerField` | `.../reminder-picker-field.tsx` | Filled field showing the formatted value; the whole field opens the picker and announces its disabled state |
+| `ReminderIosPickerSheet` | `.../reminder-ios-picker-sheet.tsx` | iOS page sheet, 58 pt fields stay in the form; native date (`inline`) or time (`spinner`) picker, `Listo` closes |
 | `ReminderOptions` disabled | same | 50% opacity, no pointer events |
 
 Chrome:
@@ -348,7 +349,7 @@ Rejected or overridden by the implementation:
 | Task metadata | Course tag, priority, drag handle, due date | Title, description, optional reminder badge |
 | Delete | Confirmation modal | Immediate delete, no modal |
 | Bottom navigation | 4 text destinations | 2 icon-only tabs |
-| Reminder sheet | Bottom sheet with presets and notification preview | Inline card in the form, presets + custom time or native date/time picker |
+| Reminder sheet | Bottom sheet with presets and notification preview | Inline card in the form, presets + custom time; iOS opens a page sheet for Fecha/Hora, Android uses the native dialog |
 | Notification preview | Separate screen | No preview screen; hint line under the reminder card |
 | Logo | Checkmark glyph | App icon PNG |
 
@@ -424,6 +425,7 @@ Recordatorio
   calendar status / notice
   Tiempo | Fecha y hora
   presets / custom / native picker
+  Fecha u Hora → iOS page sheet: native picker + Listo
   hint
 ```
 
@@ -436,6 +438,7 @@ Component names:
 | `ContactCard` | `src/components/ui/task-form/contact-card.tsx` | Shipped. Icon, name/phone, `Elegir contacto` |
 | `ScheduleCard` | `src/components/ui/task-form/schedule-card.tsx` | Shipped. Reminder switch, shared schedule, hint |
 | `ScheduleHeader` | `src/components/ui/task-form/reminder-options/schedule-header.tsx` | Shipped. Reminder switch, calendar status, notice |
+| `ReminderIosPickerSheet` | `src/components/ui/task-form/reminder-options/reminder-ios-picker-sheet.tsx` | Shipped. Page sheet with header, native picker, `Listo`; hidden while the card is disabled |
 | `PermissionNotice` | `src/components/ui/permissions/permission-notice.tsx` | Shipped. Inline message, retry or settings |
 | `TaskAttachments` | `src/components/ui/home/home-task/task-attachments.tsx` | Shipped. Photo count and meta rows; no image |
 
