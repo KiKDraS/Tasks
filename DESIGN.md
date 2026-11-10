@@ -369,10 +369,10 @@ Present:
 
 Gaps in the current build:
 
-- Icon-only edit, delete, checkbox, and FAB controls have no accessibility
-  label.
-- Touch targets for the checkbox (24), edit/delete icons (22), and password
-  toggle (20) are below the 44×44 iOS / 48×48 Android guideline.
+- The task checkbox has no accessibility label or checked state.
+- Touch targets for the checkbox (24) and password toggle (20) are below the
+  44×44 iOS / 48×48 Android guideline. Edit, delete, share, and the FAB have
+  labels and padded targets.
 - Error text is not linked to its input through `accessibilityHint` or
   `aria-describedby`.
 - Contrast is measured: `on-surface` on `surface` 16.23:1, `on-surface-variant`
@@ -389,7 +389,7 @@ These are recorded as current state, not as approved design.
 
 ## 12. Parcial 2 UI status
 
-Status: `PhotoCard`, `LocationCard`, `ContactCard`, `ScheduleCard`,
+Status: `PhotoCard`, `LocationCard`, `ScheduleCard`, `NoTaskSelected`,
 `PermissionNotice`, and `TaskAttachments` are shipped. Implementation
 status is tracked in the project-brief §Parcial 2 acceptance checklist; scoring
 stays separate. Use the tokens in §3–§5, the type scale in §4, and the
@@ -400,8 +400,8 @@ primitives in §6. Do not add a new palette.
 - Attachments are compact rows, not a second visual system.
 - One `surface-container` card per device resource, radius 8, padding 16,
   20 px internal gap. The reminder card keeps the same treatment.
-- Photo thumbnails appear only in the form; location, contact, and calendar are
-  text rows with an icon. The task list shows a photo count, not the image.
+- Photo thumbnails appear only in the form; location and calendar are text rows
+  with an icon. The task list shows a photo count, not the image.
 - No map, no full-screen photo viewer, no new navigation destinations.
 
 ### 12.2 Task form order
@@ -416,16 +416,19 @@ Fotos
 Ubicación
   [pin] Ubicación                 [Usar mi ubicación]
   Sin ubicación / address / coords
-Contacto
-  [person] Contacto               [Elegir contacto]
-  Sin contacto / name · phone
 Recordatorio
   [bell] Recordatorio             [switch]
   calendar status / notice
   Tiempo | Fecha y hora
   presets / custom / native picker
   hint
+Acciones
+  [share] Compartir (solo al editar)  Cancelar  Guardar
 ```
+
+Task Form tab with neither `id` nor `mode=create` shows `NoTaskSelected`:
+display title, body, and a `Crear tarea` button, centered with the standard
+gutter (`src/components/ui/task-form/no-task-selected.tsx`).
 
 Component names:
 
@@ -433,8 +436,9 @@ Component names:
 | --- | --- | --- |
 | `PhotoCard` | `src/components/ui/task-form/photo-card.tsx` | Shipped. 64 px thumbnail grid, add, per-photo remove |
 | `LocationCard` | `src/components/ui/task-form/location-card.tsx` | Shipped. Icon, value, `Usar mi ubicación` |
-| `ContactCard` | `src/components/ui/task-form/contact-card.tsx` | Shipped. Icon, name/phone, `Elegir contacto` |
 | `ScheduleCard` | `src/components/ui/task-form/schedule-card.tsx` | Shipped. Reminder switch, shared schedule, hint |
+| `TaskFormActions` | `src/components/ui/task-form/task-form-actions.tsx` | Shipped. Share in edit mode, cancel, save |
+| `NoTaskSelected` | `src/components/ui/task-form/no-task-selected.tsx` | Shipped. Empty tab title, body, `Crear tarea` |
 | `ScheduleHeader` | `src/components/ui/task-form/reminder-options/schedule-header.tsx` | Shipped. Reminder switch, calendar status, notice |
 | `PermissionNotice` | `src/components/ui/permissions/permission-notice.tsx` | Shipped. Inline message, retry or settings |
 | `TaskAttachments` | `src/components/ui/home/home-task/task-attachments.tsx` | Shipped. Photo count and meta rows; no image |
@@ -447,12 +451,11 @@ contrast on `surface-container`.
 
 ```text
 TaskCard
-  [checkbox] Title                  [edit] [delete]
+  [checkbox] Title                  [edit] [share] [delete]
   description
   TaskAttachments
     [gallery] N fotos
     [pin] address
-    [person] name · phone
     [calendar] Evento
   reminder badge (existing)
 ```
@@ -471,7 +474,7 @@ TaskCard
 | Pending | Action disabled; `ActivityIndicator` in the card value or action; card stays at full opacity |
 | Denied, can retry | `PermissionNotice` below the card value: `Permiso denegado. Podés volver a intentarlo.` + `Reintentar` |
 | Blocked | `PermissionNotice`: `Permiso denegado. Habilitalo en Ajustes.` + `Abrir ajustes` |
-| Granted, empty value | Normal empty copy (`Sin fotos`, `Sin ubicación`, `Sin contacto`) |
+| Granted, empty value | Normal empty copy (`Sin fotos`, `Sin ubicación`) |
 | Granted, value set | Value row plus remove or change action |
 | Device error | `PermissionNotice` with the matching message from `SPEC.md` §15.8. |
 
@@ -487,7 +490,7 @@ Add these wrappers under `src/components/icons/`:
 | `CameraIcon` | `camera` | `photo_camera` | 20 |
 | `GalleryIcon` | `photo.on.rectangle` | `photo_library` | 14 |
 | `LocationIcon` | `mappin.and.ellipse` | `location_on` | 20 |
-| `ContactIcon` | `person.crop.circle` | `person` | 20 |
+| `ShareIcon` | `square.and.arrow.up` | `share` | 22 |
 | `CalendarIcon` | `calendar` | `calendar_month` | 20 |
 | `CloseIcon` | `xmark` | `close` | 16 |
 
@@ -497,7 +500,7 @@ Use `BaseIcon`; one icon per file. Existing `ReminderIcon` and
 ### 12.6 Accessibility
 
 - Every icon-only action gets an `accessibilityLabel`: `Tomar foto`,
-  `Elegir de galería`, `Quitar foto N`, `Usar mi ubicación`, `Elegir contacto`,
+  `Elegir de galería`, `Quitar foto N`, `Usar mi ubicación`, `Compartir tarea`,
   `Crear evento`.
 - Every action target is at least 44×44 (iOS) / 48×48 (Android); pad the icon
   wrappers, do not enlarge the glyph.

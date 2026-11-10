@@ -5,6 +5,7 @@ import { Colors, setShadow, Spacing } from "@/constants/theme";
 import { useClearSentNotification } from "@/hooks/tasks/use-clear-sent-notification";
 import { useHydrateTasks } from "@/hooks/tasks/use-hydrate-tasks";
 import { useTasksStore } from "@/stores/tasks/tasks-store";
+import { openTaskFormPlaceholder } from "@/utils/task-form-navigation";
 import { Tabs } from "expo-router";
 import { type ComponentProps } from "react";
 import { type ViewStyle } from "react-native";
@@ -59,6 +60,12 @@ export default function TabLayout() {
           tabBarIcon: ({ color }) => (
             <SchedulingIcon size={TAB_ICON_SIZE} color={color as string} />
           ),
+        }}
+        listeners={{
+          tabPress: (event) => {
+            event.preventDefault();
+            openTaskFormPlaceholder();
+          },
         }}
       />
     </Tabs>

@@ -1,5 +1,5 @@
 import type { ReminderSelection } from "@/context/tasks/types/Reminder";
-import type { TaskContact, TaskLocation } from "@/context/tasks/types/Task";
+import type { TaskLocation } from "@/context/tasks/types/Task";
 import type { DeviceActionState } from "@/utils/permission-state";
 
 export type TaskFormState = {
@@ -13,11 +13,9 @@ export type TaskFormState = {
   isSubmitting: boolean;
   photoUris: string[];
   location: TaskLocation | null;
-  contact: TaskContact | null;
   calendarEventId: string | null;
   photoState: DeviceActionState;
   locationState: DeviceActionState;
-  contactState: DeviceActionState;
   calendarState: DeviceActionState;
 };
 
@@ -31,8 +29,6 @@ export type TaskFormAction =
   | { type: "ADD_PHOTOS"; payload: string[] }
   | { type: "REMOVE_PHOTO"; payload: string }
   | { type: "SET_LOCATION"; payload: TaskLocation | null }
-  | { type: "SET_CONTACT"; payload: TaskContact | null }
-  | { type: "SET_CONTACT_STATE"; payload: DeviceActionState }
   | { type: "SET_CALENDAR_EVENT"; payload: string | null }
   | { type: "SET_CALENDAR_STATE"; payload: DeviceActionState }
   | { type: "SET_PHOTO_STATE"; payload: DeviceActionState }

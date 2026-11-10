@@ -17,7 +17,6 @@ const FIELDS: TaskFields = {
   photoUris: [],
   photoUri: null,
   location: null,
-  contact: null,
   calendarEventId: null,
 };
 

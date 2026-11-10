@@ -1,10 +1,15 @@
 import * as Contacts from "expo-contacts/legacy";
 
-import type { TaskContact } from "@/context/tasks/types/Task";
 import { DEVICE_MESSAGES } from "@/services/constants/device-messages";
 import { isPermissionGranted, type DeviceResult } from "@/services/permissions";
 
-export async function pickContact(): Promise<DeviceResult<TaskContact>> {
+export interface ContactSummary {
+  id: string;
+  name: string;
+  phoneNumber?: string;
+}
+
+export async function pickContact(): Promise<DeviceResult<ContactSummary>> {
   try {
     const permission = await Contacts.requestPermissionsAsync();
     if (!isPermissionGranted(permission)) {

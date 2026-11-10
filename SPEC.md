@@ -101,10 +101,15 @@ Tabs (`src/app/(tabs)/_layout.tsx`):
 | `index` | `src/app/(tabs)/index.tsx` | Task list (Home) |
 | `task-form` | `src/app/(tabs)/task-form/index.tsx` | Create or edit a task |
 
-The task form receives an optional `id` query parameter
-(`useLocalSearchParams`). Present `id` → edit; absent → create. The form is a
-tab, so it stays mounted; `TaskFormContent` is keyed by `taskId ?? "new"` to
-reset local state when the target changes (`src/components/ui/task-form/task-form.tsx`).
+The task form receives optional `id` and `mode` query parameters
+(`useLocalSearchParams`). `id` → edit; `mode=create` → create; neither →
+`NoTaskSelected` placeholder. The add button and the placeholder push
+`mode=create`; a task card edit pushes `id`. `closeTaskForm()` clears both
+params and calls `router.back()` (`src/utils/task-form-navigation.ts`); the Task
+Form tab press also clears them, so the tab returns to the placeholder. The form
+is a tab, so it stays mounted; `TaskFormContent` is keyed by `taskId ?? "new"`
+to reset local state when the target changes
+(`src/components/ui/task-form/task-form.tsx`).
 
 Route constants live in `src/constants/routes.ts` (`signUp`, `taskForm`).
 
@@ -339,7 +344,7 @@ Additional states:
 | Sign in | `src/app/index.tsx` | Brand title `Tasks`, subtitle, username, password with visibility toggle, submit, link to sign-up |
 | Sign up | `src/app/sign-up/index.tsx` | Same shell, username, password, confirmation, submit, link back |
 | Home | `src/app/(tabs)/index.tsx` | Header, `Mis tareas`, task list with photo count and attachment meta, floating add button |
-| Task form | `src/app/(tabs)/task-form/index.tsx` | `Nueva tarea` or `Editar tarea`, fields, photo/location/contact cards, combined schedule card, cancel/save |
+| Task form | `src/app/(tabs)/task-form/index.tsx` | `Ninguna tarea seleccionada` placeholder, or `Nueva tarea` / `Editar tarea` with fields, photo/location cards, combined schedule card, share when editing, cancel/save |
 
 Shared layout shells:
 
@@ -371,12 +376,11 @@ in `package.json`.
 | `__tests__/contacts-service-test.ts` | 5 | Denied, cancel, phone selection, error |
 | `__tests__/calendar-service-test.ts` | 11 | Permission, fallback, create, delete, request |
 | `__tests__/reminder-notifications-test.ts` | 3 | DATE/TIME triggers, denied permission |
-| `__tests__/task-form-attachments-test.ts` | 33 | Multi-photo, legacy prefill, reducer, fields, cleanup, toggle intent, expiry |
+| `__tests__/task-form-attachments-test.ts` | 30 | Multi-photo, legacy prefill, reducer, fields, cleanup, toggle intent, expiry |
 | `__tests__/permission-notice-test.tsx` | 6 | Denied/blocked/error and hidden states |
 | `__tests__/photo-card-test.tsx` | 7 | Empty, multiple, per-photo remove, pending, denied |
 | `__tests__/location-card-test.tsx` | 5 | Empty, address, coords, pending, remove |
 | `__tests__/calendar-event-test.ts` | 3 | Date/time/disabled start and end |
-| `__tests__/contact-card-test.tsx` | 3 | Empty, filled, denied |
 | `__tests__/schedule-card-test.tsx` | 16 | Reminder switch, calendar states, hints, notice, disabled, completed |
 | `__tests__/resolve-calendar-attachment-test.ts` | 6 | Disabled, preserve, remove, create, denial, error |
 | `__tests__/use-task-form-calendar-test.ts` | 7 | Reminder on/off, failure save, cleanup, completed, alert order |
@@ -386,12 +390,19 @@ in `package.json`.
 | `__tests__/task-mutation-queue-test.ts` | 2 | Serial order, best-effort write |
 | `__tests__/option-chip-test.tsx` | 3 | Role, selected state, press |
 | `__tests__/reminder-options-test.tsx` | 2 | Disabled subtree hidden, enabled accessible |
+| `__tests__/no-task-selected-test.tsx` | 2 | Copy, create params |
+| `__tests__/task-form-screen-test.tsx` | 3 | Placeholder, create, edit |
+| `__tests__/share-task-test.ts` | 4 | Message fields, recipient prefix |
+| `__tests__/use-share-task-test.ts` | 11 | Menu, native share, contact, denials, errors |
+| `__tests__/task-actions-test.tsx` | 1 | Share action |
+| `__tests__/task-form-actions-test.tsx` | 3 | Share in edit mode, edit/create actions |
+| `__tests__/close-task-form-test.ts` | 2 | Clear params and go back; placeholder navigate |
+| `__tests__/home-add-button-test.tsx` | 1 | Create params, accessible label |
 | `__tests__/use-photo-attachment-test.ts` | 4 | Camera, gallery, retry, remove |
 | `__tests__/use-task-form-photo-cleanup-test.ts` | 2 | Cleanup after save, failure |
-| `__tests__/task-attachments-test.tsx` | 8 | Photo count, location, contact, calendar, completed |
-| `__tests__/format-contact-label-test.ts` | 2 | Name only, name + phone |
+| `__tests__/task-attachments-test.tsx` | 7 | Photo count, location, calendar, completed |
 
-Total: 33 files, 203 tests. Auth context has no automated coverage. Manual checks: `.opencode/docs/project-brief.md`
+Total: 39 files, 221 tests. Auth context has no automated coverage. Manual checks: `.opencode/docs/project-brief.md`
 §Manual QA.
 
 Counts above describe the current suite. Remaining Parcial 2 target test
@@ -478,7 +489,7 @@ form.
 | Camera | `ImagePicker.requestCameraPermissionsAsync()` | Take photo |
 | Gallery | `ImagePicker.requestMediaLibraryPermissionsAsync()` | Choose from gallery |
 | Location | `Location.requestForegroundPermissionsAsync()` | Use my location |
-| Contacts | `Contacts.requestPermissionsAsync()` from `expo-contacts/legacy` | Choose contact |
+| Contacts | `Contacts.requestPermissionsAsync()` from `expo-contacts/legacy` | Share with contact |
 | Calendar | `Calendar.requestCalendarPermissionsAsync()` from `expo-calendar/legacy` | Create calendar event |
 
 Target UI states:
@@ -492,8 +503,9 @@ Target UI states:
 | `blocked` | `status === "denied"` and `!canAskAgain` | Inline message + `Abrir ajustes` (`Linking.openSettings()`) |
 | `error` | Device call throws | Inline message, retry allowed |
 
-The form keeps one state per resource. Photo, location, and contact denials
-save the task without that attachment. When the reminder is on, calendar
+The form keeps one state per resource. Photo and location denials save the
+task without that attachment; a contact denial only cancels the share. When the
+reminder is on, calendar
 permission denial or event failure skips the calendar event but still saves the
 task and schedules the app notification. The user sees an inline notice and a
 post-save alert.
@@ -514,12 +526,6 @@ type TaskLocation = {
   address?: string;
 };
 
-type TaskContact = {
-  id: string;
-  name: string;
-  phoneNumber?: string;
-};
-
 type Task = {
   id?: string;
   title: string;
@@ -529,7 +535,6 @@ type Task = {
   photoUris?: string[];
   photoUri?: string | null; // legacy single-photo field
   location?: TaskLocation | null;
-  contact?: TaskContact | null;
   calendarEventId?: string | null;
 };
 ```
@@ -540,7 +545,6 @@ type Task = {
   longer referenced.
 - `location.address` is best effort from `Location.reverseGeocodeAsync`; the
   coordinates are always stored.
-- `contact` stores only the ID, display name, and first phone number.
 - `calendarEventId` is the device event ID returned by
   `Calendar.createEventAsync`; the event is not duplicated in AsyncStorage.
 - The storage key stays `tasks` with the same bare-array JSON format. No
@@ -610,7 +614,7 @@ Device services (shipped):
 | --- | --- |
 | `src/services/media.ts` | `takePhoto()` returns `DeviceResult<{ uri: string }>`; `pickPhotos()` returns `DeviceResult<{ uris: string[] }>`; copy each asset into `task-photos` |
 | `src/services/location.ts` | `getCurrentLocation()` returns `DeviceResult<TaskLocation>`; request foreground permission, get position, reverse geocode with coordinate fallback |
-| `src/services/contacts.ts` | `pickContact()` returns `DeviceResult<TaskContact>`; request permission, open the native picker, keep first phone |
+| `src/services/contacts.ts` | `pickContact()` returns `DeviceResult<ContactSummary>`; request permission, open the native picker, keep first phone; used by the share flow only |
 | `src/services/calendar.ts` | `requestCalendarPermission()` returns `DeviceResult<true>`; `createTaskEvent(event)` returns `DeviceResult<{ eventId: string }>`; `deleteTaskEvent(id): Promise<void>`; default/first writable calendar |
 | `src/services/permissions.ts` | `DeviceResult<T>`, `PermissionLike`, `isPermissionGranted`, `openAppSettings` |
 | `src/utils/reminder-date.ts` | Shared `getReminderDate` for notifications and calendar starts |
@@ -620,7 +624,7 @@ Device services (shipped):
 Create:
 
 1. The form validates the title and shared schedule when the reminder is on.
-2. Photo, location, and contact are wired in the form. Gallery can append
+2. Photo and location are wired in the form. Gallery can append
    multiple photos; camera adds one per capture. The reminder switch uses one
    shared date/time selection for both the app notification and the calendar
    event. Enabling the reminder requests calendar permission.
@@ -632,7 +636,7 @@ Create:
 5. `addTask` writes the extended task. Calendar permission denial or event
    failure skips the event but still saves the task and schedules the
    notification; the user sees the notice and a post-save alert.
-6. `router.back()` runs as today.
+6. `closeTaskForm()` clears the form params and goes back.
 
 Edit:
 
@@ -651,11 +655,24 @@ Complete / delete:
 - Deleting a task with a denied calendar permission still removes the task; the
   event cleanup is skipped.
 
+Share:
+
+- `shareTask` opens the native share sheet. The message has `Tarea`, optional
+  `Descripción`, `Estado`, optional `Ubicación`, and optional `Fotos` count
+  (`src/utils/share-task.ts`).
+- `useShareTask` opens a menu with `Compartir` and `Compartir con contacto`
+  (`src/hooks/tasks/use-share-task.ts`).
+- `Compartir con contacto` opens the `expo-contacts/legacy` picker, prefixes
+  `Para <name>:` to the message, then opens the native share sheet. No contact
+  is stored on the task.
+- Share is available from each Home card action row and from the edit form
+  action row.
+
 Permission denial messages are listed in §15.8.
 
 ### 15.6 Tests
 
-All Parcial 2 target tests are shipped; keep the 203 current tests. Mock
+All Parcial 2 target tests are shipped; keep the 221 current tests. Mock
 `expo-image-picker`, `expo-location`, `expo-contacts/legacy`,
 `expo-calendar/legacy`, `expo-file-system`, and AsyncStorage. Run `pnpm test`.
 
@@ -666,7 +683,7 @@ All Parcial 2 target tests are shipped; keep the 203 current tests. Mock
 | Permission states and denied message | `src/services/permissions.ts`, `src/utils/permission-state.ts`, `src/components/ui/permissions/permission-notice.tsx` | ✅ implemented |
 | Camera / gallery photo | `src/services/media.ts`, `src/components/ui/task-form/photo-card.tsx`, `src/components/ui/home/home-task/task-attachments.tsx`; form is the detail view; list shows count, not image | ✅ implemented |
 | GPS location | `src/services/location.ts`, `src/components/ui/task-form/location-card.tsx`, `src/components/ui/home/home-task/task-attachments.tsx` | ✅ implemented |
-| Contact | `src/services/contacts.ts`, `src/components/ui/task-form/contact-card.tsx` | ✅ implemented |
+| Contact share target | `src/services/contacts.ts`, `src/hooks/tasks/use-share-task.ts`, `src/components/ui/home/home-task/task-actions.tsx`, `src/components/ui/task-form/task-form-actions.tsx` | ✅ implemented |
 | Calendar event | `src/services/calendar.ts`, `src/components/ui/task-form/schedule-card.tsx` | ✅ implemented |
 | Zustand global state | `src/stores/tasks/`, `src/hooks/tasks/use-hydrate-tasks.ts` | ✅ implemented |
 | Tests | `__tests__/` additions | ✅ implemented |
@@ -692,9 +709,6 @@ Scoring stays separate.
 | Location action | `Usar mi ubicación` |
 | Location loading | `Obteniendo ubicación...` |
 | Location remove | `Quitar ubicación` |
-| Contact empty | `Sin contacto` |
-| Contact remove | `Quitar contacto` |
-| Contact action | `Elegir contacto` |
 | Calendar helper | `Se agregará al calendario al guardar` |
 | Calendar created | `Evento agregado` |
 | Calendar pending | `Verificando permiso...` |
@@ -713,6 +727,16 @@ Scoring stays separate.
 | Media error | `No pudimos usar la cámara o la galería. Intentá de nuevo.` |
 | Location error | `No pudimos obtener tu ubicación. Intentá de nuevo.` |
 | Contacts error | `No pudimos acceder a tus contactos. Intentá de nuevo.` |
+| Task form empty title | `Ninguna tarea seleccionada` |
+| Task form empty body | `Elegí una tarea de la lista o creá una nueva.` |
+| Task form empty action | `Crear tarea` |
+| Share menu title | `Compartir tarea` |
+| Share action | `Compartir` |
+| Share with contact action | `Compartir con contacto` |
+| Share cancel | `Cancelar` |
+| Share failure title | `No se pudo compartir` |
+| Share failure message | `Intentá de nuevo.` |
+| Share recipient prefix | `Para <name>:` |
 | Calendar error | `No pudimos acceder a tu calendario. Intentá de nuevo.` |
 | Calendar missing | `No encontramos un calendario editable. Creá uno en tu calendario e intentá de nuevo.` |
 

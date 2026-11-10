@@ -1,12 +1,12 @@
 import BaseIcon, { IconProps } from "./base/BaseIcon";
 
-export default function ContactIcon(props: IconProps) {
+export default function ShareIcon(props: IconProps) {
   return (
     <BaseIcon
       {...props}
       name={{
-        ios: "person.crop.circle",
-        android: "person",
+        ios: "square.and.arrow.up",
+        android: "share",
       }}
     />
   );

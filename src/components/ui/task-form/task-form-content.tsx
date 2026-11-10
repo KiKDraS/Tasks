@@ -4,8 +4,9 @@ import { Task } from "@/context/tasks/types/Task";
 import { useSchedulePermission } from "@/hooks/task-form/use-schedule-permission";
 import { TASK_FORM_ACTION_TYPES } from "@/hooks/task-form/constants";
 import { useTaskForm } from "@/hooks/task-form/use-task-form";
+import { useShareTask } from "@/hooks/tasks/use-share-task";
 import { openAppSettings } from "@/services/permissions";
-import { router } from "expo-router";
+import { closeTaskForm } from "@/utils/task-form-navigation";
 import { useCallback, useRef } from "react";
 import { ScheduleCard } from "./schedule-card";
 import { TaskAttachmentCards } from "./task-attachment-cards";
@@ -19,6 +20,7 @@ export function TaskFormContent({ task }: Readonly<TaskFormContentProps>) {
   const { state, dispatch, handleSubmit, reminderLabel, isEditing } =
     useTaskForm(task);
   const { requestPermission } = useSchedulePermission({ dispatch });
+  const { openShareMenu } = useShareTask(task);
 
   const showReminderError = state.reminderEnabled && !!state.reminderError;
   const eventWillBeRemoved =
@@ -28,7 +30,6 @@ export function TaskFormContent({ task }: Readonly<TaskFormContentProps>) {
   const hasPendingAttachment =
     state.photoState.status === "pending" ||
     state.locationState.status === "pending" ||
-    state.contactState.status === "pending" ||
     state.calendarState.status === "pending";
   const isSubmitDisabled =
     showReminderError || !!state.titleError || hasPendingAttachment;
@@ -62,7 +63,7 @@ export function TaskFormContent({ task }: Readonly<TaskFormContentProps>) {
   };
 
   const handleCancel = () => {
-    router.back();
+    closeTaskForm();
   };
 
   const handleSubmitGuarded = async () => {
@@ -128,6 +129,7 @@ export function TaskFormContent({ task }: Readonly<TaskFormContentProps>) {
         submitDisabled={isSubmitDisabled}
         onCancel={handleCancel}
         onSubmit={handleSubmitGuarded}
+        onShare={isEditing ? openShareMenu : undefined}
       />
     </>
   );

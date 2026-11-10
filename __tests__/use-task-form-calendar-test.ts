@@ -34,7 +34,7 @@ jest.mock("@/services/media", () => ({
 }));
 
 jest.mock("expo-router", () => ({
-  router: { back: jest.fn() },
+  router: { back: jest.fn(), setParams: jest.fn() },
 }));
 
 const addTask = jest.fn();

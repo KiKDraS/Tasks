@@ -22,7 +22,7 @@ jest.mock("@/services/permissions", () => ({
 }));
 
 jest.mock("expo-router", () => ({
-  router: { back: jest.fn() },
+  router: { back: jest.fn(), setParams: jest.fn() },
 }));
 
 jest.mock("@/hooks/task-form/use-task-form", () => ({

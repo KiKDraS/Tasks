@@ -1,11 +1,9 @@
 import CalendarIcon from "@/components/icons/CalendarIcon";
-import ContactIcon from "@/components/icons/ContactIcon";
 import GalleryIcon from "@/components/icons/GalleryIcon";
 import LocationIcon from "@/components/icons/LocationIcon";
 import { ThemedText } from "@/components/themed-text";
 import { Colors, Spacing } from "@/constants/theme";
 import type { Task } from "@/context/tasks/types/Task";
-import { formatContactLabel } from "@/utils/contact";
 import { formatLocationLabel } from "@/utils/location";
 import { getTaskPhotoUris } from "@/utils/task-photos";
 import type { ReactNode } from "react";
@@ -55,7 +53,7 @@ export function TaskAttachments({
 }: Readonly<TaskAttachmentsProps>) {
   const photoCount = getTaskPhotoUris(task).length;
   const hasPhotos = photoCount > 0;
-  const hasMeta = !!task.location || !!task.contact || !!task.calendarEventId;
+  const hasMeta = !!task.location || !!task.calendarEventId;
 
   if (!hasPhotos && !hasMeta) {
     return null;
@@ -76,13 +74,6 @@ export function TaskAttachments({
         <TaskAttachmentMeta
           icon={<LocationIcon size={14} color={Colors.secondary} />}
           label={formatLocationLabel(task.location)}
-          isComplete={isComplete}
-        />
-      )}
-      {task.contact && (
-        <TaskAttachmentMeta
-          icon={<ContactIcon size={14} color={Colors.secondary} />}
-          label={formatContactLabel(task.contact)}
           isComplete={isComplete}
         />
       )}

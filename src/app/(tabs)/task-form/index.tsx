@@ -1,12 +1,23 @@
 import { ThemedText } from "@/components/themed-text";
+import { NoTaskSelected } from "@/components/ui/task-form/no-task-selected";
 import { TaskForm } from "@/components/ui/task-form/task-form";
+import { TASK_FORM_PARAMS } from "@/constants/routes";
 import { Spacing } from "@/constants/theme";
 import { useLocalSearchParams } from "expo-router";
 import { ScrollView, StyleSheet, View } from "react-native";
 
 export default function TaskFormScreen() {
-  const { id } = useLocalSearchParams<{ id?: string }>();
-  const isEditing = !!id;
+  const { id, mode } = useLocalSearchParams<{
+    id?: string;
+    mode?: string;
+  }>();
+  const taskId = id || undefined;
+  const isEditing = !!taskId;
+  const isCreating = mode === TASK_FORM_PARAMS.create.mode;
+
+  if (!isEditing && !isCreating) {
+    return <NoTaskSelected />;
+  }
 
   return (
     <ScrollView style={styles.container}>
@@ -21,7 +32,7 @@ export default function TaskFormScreen() {
         </ThemedText>
       </View>
       <View style={styles.content}>
-        <TaskForm taskId={id} />
+        <TaskForm taskId={taskId} />
       </View>
     </ScrollView>
   );

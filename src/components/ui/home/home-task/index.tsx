@@ -10,7 +10,8 @@ interface HomeTaskProps {
 }
 
 export function HomeTask({ task, now }: Readonly<HomeTaskProps>) {
-  const { toggleCompletion, handleDelete, openEdit } = useTaskActions(task);
+  const { toggleCompletion, handleDelete, openEdit, share } =
+    useTaskActions(task);
   const isComplete = !!task.isComplete;
 
   return (
@@ -21,6 +22,7 @@ export function HomeTask({ task, now }: Readonly<HomeTaskProps>) {
         onToggle={toggleCompletion}
         onDelete={handleDelete}
         onEdit={openEdit}
+        onShare={share}
       />
       <TaskBody task={task} isComplete={isComplete} now={now} />
     </TaskCard>

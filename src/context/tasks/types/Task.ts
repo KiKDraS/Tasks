@@ -9,12 +9,6 @@ export interface TaskLocation {
   address?: string;
 }
 
-export interface TaskContact {
-  id: string;
-  name: string;
-  phoneNumber?: string;
-}
-
 export type Task = {
   id?: string;
   title: string;
@@ -24,6 +18,5 @@ export type Task = {
   photoUris?: string[];
   photoUri?: string | null;
   location?: TaskLocation | null;
-  contact?: TaskContact | null;
   calendarEventId?: string | null;
 };

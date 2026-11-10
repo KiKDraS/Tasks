@@ -7,10 +7,6 @@ jest.mock("@/components/icons/CalendarIcon", () => ({
   __esModule: true,
   default: () => null,
 }));
-jest.mock("@/components/icons/ContactIcon", () => ({
-  __esModule: true,
-  default: () => null,
-}));
 jest.mock("@/components/icons/GalleryIcon", () => ({
   __esModule: true,
   default: () => null,
@@ -38,7 +34,7 @@ describe("<TaskAttachments />", () => {
     expect(toJSON()).toBeNull();
   });
 
-  test("renders the photo count with the address, contact, and calendar meta", async () => {
+  test("renders the photo count with the address and calendar meta", async () => {
     const task = buildTask({
       photoUris: [
         "file:///photo-1.jpg",
@@ -50,11 +46,6 @@ describe("<TaskAttachments />", () => {
         longitude: -58.3816,
         address: "Av. Corrientes 1234",
       },
-      contact: {
-        id: "contact-1",
-        name: "Ana Pérez",
-        phoneNumber: "11 5555-1111",
-      },
       calendarEventId: "event-1",
     });
 
@@ -64,7 +55,6 @@ describe("<TaskAttachments />", () => {
 
     expect(getByText("3 fotos")).toBeTruthy();
     expect(getByText("Av. Corrientes 1234")).toBeTruthy();
-    expect(getByText("Ana Pérez · 11 5555-1111")).toBeTruthy();
     expect(getByText("Evento")).toBeTruthy();
     expect(queryByRole("image")).toBeNull();
   });
@@ -116,26 +106,9 @@ describe("<TaskAttachments />", () => {
     expect(getByText("-34.6037, -58.3816")).toBeTruthy();
   });
 
-  test("renders a contact without a phone number", async () => {
-    const task = buildTask({
-      contact: { id: "contact-1", name: "Ana Pérez" },
-    });
-
-    const { getByText } = await render(
-      <TaskAttachments task={task} isComplete={false} />,
-    );
-
-    expect(getByText("Ana Pérez")).toBeTruthy();
-  });
-
   test("applies the completed treatment to the meta labels", async () => {
     const task = buildTask({
       photoUri: "file:///photo.jpg",
-      contact: {
-        id: "contact-1",
-        name: "Ana Pérez",
-        phoneNumber: "11 5555-1111",
-      },
     });
 
     const { getByText } = await render(
@@ -143,9 +116,6 @@ describe("<TaskAttachments />", () => {
     );
 
     expect(getByText("1 foto")).toHaveStyle({
-      textDecorationLine: "line-through",
-    });
-    expect(getByText("Ana Pérez · 11 5555-1111")).toHaveStyle({
       textDecorationLine: "line-through",
     });
   });

@@ -17,7 +17,7 @@ import { resolveCalendarAttachment } from "@/hooks/task-form/utils/resolve-calen
 import { buildTaskFields } from "@/hooks/task-form/utils/task-fields";
 import { validateTaskForm } from "@/hooks/task-form/utils/validate-task-form";
 import { useTasksStore } from "@/stores/tasks/tasks-store";
-import { router } from "expo-router";
+import { closeTaskForm } from "@/utils/task-form-navigation";
 import { useCallback, useReducer } from "react";
 import { Alert } from "react-native";
 
@@ -56,7 +56,7 @@ export function useTaskForm(task?: Task) {
       });
 
       dispatch({ type: TASK_FORM_ACTION_TYPES.SET_SUBMITTING, payload: false });
-      router.back();
+      closeTaskForm();
 
       if (failure) {
         showCalendarFailureAlert(failure, notification);

@@ -1,7 +1,7 @@
 import * as Contacts from "expo-contacts/legacy";
 
 import { DEVICE_MESSAGES } from "@/services/constants/device-messages";
-import { pickContact } from "@/services/contacts";
+import { pickContact, type ContactSummary } from "@/services/contacts";
 
 jest.mock("expo-contacts/legacy", () => ({
   requestPermissionsAsync: jest.fn(),
@@ -33,6 +33,8 @@ const contact = (
     phoneNumbers,
   }) as Contacts.ExistingContact;
 
+const SUMMARY: ContactSummary = { id: "contact-1", name: "Ana Pérez" };
+
 describe("pickContact", () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -63,7 +65,7 @@ describe("pickContact", () => {
 
     expect(result).toEqual({
       status: "granted",
-      value: { id: "contact-1", name: "Ana Pérez" },
+      value: SUMMARY,
     });
     if (result.status === "granted") {
       expect("phoneNumber" in result.value).toBe(false);
@@ -82,8 +84,7 @@ describe("pickContact", () => {
     await expect(pickContact()).resolves.toEqual({
       status: "granted",
       value: {
-        id: "contact-1",
-        name: "Ana Pérez",
+        ...SUMMARY,
         phoneNumber: "11 5555-1111",
       },
     });
