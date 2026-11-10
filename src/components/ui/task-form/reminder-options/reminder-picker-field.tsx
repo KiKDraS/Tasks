@@ -7,21 +7,25 @@ interface ReminderPickerFieldProps {
   label: string;
   value: string;
   onPress: () => void;
+  disabled?: boolean;
 }
 
 export function ReminderPickerField({
   label,
   value,
   onPress,
+  disabled,
 }: Readonly<ReminderPickerFieldProps>) {
   return (
     <AppTouchableOpacity
       style={styles.field}
       onPress={onPress}
+      disabled={disabled}
       accessibilityRole="button"
       accessibilityLabel={label}
       accessibilityValue={{ text: value }}
-      accessibilityHint="Abre el selector"
+      accessibilityHint={disabled ? undefined : "Abre el selector"}
+      accessibilityState={{ disabled }}
     >
       <ThemedText type="label-sm" color="on-surface-variant">
         {label}

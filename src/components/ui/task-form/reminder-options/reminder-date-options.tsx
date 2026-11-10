@@ -1,11 +1,10 @@
-import { ThemedText } from "@/components/themed-text";
-import { FormButton } from "@/components/ui/form/form-button";
-import { Colors, Spacing } from "@/constants/theme";
+import { Spacing } from "@/constants/theme";
 import { REMINDER_TYPES, ReminderType } from "@/context/tasks/types/Reminder";
 import { formatDate, formatTime } from "@/utils/date";
 import { DateTimePicker } from "@expo/ui/community/datetime-picker";
 import { useState } from "react";
-import { Modal, Platform, StyleSheet, View } from "react-native";
+import { Platform, StyleSheet, View } from "react-native";
+import { ReminderIosPickerSheet } from "./reminder-ios-picker-sheet";
 import { ReminderPickerField } from "./reminder-picker-field";
 
 interface ReminderDateOptionsProps {
@@ -37,6 +36,10 @@ export function ReminderDateOptions({
   const isAndroid = Platform.OS === "android";
   const [iosPicker, setIosPicker] = useState<ReminderType | null>(null);
 
+  if (disabled && iosPicker !== null) {
+    setIosPicker(null);
+  }
+
   const fields: ReminderDateField[] = [
     {
       mode: REMINDER_TYPES.DATE,
@@ -54,7 +57,6 @@ export function ReminderDateOptions({
   ];
 
   const activeIosField = fields.find((field) => field.mode === iosPicker);
-  const isIosPickerVisible = isIos && !disabled && activeIosField !== undefined;
 
   const handleFieldPress = (mode: ReminderType) => {
     if (isAndroid) {
@@ -75,6 +77,7 @@ export function ReminderDateOptions({
             label={field.label}
             value={field.value}
             onPress={() => handleFieldPress(field.mode)}
+            disabled={disabled}
           />
         ))}
       </View>
@@ -93,24 +96,15 @@ export function ReminderDateOptions({
           ) : null,
         )}
 
-      {isIosPickerVisible && activeIosField && (
-        <Modal presentationStyle="pageSheet" onRequestClose={closeIosPicker} visible>
-          <View style={styles.sheet}>
-            <ThemedText type="headline-md">{activeIosField.label}</ThemedText>
-            <DateTimePicker
-              value={selectedDate}
-              mode={activeIosField.mode}
-              display={
-                activeIosField.mode === REMINDER_TYPES.DATE
-                  ? "inline"
-                  : "spinner"
-              }
-              minimumDate={activeIosField.minimumDate}
-              onValueChange={(_, date) => date && activeIosField.onChange(date)}
-            />
-            <FormButton onPress={closeIosPicker}>Listo</FormButton>
-          </View>
-        </Modal>
+      {isIos && !disabled && activeIosField && (
+        <ReminderIosPickerSheet
+          label={activeIosField.label}
+          mode={activeIosField.mode}
+          selectedDate={selectedDate}
+          minimumDate={activeIosField.minimumDate}
+          onChange={activeIosField.onChange}
+          onClose={closeIosPicker}
+        />
       )}
     </View>
   );
@@ -123,11 +117,5 @@ const styles = StyleSheet.create({
   dateRow: {
     flexDirection: "row",
     gap: Spacing["space-sm"],
-  },
-  sheet: {
-    flex: 1,
-    gap: Spacing["space-lg"],
-    padding: Spacing.margin,
-    backgroundColor: Colors.surface,
   },
 });
