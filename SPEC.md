@@ -401,10 +401,10 @@ in `package.json`.
 | `__tests__/use-photo-attachment-test.ts` | 4 | Camera, gallery, retry, remove |
 | `__tests__/use-task-form-photo-cleanup-test.ts` | 2 | Cleanup after save, failure |
 | `__tests__/task-attachments-test.tsx` | 11 | Photo count, location, calendar, newest share, completed |
-| `__tests__/share-history-test.ts` | 16 | Target labels, share labels, activity map, dates |
+| `__tests__/share-history-test.ts` | 20 | Target labels, raw IDs hidden, share labels, dates |
 | `__tests__/share-history-card-test.tsx` | 2 | Empty state, newest-first rows |
 
-Total: 41 files, 256 tests. Auth context has no automated coverage. Manual checks: `.opencode/docs/project-brief.md`
+Total: 41 files, 260 tests. Auth context has no automated coverage. Manual checks: `.opencode/docs/project-brief.md`
 §Manual QA.
 
 Counts above describe the current suite. Remaining Parcial 2 target test
@@ -690,7 +690,8 @@ Share:
 - The Home card shows the newest share: `Compartida con <name> · <target>` or
   `Compartida · <target>` when iOS reports a target;
   `Compartida con <name> · Contacto` for contact shares without a target;
-  `Compartida` for plain shares without a target
+  `Compartida` for plain shares without a target. Raw technical activity IDs
+  (for example `sharexcomponent`) are never shown
   (`src/utils/share-history.ts`, `src/components/ui/home/home-task/task-attachments.tsx`).
 - The edit form shows the full history newest first in `Historial de envíos`
   (`src/components/ui/task-form/share-history-card.tsx`).
@@ -701,7 +702,7 @@ Permission denial messages are listed in §15.8.
 
 ### 15.6 Tests
 
-All Parcial 2 target tests are shipped; keep the 256 current tests. Mock
+All Parcial 2 target tests are shipped; keep the 260 current tests. Mock
 `expo-image-picker`, `expo-location`, `expo-contacts/legacy`,
 `expo-calendar/legacy`, `expo-file-system`, and AsyncStorage. Run `pnpm test`.
 

@@ -23,6 +23,12 @@ const CONTACT_LABEL = "Contacto";
 
 const isNonEmptySegment = (segment: string): boolean => segment !== "";
 
+const STARTS_UPPERCASE = /^[A-Z]/;
+const TECHNICAL_SEGMENT = /component|extension/i;
+
+const isHumanSegment = (segment: string): boolean =>
+  STARTS_UPPERCASE.test(segment) && !TECHNICAL_SEGMENT.test(segment);
+
 export function formatShareTarget(share: TaskShare): string | null {
   const activityType = share.activityType?.trim();
 
@@ -37,8 +43,9 @@ export function formatShareTarget(share: TaskShare): string | null {
   }
 
   const segments = activityType.split(".").filter(isNonEmptySegment);
+  const lastSegment = segments[segments.length - 1];
 
-  return segments[segments.length - 1] ?? null;
+  return lastSegment && isHumanSegment(lastSegment) ? lastSegment : null;
 }
 
 export function formatShareLabel(share: TaskShare): string {

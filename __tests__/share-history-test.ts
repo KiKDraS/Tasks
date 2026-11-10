@@ -49,6 +49,13 @@ describe("formatShareTarget", () => {
     ).toBe("Channel");
   });
 
+  test.each(["sharexcomponent", "ShareXComponent"])(
+    "returns null for the raw activity id %p",
+    (activityType) => {
+      expect(formatShareTarget(buildShare({ activityType }))).toBeNull();
+    },
+  );
+
   test.each([undefined, "", "   "])(
     "returns null when the activity type is %p",
     (activityType) => {
@@ -76,6 +83,26 @@ describe("formatShareLabel", () => {
         buildShare({ method: "contact", recipientName: "Ana Pérez" }),
       ),
     ).toBe("Compartida con Ana Pérez · Contacto");
+  });
+
+  test("falls back to the contact method for a raw activity id", () => {
+    expect(
+      formatShareLabel(
+        buildShare({
+          method: "contact",
+          recipientName: "Ana Pérez",
+          activityType: "sharexcomponent",
+        }),
+      ),
+    ).toBe("Compartida con Ana Pérez · Contacto");
+  });
+
+  test("renders a generic share without a target for a raw activity id", () => {
+    expect(
+      formatShareLabel(
+        buildShare({ method: "share", activityType: "sharexcomponent" }),
+      ),
+    ).toBe("Compartida");
   });
 
   test("renders a generic share with its target", () => {

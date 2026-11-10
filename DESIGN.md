@@ -470,8 +470,9 @@ TaskCard
   `numberOfLines={1}`.
 - Calendar indicator is a small icon plus `Evento`; no date duplication.
 - Share row shows only the newest history entry; full history is in the edit
-  form. Target app is shown when iOS reports it. Contact shares without a target
-  show `Contacto`; plain shares without a target show only `Compartida`.
+  form. Target app is shown only when iOS reports a friendly name; raw
+  technical activity IDs are hidden. Contact shares without a target show
+  `Contacto`; plain shares without a target show only `Compartida`.
 - The card grows only when an attachment exists. Do not reserve empty space.
 - The photo is not tappable in this target; there is no viewer.
 
