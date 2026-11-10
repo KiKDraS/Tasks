@@ -1,63 +1,124 @@
 # Tasks — Gestor de tareas
 
+App móvil en **React Native + Expo** para organizar tareas con recordatorios,
+fotos, ubicación, contacto y evento en el calendario. Funciona de forma local, sin
+backend.
+
 ## ¿Por qué existe este repositorio?
 
-Proyecto desarrollado para el **Parcial 1 – Aplicaciones Móviles (ISTEA)**. Es
-una app móvil en **React Native + Expo** que aplica los conceptos vistos en
-clase: componentes y estilos, navegación con stack, almacenamiento local,
-autenticación básica y notificaciones locales.
+Proyecto desarrollado para **Aplicaciones Móviles (ISTEA)**. El **Parcial 1**
+cubrió componentes, estilos, navegación, autenticación local, almacenamiento y
+notificaciones. El **Parcial 2** sumó permisos y acceso a recursos del
+dispositivo, testing automatizado y estado global con Zustand.
+
+Repositorio: [github.com/KiKDraS/Tasks](https://github.com/KiKDraS/Tasks)
 
 ## Opción elegida
 
-✅ **Gestor de tareas** — permite crear tareas con título, descripción y
-recordatorio (15m, 30m, 1h, 2h o un tiempo personalizado).
+**Gestor de tareas** — continuación de la app del Parcial 1, con título,
+descripción y recordatorio (tiempo relativo o fecha y hora).
 
 ## Cómo ejecutar la app
 
-Requisitos: Node.js y pnpm.
+Requisitos: Node.js, pnpm y, para el development build, Xcode (iOS) o Android
+Studio (Android).
 
 ```bash
 pnpm install
 pnpm start
 ```
 
-Escaneá el QR con **Expo Go** o abrí un emulador (también podés usar
-`pnpm android`, `pnpm ios` o `pnpm web`). Si algún componente nativo no se
-renderiza, usá un development build (`pnpm dlx expo run:ios` /
-`pnpm dlx expo run:android`).
-
-Usuario de prueba (seed): `Ana` / `1234`, o creá una cuenta desde la pantalla de
-registro.
+Para compilar un development build:
 
 ```bash
-pnpm test   # Jest + React Native Testing Library
-pnpm lint
+pnpm dlx expo run:ios
+pnpm dlx expo run:android
 ```
+
+> **Development build obligatorio para las funciones del dispositivo.** Cámara,
+> galería, ubicación, contactos, calendario y notificaciones usan módulos nativos
+> con permisos propios. Expo Go no alcanza para probarlos ni para validar los
+> permisos: usá un development build en simulador, emulador o dispositivo.
+
+Usuario de prueba (seed): `Ana` / `1234`, o creá una cuenta desde el registro.
+
+## Tests y calidad
+
+```bash
+pnpm test              # Jest + React Native Testing Library
+pnpm lint              # ESLint (expo lint)
+pnpm exec tsc --noEmit # TypeScript
+```
+
+Estado actual: **29 suites, 181 tests, todos pasando** (`pnpm test`).
 
 ## Funcionalidades implementadas
 
-- **Autenticación local**: registro de usuario, login validado contra los datos
-  guardados y rutas protegidas.
-- **Tareas**: crear, listar, editar y eliminar.
-- **Recordatorios**: notificación local programada por tiempo o fecha, con badge
-  en la tarea y cancelación al completarla o eliminarla.
-- **Persistencia con AsyncStorage**: usuarios, sesión y tareas se mantienen al
-  cerrar la app.
+### Parcial 1
+
+- **Autenticación local**: registro, login contra los datos guardados y rutas
+  protegidas con `Stack.Protected`. Sin sesión no se accede a las tareas.
+- **Tareas**: alta, listado, edición, completar y eliminar.
+- **Persistencia con AsyncStorage**: usuarios, sesión y tareas sobreviven al
+  cierre de la app.
+- **Recordatorios**: notificación local programada por tiempo o por fecha, con
+  badge en la tarea y cancelación al completarla o eliminarla.
 - **Navegación**: Expo Router (Stack + Tabs).
-- **Tests**: 4 suites / 12 tests con Jest + React Native Testing Library.
 - **UI**: componentes reutilizables (`FormButton`, `TextField`, `OptionChip`,
-  `TaskCheckbox`) y tema centralizado de colores, tipografía y espaciado.
+  `TaskCheckbox`) y tema centralizado de color, tipografía y espaciado.
+
+### Parcial 2
+
+- **Permisos con estados**: cada recurso informa concedido, denegado o pendiente.
+  Si se deniega, la pantalla muestra un mensaje claro con opción de reintentar; si
+  el permiso quedó bloqueado, ofrece **Abrir ajustes**.
+- **Cámara y galería**: fotos por tarea con `expo-image-picker`. La galería
+  permite elegir varias imágenes y la cámara agrega una por captura. Las fotos se
+  copian al almacenamiento de la app. El formulario es la vista de detalle; el
+  listado muestra solo la cantidad de fotos.
+- **Ubicación GPS**: con `expo-location` se guardan las coordenadas de la tarea y
+  se muestran como dirección aproximada cuando el geocoding la devuelve.
+- **Contactos**: con `expo-contacts` se elige un contacto del dispositivo y se
+  asocia a la tarea; se muestra nombre y primer teléfono.
+- **Calendario**: con `expo-calendar` se crea un evento vinculado a la tarea
+  cuando el recordatorio está activo. Si el permiso se deniega, la tarea se
+  guarda igual, sin evento.
+- **Estado global con Zustand**: `src/stores/tasks/` concentra las tareas con
+  acciones de agregar, actualizar, completar y eliminar. Los componentes leen el
+  estado por selectores; la hidratación ocurre al montar las tabs autenticadas.
+
+## Estructura del proyecto
+
+```text
+src/
+├── app/          rutas (Expo Router)
+├── components/   UI reutilizable, agrupada por función
+├── constants/    tema, rutas, claves de storage
+├── context/      sesión de autenticación
+├── hooks/        lógica con estado reutilizable
+├── services/     AsyncStorage y APIs del dispositivo
+├── stores/       estado global con Zustand
+└── utils/        helpers puros
+__tests__/        Jest + React Native Testing Library
+```
+
+El comportamiento y el modelo de datos están especificados en
+[SPEC.md](https://github.com/KiKDraS/Tasks/blob/main/SPEC.md). El sistema visual
+está en [DESIGN.md](https://github.com/KiKDraS/Tasks/blob/main/DESIGN.md).
 
 ## Tests
 
-![Resultado de los tests](assets/images/test.png)
+La suite cubre componentes reutilizables, validaciones, storage, store de
+Zustand, servicios del dispositivo (media, ubicación, contactos, calendario,
+notificaciones) y el formulario de tareas: **29 suites, 181 tests**.
 
 ## Video DEMO
 
-🎥
-[Ver demo](https://drive.google.com/file/d/1THcxt3eE3Cy0kfMN5tDxMoz1hXcslQhd/view?usp=sharing).
+<!-- TODO: reemplazar por el enlace de YouTube antes de la entrega -->
+[PENDIENTE: enlace al video DEMO en YouTube]
 
 ## Tecnologías
 
-React Native · Expo SDK 57 · Expo Router · AsyncStorage · expo-notifications ·
-TypeScript · Jest + React Native Testing Library
+React Native · Expo SDK 57 · Expo Router · TypeScript · Zustand · AsyncStorage ·
+expo-notifications · expo-image-picker · expo-location · expo-contacts ·
+expo-calendar · expo-file-system · Jest + React Native Testing Library
