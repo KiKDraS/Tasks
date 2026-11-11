@@ -1,6 +1,6 @@
 import { fireEvent, render } from "@testing-library/react-native";
 
-import { PERMISSION_NOTICE_COPY } from "@/components/ui/permissions/constants";
+import { PERMISSION_NOTICE_COPY } from "@/constants/permission-notice-copy";
 import { TaskFormContent } from "@/components/ui/task-form/task-form-content";
 import type { Task } from "@/context/tasks/types/Task";
 import { TASK_FORM_ACTION_TYPES } from "@/hooks/task-form/constants";
