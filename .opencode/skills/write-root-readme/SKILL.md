@@ -31,8 +31,8 @@ description: Write or rewrite the repo-root README.md for Tasks.
 
 - Spanish rioplatense, concise. Code identifiers and commands stay unchanged.
 - Every command must exist in `package.json` or the Expo CLI. Use `pnpm`.
-- Current test count: 5 suites, 13 tests. Verify before writing; do not copy an
-  old count.
+- Never hardcode a test count. Run the test command on the branch you are
+  documenting and use its real suite/test numbers; never copy an old count.
 - No Socialify, badge walls, emojis, or invented links.
 - No relative links. Use absolute GitHub URLs.
 - Do not duplicate `SPEC.md` or `DESIGN.md`; link to them if useful.
