@@ -1,8 +1,8 @@
 # Tasks — Gestor de tareas
 
 App móvil en **React Native + Expo** para organizar tareas con recordatorios,
-fotos, ubicación, contacto y evento en el calendario. Funciona de forma local, sin
-backend.
+fotos, ubicación, envío a un contacto y evento en el calendario. Funciona de
+forma local, sin backend.
 
 ## ¿Por qué existe este repositorio?
 
@@ -51,7 +51,7 @@ pnpm lint              # ESLint (expo lint)
 pnpm exec tsc --noEmit # TypeScript
 ```
 
-Estado actual: **30 suites, 184 tests, todos pasando** (`pnpm test`).
+Estado actual: **42 suites, 266 tests, todos pasando** (`pnpm test`).
 
 ## Funcionalidades implementadas
 
@@ -70,17 +70,25 @@ Estado actual: **30 suites, 184 tests, todos pasando** (`pnpm test`).
 
 ### Parcial 2
 
-- **Permisos con estados**: cada recurso informa concedido, denegado o pendiente.
-  Si se deniega, la pantalla muestra un mensaje claro con opción de reintentar; si
-  el permiso quedó bloqueado, ofrece **Abrir ajustes**.
+- **Permisos con estados**: fotos, ubicación y calendario informan concedido,
+  denegado o pendiente. Si se deniega, la pantalla muestra un mensaje claro con
+  opción de reintentar; si el permiso quedó bloqueado, ofrece **Abrir ajustes**.
+  Contactos usa una alerta del sistema con **Entendido** o **Abrir ajustes**, sin
+  reintento en pantalla.
 - **Cámara y galería**: fotos por tarea con `expo-image-picker`. La galería
   permite elegir varias imágenes y la cámara agrega una por captura. Las fotos se
   copian al almacenamiento de la app. El formulario es la vista de detalle; el
   listado muestra solo la cantidad de fotos.
 - **Ubicación GPS**: con `expo-location` se guardan las coordenadas de la tarea y
   se muestran como dirección aproximada cuando el geocoding la devuelve.
-- **Contactos**: con `expo-contacts` se elige un contacto del dispositivo y se
-  asocia a la tarea; se muestra nombre y primer teléfono.
+- **Compartir con contacto**: `expo-contacts` se usa solo para elegir el contacto
+  de destino (el permiso de contactos sigue siendo obligatorio); compartir abre el
+  share sheet del sistema con el resumen de la tarea. Cada envío exitoso se
+  registra en `Task.shares` (método, nombre del destinatario, tipo de actividad de
+  iOS y fecha) y se muestra en **Historial de envíos** (en Android el share sheet
+  informa `sharedAction` aunque se cancele, así que un envío cancelado puede
+  quedar registrado; iOS respeta `dismissedAction`). No se guarda el ID ni el
+  teléfono del contacto.
 - **Calendario**: con `expo-calendar` se crea un evento vinculado a la tarea
   cuando el recordatorio está activo. Si el permiso se deniega, la tarea se
   guarda igual, sin evento.
