@@ -1,5 +1,6 @@
 import { ThemedText } from "@/components/themed-text";
 import { Colors, Spacing } from "@/constants/theme";
+import { hasExpiredTaskNotification } from "@/context/tasks/utils/clear-expired-notifications";
 import { useCurrentTime } from "@/hooks/use-current-time";
 import { useTasks } from "@/stores/tasks/selectors";
 import { useTasksStore } from "@/stores/tasks/tasks-store";
@@ -16,8 +17,12 @@ export function HomeTasksList() {
   );
 
   useEffect(() => {
+    if (!hasExpiredTaskNotification(tasks, now)) {
+      return;
+    }
+
     void clearExpiredNotifications(now);
-  }, [clearExpiredNotifications, now]);
+  }, [clearExpiredNotifications, now, tasks]);
 
   return (
     <View style={styles.container}>

@@ -14,6 +14,16 @@ function isNotificationExpired(
   return scheduledAt <= now.getTime();
 }
 
+export function hasExpiredTaskNotification(
+  tasks: Task[],
+  now = new Date(),
+): boolean {
+  return tasks.some(
+    (task) =>
+      !!task.notification && isNotificationExpired(task.notification, now),
+  );
+}
+
 export function clearExpiredTaskNotifications(
   tasks: Task[],
   now = new Date(),
