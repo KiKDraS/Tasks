@@ -386,10 +386,11 @@ in `package.json`.
 | `__tests__/use-task-form-calendar-test.ts` | 7 | Reminder on/off, failure save, cleanup, completed, alert order |
 | `__tests__/task-form-content-test.tsx` | 7 | Reminder toggle, permission retry, disabled, share history |
 | `__tests__/use-schedule-permission-test.ts` | 4 | Granted, denied, blocked, error |
-| `__tests__/clear-expired-notifications-test.ts` | 2 | Past cleared, future untouched |
+| `__tests__/clear-expired-notifications-test.ts` | 4 | Past cleared, future untouched, expiry guard |
 | `__tests__/task-mutation-queue-test.ts` | 2 | Serial order, best-effort write |
 | `__tests__/option-chip-test.tsx` | 3 | Role, selected state, press |
-| `__tests__/reminder-options-test.tsx` | 2 | Disabled subtree hidden, enabled accessible |
+| `__tests__/reminder-options-test.tsx` | 3 | Disabled chip announced, enabled accessible |
+| `__tests__/reminder-date-options-test.tsx` | 3 | iOS sheet opens on Fecha, `Listo` closes, disabled opens nothing |
 | `__tests__/no-task-selected-test.tsx` | 2 | Copy, create params |
 | `__tests__/task-form-screen-test.tsx` | 3 | Placeholder, create, edit |
 | `__tests__/share-task-test.ts` | 4 | Message fields, recipient prefix |
@@ -398,13 +399,13 @@ in `package.json`.
 | `__tests__/task-form-actions-test.tsx` | 3 | Share in edit mode, edit/create actions |
 | `__tests__/close-task-form-test.ts` | 2 | Clear params and go back; placeholder navigate |
 | `__tests__/home-add-button-test.tsx` | 1 | Create params, accessible label |
-| `__tests__/use-photo-attachment-test.ts` | 4 | Camera, gallery, retry, remove |
+| `__tests__/use-photo-attachment-test.tsx` | 4 | Camera, gallery, retry, remove |
 | `__tests__/use-task-form-photo-cleanup-test.ts` | 2 | Cleanup after save, failure |
 | `__tests__/task-attachments-test.tsx` | 11 | Photo count, location, calendar, newest share, completed |
 | `__tests__/share-history-test.ts` | 20 | Target labels, raw IDs hidden, share labels, dates |
 | `__tests__/share-history-card-test.tsx` | 2 | Empty state, newest-first rows |
 
-Total: 41 files, 260 tests. Auth context has no automated coverage. Manual checks: `.opencode/docs/project-brief.md`
+Total: 42 files, 266 tests. Auth context has no automated coverage. Manual checks: `.opencode/docs/project-brief.md`
 §Manual QA.
 
 Counts above describe the current suite. Remaining Parcial 2 target test
@@ -628,7 +629,7 @@ Device services (shipped):
 | --- | --- |
 | `src/services/media.ts` | `takePhoto()` returns `DeviceResult<{ uri: string }>`; `pickPhotos()` returns `DeviceResult<{ uris: string[] }>`; copy each asset into `task-photos` |
 | `src/services/location.ts` | `getCurrentLocation()` returns `DeviceResult<TaskLocation>`; request foreground permission, get position, reverse geocode with coordinate fallback |
-| `src/services/contacts.ts` | `pickContact()` returns `DeviceResult<ContactSummary>`; request permission, open the native picker, keep first phone; used by the share flow only |
+| `src/services/contacts.ts` | `pickContact()` returns `DeviceResult<ContactSummary>`; request permission, open the native picker, keep the display name only; used by the share flow only |
 | `src/services/calendar.ts` | `requestCalendarPermission()` returns `DeviceResult<true>`; `createTaskEvent(event)` returns `DeviceResult<{ eventId: string }>`; `deleteTaskEvent(id): Promise<void>`; default/first writable calendar |
 | `src/services/permissions.ts` | `DeviceResult<T>`, `PermissionLike`, `isPermissionGranted`, `openAppSettings` |
 | `src/utils/reminder-date.ts` | Shared `getReminderDate` for notifications and calendar starts |
@@ -672,8 +673,9 @@ Complete / delete:
 Share:
 
 - `shareTask` opens the native share sheet. The message has `Tarea`, optional
-  `Descripción`, `Estado`, optional `Ubicación`, and optional `Fotos` count
-  (`src/utils/share-task.ts`).
+  `Descripción`, `Estado`, optional `Ubicación`, and optional `Fotos` count.
+  `buildTaskShareMessage` lives in `src/utils/share-task.ts`; the native call
+  is `src/services/share.ts`.
 - `useShareTask` opens a menu with `Compartir` and `Compartir con contacto`
   (`src/hooks/tasks/use-share-task.ts`).
 - `Compartir con contacto` opens the `expo-contacts/legacy` picker, prefixes
@@ -686,7 +688,9 @@ Share:
     Android.
   - `sharedAt`: current ISO timestamp.
 - `dismissedAction`, share errors, picker cancellation, and permission denial
-  append nothing.
+  append nothing. **Android limitation:** React Native's `Share.share` always
+  resolves `sharedAction` on Android, so a cancelled Android share is still
+  recorded; iOS honours `dismissedAction`.
 - The Home card shows the newest share: `Compartida con <name> · <target>` or
   `Compartida · <target>` when iOS reports a target;
   `Compartida con <name> · Contacto` for contact shares without a target;

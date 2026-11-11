@@ -1,10 +1,10 @@
-import { PERMISSION_NOTICE_COPY } from "@/components/ui/permissions/constants";
+import { PERMISSION_NOTICE_COPY } from "@/constants/permission-notice-copy";
 import type { Task } from "@/context/tasks/types/Task";
 import { recordTaskShareAfterShare } from "@/hooks/tasks/utils/record-task-share";
 import { pickContact, type ContactSummary } from "@/services/contacts";
 import { openAppSettings, type DeviceResult } from "@/services/permissions";
+import { shareTask } from "@/services/share";
 import { useTasksStore } from "@/stores/tasks/tasks-store";
-import { shareTask } from "@/utils/share-task";
 import { useCallback } from "react";
 import { Alert } from "react-native";
 
@@ -102,7 +102,6 @@ export function useShareTask(task?: Task): ShareTaskActions {
 
     try {
       const shareResult = await shareTask(task, {
-        title: result.value.name,
         recipientName: result.value.name,
       });
 

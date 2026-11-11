@@ -33,7 +33,7 @@ const contact = (
     phoneNumbers,
   }) as Contacts.ExistingContact;
 
-const SUMMARY: ContactSummary = { id: "contact-1", name: "Ana Pérez" };
+const SUMMARY: ContactSummary = { name: "Ana Pérez" };
 
 describe("pickContact", () => {
   beforeEach(() => {
@@ -57,7 +57,7 @@ describe("pickContact", () => {
     await expect(pickContact()).resolves.toEqual({ status: "cancelled" });
   });
 
-  test("omits phoneNumber when the contact has no phone numbers", async () => {
+  test("returns only the contact name when the contact has no phone numbers", async () => {
     permissionMock.mockResolvedValue(permission("granted"));
     pickerMock.mockResolvedValue(contact(undefined));
 
@@ -72,7 +72,7 @@ describe("pickContact", () => {
     }
   });
 
-  test("keeps the first phone number when the contact has several", async () => {
+  test("returns only the contact name when the contact has several phone numbers", async () => {
     permissionMock.mockResolvedValue(permission("granted"));
     pickerMock.mockResolvedValue(
       contact([
@@ -81,13 +81,15 @@ describe("pickContact", () => {
       ]),
     );
 
-    await expect(pickContact()).resolves.toEqual({
+    const result = await pickContact();
+
+    expect(result).toEqual({
       status: "granted",
-      value: {
-        ...SUMMARY,
-        phoneNumber: "11 5555-1111",
-      },
+      value: SUMMARY,
     });
+    if (result.status === "granted") {
+      expect("phoneNumber" in result.value).toBe(false);
+    }
   });
 
   test("returns contactsError when the picker throws", async () => {

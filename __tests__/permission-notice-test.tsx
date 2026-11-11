@@ -1,6 +1,6 @@
 import { fireEvent, render } from "@testing-library/react-native";
 
-import { PERMISSION_NOTICE_COPY } from "@/components/ui/permissions/constants";
+import { PERMISSION_NOTICE_COPY } from "@/constants/permission-notice-copy";
 import { PermissionNotice } from "@/components/ui/permissions/permission-notice";
 import type { DeviceActionState } from "@/utils/permission-state";
 

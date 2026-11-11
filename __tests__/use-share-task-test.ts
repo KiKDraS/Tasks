@@ -1,7 +1,7 @@
 import { act, renderHook } from "@testing-library/react-native";
 import { Alert, Share, type AlertButton } from "react-native";
 
-import { PERMISSION_NOTICE_COPY } from "@/components/ui/permissions/constants";
+import { PERMISSION_NOTICE_COPY } from "@/constants/permission-notice-copy";
 import type { Task } from "@/context/tasks/types/Task";
 import { useShareTask } from "@/hooks/tasks/use-share-task";
 import { DEVICE_MESSAGES } from "@/services/constants/device-messages";
@@ -80,7 +80,7 @@ describe("useShareTask", () => {
   test("shares with the picked contact as the recipient", async () => {
     pickContactMock.mockResolvedValue({
       status: "granted",
-      value: { id: "contact-1", name: "Ana Pérez" },
+      value: { name: "Ana Pérez" },
     });
 
     const { result } = await renderHook(() => useShareTask(TASK));
@@ -92,7 +92,7 @@ describe("useShareTask", () => {
     expect(pickContactMock).toHaveBeenCalledTimes(1);
     expect(shareSpy).toHaveBeenCalledWith({
       message: `Para Ana Pérez:\n\n${MESSAGE}`,
-      title: "Ana Pérez",
+      title: "Comprar pan",
     });
   });
 
@@ -267,7 +267,7 @@ describe("useShareTask share history", () => {
   test("records a contact share with the recipient", async () => {
     pickContactMock.mockResolvedValue({
       status: "granted",
-      value: { id: "contact-1", name: "Ana Pérez" },
+      value: { name: "Ana Pérez" },
     });
     shareSpy.mockResolvedValueOnce({
       action: Share.sharedAction,

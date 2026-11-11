@@ -66,4 +66,23 @@ describe("<ReminderOptions /> accessibility", () => {
     ).toBeNull();
     expect(getByRole("button", { name: "15m" })).toBeSelected();
   });
+
+  test("announces the disabled mode chips as selected and disabled", async () => {
+    const { getByRole } = await renderOptions(true);
+
+    const timeChip = getByRole("button", {
+      name: "Tiempo",
+      selected: true,
+      disabled: true,
+    });
+    const dateChip = getByRole("button", {
+      name: "Fecha y hora",
+      selected: false,
+      disabled: true,
+    });
+
+    expect(timeChip).toBeSelected();
+    expect(timeChip).toBeDisabled();
+    expect(dateChip).toBeDisabled();
+  });
 });

@@ -1,10 +1,10 @@
 import { ThemedText } from "@/components/themed-text";
 import { FormButton } from "@/components/ui/form/form-button";
+import { PERMISSION_NOTICE_COPY } from "@/constants/permission-notice-copy";
 import { Spacing } from "@/constants/theme";
 import type { DeviceActionState } from "@/utils/permission-state";
 import { useEffect } from "react";
 import { AccessibilityInfo, Platform, StyleSheet, View } from "react-native";
-import { PERMISSION_NOTICE_COPY } from "./constants";
 
 interface PermissionNoticeProps {
   state: DeviceActionState;

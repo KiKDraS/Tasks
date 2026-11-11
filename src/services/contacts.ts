@@ -4,9 +4,7 @@ import { DEVICE_MESSAGES } from "@/services/constants/device-messages";
 import { isPermissionGranted, type DeviceResult } from "@/services/permissions";
 
 export interface ContactSummary {
-  id: string;
   name: string;
-  phoneNumber?: string;
 }
 
 export async function pickContact(): Promise<DeviceResult<ContactSummary>> {
@@ -21,15 +19,9 @@ export async function pickContact(): Promise<DeviceResult<ContactSummary>> {
       return { status: "cancelled" };
     }
 
-    const phoneNumber = contact.phoneNumbers?.[0]?.number;
-
     return {
       status: "granted",
-      value: {
-        id: contact.id,
-        name: contact.name,
-        ...(phoneNumber ? { phoneNumber } : {}),
-      },
+      value: { name: contact.name },
     };
   } catch {
     return { status: "error", message: DEVICE_MESSAGES.contactsError };

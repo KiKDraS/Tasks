@@ -39,17 +39,12 @@ export function ReminderOptions({
       pointerEvents={disabled ? "none" : "auto"}
       style={[styles.container, disabled && styles.disabled]}
     >
-      <View
-        accessibilityElementsHidden={disabled}
-        importantForAccessibility={disabled ? "no-hide-descendants" : "auto"}
-        pointerEvents={disabled ? "none" : "auto"}
-      >
-        <ReminderModeSelector
-          reminder={reminder}
-          selectedDate={selectedDate}
-          onSelect={onSelect}
-        />
-      </View>
+      <ReminderModeSelector
+        reminder={reminder}
+        selectedDate={selectedDate}
+        onSelect={onSelect}
+        disabled={disabled}
+      />
       {reminder.type === REMINDER_TYPES.TIME ? (
         <View
           accessibilityElementsHidden={disabled}
