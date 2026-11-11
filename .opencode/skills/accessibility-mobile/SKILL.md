@@ -56,8 +56,9 @@ Minimum: 44×44 pt iOS, 48×48 dp Android.
 - Checkbox, edit, delete, password toggle, and FAB must meet the minimum.
 - Do not rely on visual size alone; the hit area is what counts.
 
-Current gap: edit/delete icons are 22, checkbox 24, password toggle 20, FAB 42.
-Add `hitSlop` or a larger pressable wrapper.
+Current gap: checkbox 24, password toggle 20. Edit/delete/share actions and the
+FAB now have labels and padded targets. Add `hitSlop` or a larger pressable
+wrapper to the remaining two.
 
 ## 3. Dynamic type
 

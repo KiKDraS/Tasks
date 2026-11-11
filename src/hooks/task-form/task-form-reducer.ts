@@ -20,17 +20,16 @@ export const initialTaskFormState: TaskFormState = {
   title: "",
   description: "",
   reminderEnabled: true,
+  reminderToggledOff: false,
   reminder: createDefaultTimeReminder(),
   titleError: null,
   reminderError: null,
   isSubmitting: false,
   photoUris: [],
   location: null,
-  contact: null,
   calendarEventId: null,
   photoState: { status: "idle" },
   locationState: { status: "idle" },
-  contactState: { status: "idle" },
   calendarState: { status: "idle" },
 };
 
@@ -49,25 +48,23 @@ export function taskFormStateFromTask(task: Task): TaskFormState {
   const pendingReminder = getPendingReminder(task);
   const photoUris = getTaskPhotoUris(task);
   const location = task.location ?? null;
-  const contact = task.contact ?? null;
   const calendarEventId = task.calendarEventId ?? null;
 
   return {
     title: task.title,
     description: task.description,
-    reminderEnabled: pendingReminder !== null || !!task.calendarEventId,
+    reminderEnabled: pendingReminder !== null,
+    reminderToggledOff: false,
     reminder: pendingReminder ?? createDefaultTimeReminder(),
     titleError: null,
     reminderError: null,
     isSubmitting: false,
     photoUris,
     location,
-    contact,
     calendarEventId,
     photoState:
       photoUris.length > 0 ? { status: "granted" } : { status: "idle" },
     locationState: location ? { status: "granted" } : { status: "idle" },
-    contactState: contact ? { status: "granted" } : { status: "idle" },
     calendarState: calendarEventId ? { status: "granted" } : { status: "idle" },
   };
 }
@@ -81,8 +78,15 @@ export function taskFormReducer(
       return { ...state, title: action.payload, titleError: null };
     case TASK_FORM_ACTION_TYPES.SET_DESCRIPTION:
       return { ...state, description: action.payload };
-    case TASK_FORM_ACTION_TYPES.TOGGLE_REMINDER:
-      return { ...state, reminderEnabled: !state.reminderEnabled };
+    case TASK_FORM_ACTION_TYPES.TOGGLE_REMINDER: {
+      const nextEnabled = !state.reminderEnabled;
+
+      return {
+        ...state,
+        reminderEnabled: nextEnabled,
+        reminderToggledOff: !nextEnabled,
+      };
+    }
     case TASK_FORM_ACTION_TYPES.SET_REMINDER: {
       const isInvalidTimeReminder =
         action.payload.type === REMINDER_TYPES.TIME &&
@@ -116,10 +120,6 @@ export function taskFormReducer(
     }
     case TASK_FORM_ACTION_TYPES.SET_LOCATION:
       return { ...state, location: action.payload };
-    case TASK_FORM_ACTION_TYPES.SET_CONTACT:
-      return { ...state, contact: action.payload };
-    case TASK_FORM_ACTION_TYPES.SET_CONTACT_STATE:
-      return { ...state, contactState: action.payload };
     case TASK_FORM_ACTION_TYPES.SET_CALENDAR_EVENT:
       return { ...state, calendarEventId: action.payload };
     case TASK_FORM_ACTION_TYPES.SET_CALENDAR_STATE:

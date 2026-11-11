@@ -1,9 +1,5 @@
 import { REMINDER_TYPES } from "@/context/tasks/types/Reminder";
-import type {
-  Task,
-  TaskContact,
-  TaskLocation,
-} from "@/context/tasks/types/Task";
+import type { Task, TaskLocation } from "@/context/tasks/types/Task";
 import { TASK_FORM_ACTION_TYPES } from "@/hooks/task-form/constants";
 import {
   initialTaskFormState,
@@ -20,12 +16,6 @@ const PHOTOS = ["file:///photo-1.jpg", "file:///photo-2.jpg"];
 const LOCATION: TaskLocation = {
   latitude: -34.603712,
   longitude: -58.381569,
-};
-
-const CONTACT: TaskContact = {
-  id: "contact-1",
-  name: "Ana Pérez",
-  phoneNumber: "11 5555-1111",
 };
 
 const buildTask = (overrides: Partial<Task> = {}): Task => ({
@@ -96,13 +86,6 @@ describe("taskFormStateFromTask", () => {
     expect(state.photoState).toEqual({ status: "granted" });
   });
 
-  test("prefills the contact and granted state", () => {
-    const state = taskFormStateFromTask(buildTask({ contact: CONTACT }));
-
-    expect(state.contact).toEqual(CONTACT);
-    expect(state.contactState).toEqual({ status: "granted" });
-  });
-
   test("prefills the calendar event and granted state", () => {
     const state = taskFormStateFromTask(
       buildTask({ calendarEventId: "event-1" }),
@@ -125,16 +108,40 @@ describe("taskFormStateFromTask", () => {
     });
   });
 
+  test("disables the reminder but keeps the calendar event when the notification expired", () => {
+    const scheduledAt = new Date(Date.now() - 60 * 60 * 1000).toISOString();
+    const state = taskFormStateFromTask(
+      buildTask({
+        notification: { id: "notification-1", scheduledAt },
+        calendarEventId: "event-1",
+      }),
+    );
+
+    expect(state.reminderEnabled).toBe(false);
+    expect(state.calendarEventId).toBe("event-1");
+    expect(state.reminder).toEqual({
+      type: REMINDER_TYPES.TIME,
+      seconds: expect.any(Number),
+    });
+  });
+
+  test("disables the reminder but keeps the calendar event when there is no notification", () => {
+    const state = taskFormStateFromTask(
+      buildTask({ notification: null, calendarEventId: "event-1" }),
+    );
+
+    expect(state.reminderEnabled).toBe(false);
+    expect(state.calendarEventId).toBe("event-1");
+  });
+
   test("leaves attachments empty when the task has none", () => {
     const state = taskFormStateFromTask(buildTask());
 
     expect(state.photoUris).toEqual([]);
     expect(state.location).toBeNull();
-    expect(state.contact).toBeNull();
     expect(state.calendarEventId).toBeNull();
     expect(state.photoState).toEqual({ status: "idle" });
     expect(state.locationState).toEqual({ status: "idle" });
-    expect(state.contactState).toEqual({ status: "idle" });
     expect(state.calendarState).toEqual({ status: "idle" });
   });
 });
@@ -227,24 +234,6 @@ describe("taskFormReducer attachments", () => {
     });
   });
 
-  test("SET_CONTACT stores the contact", () => {
-    const state = taskFormReducer(initialTaskFormState, {
-      type: TASK_FORM_ACTION_TYPES.SET_CONTACT,
-      payload: CONTACT,
-    });
-
-    expect(state.contact).toEqual(CONTACT);
-  });
-
-  test("SET_CONTACT_STATE stores the contact permission state", () => {
-    const state = taskFormReducer(initialTaskFormState, {
-      type: TASK_FORM_ACTION_TYPES.SET_CONTACT_STATE,
-      payload: { status: "blocked" },
-    });
-
-    expect(state.contactState).toEqual({ status: "blocked" });
-  });
-
   test("SET_CALENDAR_EVENT stores the calendar event id", () => {
     const state = taskFormReducer(initialTaskFormState, {
       type: TASK_FORM_ACTION_TYPES.SET_CALENDAR_EVENT,
@@ -265,6 +254,27 @@ describe("taskFormReducer attachments", () => {
       canAskAgain: true,
     });
   });
+
+  test("TOGGLE_REMINDER marks the reminder as toggled off when disabling", () => {
+    const state = taskFormReducer(initialTaskFormState, {
+      type: TASK_FORM_ACTION_TYPES.TOGGLE_REMINDER,
+    });
+
+    expect(state.reminderEnabled).toBe(false);
+    expect(state.reminderToggledOff).toBe(true);
+  });
+
+  test("TOGGLE_REMINDER clears the toggled-off flag when enabling again", () => {
+    const disabled = taskFormReducer(initialTaskFormState, {
+      type: TASK_FORM_ACTION_TYPES.TOGGLE_REMINDER,
+    });
+    const state = taskFormReducer(disabled, {
+      type: TASK_FORM_ACTION_TYPES.TOGGLE_REMINDER,
+    });
+
+    expect(state.reminderEnabled).toBe(true);
+    expect(state.reminderToggledOff).toBe(false);
+  });
 });
 
 describe("buildTaskFields", () => {
@@ -283,19 +293,16 @@ describe("buildTaskFields", () => {
       photoUris: PHOTOS,
       photoUri: null,
       location: LOCATION,
-      contact: null,
       calendarEventId: null,
     });
   });
 
-  test("carries the contact and calendar event id into the saved fields", () => {
+  test("carries the calendar event id into the saved fields", () => {
     const fields = buildTaskFields({
       ...initialTaskFormState,
-      contact: CONTACT,
       calendarEventId: "event-1",
     });
 
-    expect(fields.contact).toEqual(CONTACT);
     expect(fields.calendarEventId).toBe("event-1");
   });
 });

@@ -17,7 +17,6 @@ const FIELDS: TaskFields = {
   photoUris: [],
   photoUri: null,
   location: null,
-  contact: null,
   calendarEventId: null,
 };
 
@@ -35,19 +34,34 @@ describe("resolveCalendarAttachment", () => {
     jest.clearAllMocks();
   });
 
-  test("clears the event id when the reminder is off", async () => {
+  test("clears the event id when the reminder was toggled off", async () => {
     const dispatch = jest.fn();
 
     await expect(
       resolveCalendarAttachment(
         { ...FIELDS, calendarEventId: "event-1" },
-        buildState({ reminderEnabled: false }),
+        buildState({ reminderEnabled: false, reminderToggledOff: true }),
         dispatch,
       ),
     ).resolves.toEqual({
       fields: { ...FIELDS, calendarEventId: null },
       failure: null,
     });
+    expect(createTaskEventMock).not.toHaveBeenCalled();
+    expect(dispatch).not.toHaveBeenCalled();
+  });
+
+  test("preserves the event id when the reminder is off but was not toggled off", async () => {
+    const dispatch = jest.fn();
+    const fields = { ...FIELDS, calendarEventId: "event-1" };
+
+    await expect(
+      resolveCalendarAttachment(
+        fields,
+        buildState({ reminderEnabled: false, reminderToggledOff: false }),
+        dispatch,
+      ),
+    ).resolves.toEqual({ fields, failure: null });
     expect(createTaskEventMock).not.toHaveBeenCalled();
     expect(dispatch).not.toHaveBeenCalled();
   });

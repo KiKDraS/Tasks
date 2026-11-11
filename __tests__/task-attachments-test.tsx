@@ -1,13 +1,9 @@
 import { render } from "@testing-library/react-native";
 
 import { TaskAttachments } from "@/components/ui/home/home-task/task-attachments";
-import type { Task } from "@/context/tasks/types/Task";
+import type { Task, TaskShare } from "@/context/tasks/types/Task";
 
 jest.mock("@/components/icons/CalendarIcon", () => ({
-  __esModule: true,
-  default: () => null,
-}));
-jest.mock("@/components/icons/ContactIcon", () => ({
   __esModule: true,
   default: () => null,
 }));
@@ -19,6 +15,23 @@ jest.mock("@/components/icons/LocationIcon", () => ({
   __esModule: true,
   default: () => null,
 }));
+jest.mock("@/components/icons/ShareIcon", () => ({
+  __esModule: true,
+  default: () => null,
+}));
+
+const OLD_SHARE: TaskShare = {
+  method: "share",
+  activityType: "com.apple.UIKit.activity.Mail",
+  sharedAt: "2026-11-08T10:00:00",
+};
+
+const NEW_SHARE: TaskShare = {
+  method: "contact",
+  recipientName: "Ana Pérez",
+  activityType: "net.whatsapp.WhatsApp",
+  sharedAt: "2026-11-09T14:30:00",
+};
 
 const buildTask = (overrides: Partial<Task> = {}): Task => ({
   id: "task-1",
@@ -38,7 +51,7 @@ describe("<TaskAttachments />", () => {
     expect(toJSON()).toBeNull();
   });
 
-  test("renders the photo count with the address, contact, and calendar meta", async () => {
+  test("renders the photo count with the address and calendar meta", async () => {
     const task = buildTask({
       photoUris: [
         "file:///photo-1.jpg",
@@ -50,11 +63,6 @@ describe("<TaskAttachments />", () => {
         longitude: -58.3816,
         address: "Av. Corrientes 1234",
       },
-      contact: {
-        id: "contact-1",
-        name: "Ana Pérez",
-        phoneNumber: "11 5555-1111",
-      },
       calendarEventId: "event-1",
     });
 
@@ -64,7 +72,6 @@ describe("<TaskAttachments />", () => {
 
     expect(getByText("3 fotos")).toBeTruthy();
     expect(getByText("Av. Corrientes 1234")).toBeTruthy();
-    expect(getByText("Ana Pérez · 11 5555-1111")).toBeTruthy();
     expect(getByText("Evento")).toBeTruthy();
     expect(queryByRole("image")).toBeNull();
   });
@@ -116,26 +123,9 @@ describe("<TaskAttachments />", () => {
     expect(getByText("-34.6037, -58.3816")).toBeTruthy();
   });
 
-  test("renders a contact without a phone number", async () => {
-    const task = buildTask({
-      contact: { id: "contact-1", name: "Ana Pérez" },
-    });
-
-    const { getByText } = await render(
-      <TaskAttachments task={task} isComplete={false} />,
-    );
-
-    expect(getByText("Ana Pérez")).toBeTruthy();
-  });
-
   test("applies the completed treatment to the meta labels", async () => {
     const task = buildTask({
       photoUri: "file:///photo.jpg",
-      contact: {
-        id: "contact-1",
-        name: "Ana Pérez",
-        phoneNumber: "11 5555-1111",
-      },
     });
 
     const { getByText } = await render(
@@ -145,8 +135,60 @@ describe("<TaskAttachments />", () => {
     expect(getByText("1 foto")).toHaveStyle({
       textDecorationLine: "line-through",
     });
-    expect(getByText("Ana Pérez · 11 5555-1111")).toHaveStyle({
-      textDecorationLine: "line-through",
+  });
+
+  test("shows only the newest share when the history has two", async () => {
+    const task = buildTask({ shares: [OLD_SHARE, NEW_SHARE] });
+
+    const { getByText, queryByText } = await render(
+      <TaskAttachments task={task} isComplete={false} />,
+    );
+
+    expect(getByText("Compartida con Ana Pérez · WhatsApp")).toBeTruthy();
+    expect(queryByText("Compartida · Mail")).toBeNull();
+  });
+
+  test("labels a contact share with the recipient", async () => {
+    const task = buildTask({
+      shares: [
+        {
+          method: "contact",
+          recipientName: "Ana Pérez",
+          sharedAt: OLD_SHARE.sharedAt,
+        },
+      ],
     });
+
+    const { getByText } = await render(
+      <TaskAttachments task={task} isComplete={false} />,
+    );
+
+    expect(getByText("Compartida con Ana Pérez · Contacto")).toBeTruthy();
+  });
+
+  test("labels a generic share without a target", async () => {
+    const task = buildTask({
+      location: { latitude: -34.6037, longitude: -58.3816 },
+      shares: [{ method: "share", sharedAt: OLD_SHARE.sharedAt }],
+    });
+
+    const { getByText } = await render(
+      <TaskAttachments task={task} isComplete={false} />,
+    );
+
+    expect(getByText("Compartida")).toBeTruthy();
+  });
+
+  test("renders the share row for a task with only shares", async () => {
+    const task = buildTask({
+      shares: [NEW_SHARE],
+    });
+
+    const { getByText, toJSON } = await render(
+      <TaskAttachments task={task} isComplete={false} />,
+    );
+
+    expect(toJSON()).not.toBeNull();
+    expect(getByText("Compartida con Ana Pérez · WhatsApp")).toBeTruthy();
   });
 });

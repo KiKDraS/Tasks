@@ -31,13 +31,14 @@ export function getCalendarLabel(
   reminderEnabled: boolean,
   eventId: string | null,
   calendarState: DeviceActionState,
+  eventWillBeRemoved = false,
 ): string | null {
   if (calendarState.status === "pending") {
     return PENDING_LABEL;
   }
 
   if (eventId) {
-    return reminderEnabled ? EVENT_ADDED_LABEL : EVENT_REMOVED_LABEL;
+    return eventWillBeRemoved ? EVENT_REMOVED_LABEL : EVENT_ADDED_LABEL;
   }
 
   return reminderEnabled ? getEnabledCalendarLabel(calendarState) : null;

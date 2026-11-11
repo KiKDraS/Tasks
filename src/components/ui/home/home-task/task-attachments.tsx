@@ -1,12 +1,12 @@
 import CalendarIcon from "@/components/icons/CalendarIcon";
-import ContactIcon from "@/components/icons/ContactIcon";
 import GalleryIcon from "@/components/icons/GalleryIcon";
 import LocationIcon from "@/components/icons/LocationIcon";
+import ShareIcon from "@/components/icons/ShareIcon";
 import { ThemedText } from "@/components/themed-text";
 import { Colors, Spacing } from "@/constants/theme";
 import type { Task } from "@/context/tasks/types/Task";
-import { formatContactLabel } from "@/utils/contact";
 import { formatLocationLabel } from "@/utils/location";
+import { formatShareCardLabel } from "@/utils/share-history";
 import { getTaskPhotoUris } from "@/utils/task-photos";
 import type { ReactNode } from "react";
 import { StyleSheet, View } from "react-native";
@@ -55,7 +55,10 @@ export function TaskAttachments({
 }: Readonly<TaskAttachmentsProps>) {
   const photoCount = getTaskPhotoUris(task).length;
   const hasPhotos = photoCount > 0;
-  const hasMeta = !!task.location || !!task.contact || !!task.calendarEventId;
+  const shares = task.shares ?? [];
+  const latestShareLabel = formatShareCardLabel(shares[shares.length - 1]);
+  const hasMeta =
+    !!task.location || !!task.calendarEventId || !!latestShareLabel;
 
   if (!hasPhotos && !hasMeta) {
     return null;
@@ -79,17 +82,17 @@ export function TaskAttachments({
           isComplete={isComplete}
         />
       )}
-      {task.contact && (
-        <TaskAttachmentMeta
-          icon={<ContactIcon size={14} color={Colors.secondary} />}
-          label={formatContactLabel(task.contact)}
-          isComplete={isComplete}
-        />
-      )}
       {task.calendarEventId && (
         <TaskAttachmentMeta
           icon={<CalendarIcon size={14} color={Colors.secondary} />}
           label="Evento"
+          isComplete={isComplete}
+        />
+      )}
+      {latestShareLabel && (
+        <TaskAttachmentMeta
+          icon={<ShareIcon size={14} color={Colors.secondary} />}
+          label={latestShareLabel}
           isComplete={isComplete}
         />
       )}

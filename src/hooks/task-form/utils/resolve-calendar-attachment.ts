@@ -47,8 +47,12 @@ export async function resolveCalendarAttachment(
   state: TaskFormState,
   dispatch: Dispatch<TaskFormAction>,
 ): Promise<CalendarAttachmentResult> {
-  if (!state.reminderEnabled) {
+  if (!state.reminderEnabled && state.reminderToggledOff) {
     return { fields: { ...fields, calendarEventId: null }, failure: null };
+  }
+
+  if (!state.reminderEnabled) {
+    return { fields, failure: null };
   }
 
   if (shouldCreateCalendarEvent(state)) {

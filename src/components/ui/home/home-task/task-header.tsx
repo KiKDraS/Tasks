@@ -11,6 +11,7 @@ interface TaskHeaderProps {
   onToggle: () => void;
   onDelete: () => void;
   onEdit: () => void;
+  onShare: () => void;
 }
 
 export function TaskHeader({
@@ -19,6 +20,7 @@ export function TaskHeader({
   onToggle,
   onDelete,
   onEdit,
+  onShare,
 }: Readonly<TaskHeaderProps>) {
   return (
     <View style={styles.header}>
@@ -29,7 +31,12 @@ export function TaskHeader({
       >
         {title}
       </ThemedText>
-      <TaskActions onEdit={onEdit} onDelete={onDelete} />
+      <TaskActions
+        title={title}
+        onEdit={onEdit}
+        onShare={onShare}
+        onDelete={onDelete}
+      />
     </View>
   );
 }
