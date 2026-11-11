@@ -12,6 +12,7 @@ interface ScheduleHeaderProps {
   disabled: boolean;
   calendarEventId: string | null;
   calendarState: DeviceActionState;
+  eventWillBeRemoved?: boolean;
   onToggleReminder: () => void;
   onRetryCalendar: () => void;
   onOpenSettings?: () => void;
@@ -23,6 +24,7 @@ export function ScheduleHeader({
   disabled,
   calendarEventId,
   calendarState,
+  eventWillBeRemoved = false,
   onToggleReminder,
   onRetryCalendar,
   onOpenSettings,
@@ -32,6 +34,7 @@ export function ScheduleHeader({
     reminderEnabled,
     calendarEventId,
     calendarState,
+    eventWillBeRemoved,
   );
   const isCalendarPending = calendarState.status === "pending";
 

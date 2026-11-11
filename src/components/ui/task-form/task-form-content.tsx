@@ -4,10 +4,12 @@ import { Task } from "@/context/tasks/types/Task";
 import { useSchedulePermission } from "@/hooks/task-form/use-schedule-permission";
 import { TASK_FORM_ACTION_TYPES } from "@/hooks/task-form/constants";
 import { useTaskForm } from "@/hooks/task-form/use-task-form";
+import { useShareTask } from "@/hooks/tasks/use-share-task";
 import { openAppSettings } from "@/services/permissions";
-import { router } from "expo-router";
+import { closeTaskForm } from "@/utils/task-form-navigation";
 import { useCallback, useRef } from "react";
 import { ScheduleCard } from "./schedule-card";
+import { ShareHistoryCard } from "./share-history-card";
 import { TaskAttachmentCards } from "./task-attachment-cards";
 import { TaskFormActions } from "./task-form-actions";
 
@@ -19,12 +21,16 @@ export function TaskFormContent({ task }: Readonly<TaskFormContentProps>) {
   const { state, dispatch, handleSubmit, reminderLabel, isEditing } =
     useTaskForm(task);
   const { requestPermission } = useSchedulePermission({ dispatch });
+  const { openShareMenu } = useShareTask(task);
 
   const showReminderError = state.reminderEnabled && !!state.reminderError;
+  const eventWillBeRemoved =
+    state.reminderToggledOff &&
+    !!state.calendarEventId &&
+    !state.reminderEnabled;
   const hasPendingAttachment =
     state.photoState.status === "pending" ||
     state.locationState.status === "pending" ||
-    state.contactState.status === "pending" ||
     state.calendarState.status === "pending";
   const isSubmitDisabled =
     showReminderError || !!state.titleError || hasPendingAttachment;
@@ -58,7 +64,7 @@ export function TaskFormContent({ task }: Readonly<TaskFormContentProps>) {
   };
 
   const handleCancel = () => {
-    router.back();
+    closeTaskForm();
   };
 
   const handleSubmitGuarded = async () => {
@@ -110,6 +116,7 @@ export function TaskFormContent({ task }: Readonly<TaskFormContentProps>) {
         isComplete={!!task?.isComplete}
         calendarEventId={state.calendarEventId}
         calendarState={state.calendarState}
+        eventWillBeRemoved={eventWillBeRemoved}
         onToggleReminder={handleReminderToggle}
         onSelect={handleReminderSelect}
         onRetryCalendar={requestPermission}
@@ -117,12 +124,15 @@ export function TaskFormContent({ task }: Readonly<TaskFormContentProps>) {
         retryDisabled={state.isSubmitting}
       />
 
+      {isEditing && <ShareHistoryCard shares={task?.shares ?? []} />}
+
       <TaskFormActions
         isEditing={isEditing}
         isSubmitting={state.isSubmitting}
         submitDisabled={isSubmitDisabled}
         onCancel={handleCancel}
         onSubmit={handleSubmitGuarded}
+        onShare={isEditing ? openShareMenu : undefined}
       />
     </>
   );

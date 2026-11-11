@@ -17,7 +17,6 @@ const FIELDS: TaskFields = {
     longitude: -58.381569,
     address: "Av. Corrientes 1234",
   },
-  contact: null,
   calendarEventId: null,
 };
 

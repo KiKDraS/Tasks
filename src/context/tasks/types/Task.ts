@@ -9,10 +9,13 @@ export interface TaskLocation {
   address?: string;
 }
 
-export interface TaskContact {
-  id: string;
-  name: string;
-  phoneNumber?: string;
+export type TaskShareMethod = "contact" | "share";
+
+export interface TaskShare {
+  method: TaskShareMethod;
+  recipientName?: string;
+  activityType?: string;
+  sharedAt: string;
 }
 
 export type Task = {
@@ -24,6 +27,6 @@ export type Task = {
   photoUris?: string[];
   photoUri?: string | null;
   location?: TaskLocation | null;
-  contact?: TaskContact | null;
   calendarEventId?: string | null;
+  shares?: TaskShare[];
 };

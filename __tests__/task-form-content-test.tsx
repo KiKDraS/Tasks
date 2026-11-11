@@ -1,7 +1,8 @@
 import { fireEvent, render } from "@testing-library/react-native";
 
-import { PERMISSION_NOTICE_COPY } from "@/components/ui/permissions/constants";
+import { PERMISSION_NOTICE_COPY } from "@/constants/permission-notice-copy";
 import { TaskFormContent } from "@/components/ui/task-form/task-form-content";
+import type { Task } from "@/context/tasks/types/Task";
 import { TASK_FORM_ACTION_TYPES } from "@/hooks/task-form/constants";
 import { initialTaskFormState } from "@/hooks/task-form/task-form-reducer";
 import type { TaskFormState } from "@/hooks/task-form/types/TaskForm";
@@ -9,6 +10,11 @@ import { useSchedulePermission } from "@/hooks/task-form/use-schedule-permission
 import { useTaskForm } from "@/hooks/task-form/use-task-form";
 
 jest.mock("@/components/icons/ReminderIcon", () => ({
+  __esModule: true,
+  default: () => null,
+}));
+
+jest.mock("@/components/icons/ShareIcon", () => ({
   __esModule: true,
   default: () => null,
 }));
@@ -22,7 +28,7 @@ jest.mock("@/services/permissions", () => ({
 }));
 
 jest.mock("expo-router", () => ({
-  router: { back: jest.fn() },
+  router: { back: jest.fn(), setParams: jest.fn() },
 }));
 
 jest.mock("@/hooks/task-form/use-task-form", () => ({
@@ -37,7 +43,10 @@ const handleSubmit = jest.fn();
 const dispatch = jest.fn();
 const requestPermission = jest.fn().mockResolvedValue(undefined);
 
-function mockFormState(overrides: Partial<TaskFormState> = {}) {
+function mockFormState(
+  overrides: Partial<TaskFormState> = {},
+  isEditing = false,
+) {
   jest.mocked(useTaskForm).mockReturnValue({
     state: {
       ...initialTaskFormState,
@@ -46,7 +55,7 @@ function mockFormState(overrides: Partial<TaskFormState> = {}) {
     },
     dispatch,
     handleSubmit,
-    isEditing: false,
+    isEditing,
     reminderLabel: "En 15 minutos",
   });
   jest.mocked(useSchedulePermission).mockReturnValue({ requestPermission });
@@ -135,5 +144,43 @@ describe("<TaskFormContent /> reminder and calendar permission", () => {
     expect(
       getByRole("button", { name: PERMISSION_NOTICE_COPY.retry }),
     ).toBeDisabled();
+  });
+});
+
+describe("<TaskFormContent /> share history", () => {
+  const SHARED_TASK: Task = {
+    id: "task-1",
+    title: "Comprar pan",
+    description: "Ir al almacén",
+    notification: null,
+    shares: [
+      {
+        method: "contact",
+        recipientName: "Ana Pérez",
+        activityType: "net.whatsapp.WhatsApp",
+        sharedAt: "2026-11-09T14:30:00",
+      },
+    ],
+  };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  test("renders the share history in edit mode", async () => {
+    mockFormState({}, true);
+
+    const { getByText } = await render(<TaskFormContent task={SHARED_TASK} />);
+
+    expect(getByText("Historial de envíos")).toBeTruthy();
+    expect(getByText("Compartida con Ana Pérez · WhatsApp")).toBeTruthy();
+  });
+
+  test("does not render the share history in create mode", async () => {
+    mockFormState();
+
+    const { queryByText } = await render(<TaskFormContent />);
+
+    expect(queryByText("Historial de envíos")).toBeNull();
   });
 });

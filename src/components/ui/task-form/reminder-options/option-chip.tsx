@@ -7,16 +7,21 @@ interface OptionChipProps extends PropsWithChildren {
   selected: boolean;
   onPress: () => void;
   style?: TouchableOpacityProps["style"];
+  disabled?: boolean;
 }
 
 export function OptionChip({
   selected,
   onPress,
   style,
+  disabled,
   children,
 }: Readonly<OptionChipProps>) {
   return (
     <AppTouchableOpacity
+      accessibilityRole="button"
+      accessibilityState={{ selected, disabled }}
+      disabled={disabled}
       onPress={onPress}
       style={[styles.chip, selected && styles.chipSelected, style]}
     >

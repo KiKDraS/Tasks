@@ -14,12 +14,14 @@ interface ReminderModeSelectorProps {
   reminder: ReminderSelection;
   selectedDate: Date;
   onSelect: (reminder: ReminderSelection) => void;
+  disabled?: boolean;
 }
 
 export function ReminderModeSelector({
   reminder,
   selectedDate,
   onSelect,
+  disabled,
 }: Readonly<ReminderModeSelectorProps>) {
   const timeSelected = reminder.type === REMINDER_TYPES.TIME;
 
@@ -27,6 +29,7 @@ export function ReminderModeSelector({
     <View style={styles.modeSelector}>
       <OptionChip
         selected={timeSelected}
+        disabled={disabled}
         onPress={() =>
           onSelect({
             type: REMINDER_TYPES.TIME,
@@ -47,6 +50,7 @@ export function ReminderModeSelector({
       </OptionChip>
       <OptionChip
         selected={!timeSelected}
+        disabled={disabled}
         onPress={() => onSelect({ type: REMINDER_TYPES.DATE, date: selectedDate })}
         style={styles.modeChip}
       >

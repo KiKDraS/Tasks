@@ -65,7 +65,7 @@
       [
         "expo-contacts",
         {
-          "contactsPermission": "Permití que Tasks acceda a tus contactos para asociar un responsable a una tarea."
+          "contactsPermission": "Permití que Tasks acceda a tus contactos para compartir una tarea con un contacto."
         }
       ],
       [

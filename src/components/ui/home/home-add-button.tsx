@@ -1,6 +1,6 @@
 import AddIcon from "@/components/icons/AddIcon";
 import { AppTouchableOpacity } from "@/components/ui/app-touchable-opacity";
-import { ROUTES } from "@/constants/routes";
+import { ROUTES, TASK_FORM_PARAMS } from "@/constants/routes";
 import { Colors, Rounded, setShadow } from "@/constants/theme";
 import { router } from "expo-router";
 import { StyleSheet } from "react-native";
@@ -10,11 +10,20 @@ const FAB_OFFSET = 24;
 
 export function HomeAddButton() {
   const navigateToTaskForm = () => {
-    router.push(ROUTES.taskForm);
+    router.push({
+      pathname: ROUTES.taskForm,
+      params: TASK_FORM_PARAMS.create,
+    });
   };
 
   return (
-    <AppTouchableOpacity onPress={navigateToTaskForm} style={styles.button}>
+    <AppTouchableOpacity
+      accessibilityRole="button"
+      accessibilityLabel="Crear tarea"
+      hitSlop={8}
+      onPress={navigateToTaskForm}
+      style={styles.button}
+    >
       <AddIcon size={FAB_SIZE} color={Colors["on-primary"]} />
     </AppTouchableOpacity>
   );
