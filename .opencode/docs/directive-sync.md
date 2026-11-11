@@ -18,11 +18,13 @@ Canonical source-of-truth policy for this repo.
 | Assignment requirements, acceptance checklist, accepted gaps, manual QA | `.opencode/docs/project-brief.md` |
 | Stage flow, gates, git flow, handoff format | `.opencode/docs/pipeline.md` |
 | Review/test checklist and test conventions | `.opencode/docs/quality-gates.md` |
+| TypeScript, composition, component hygiene standards (mobile-dev + code-review) | `.opencode/docs/stack-standards.md` |
+| Cognitive difficulty and lookup performance (mobile-dev + code-review) | `.opencode/docs/performance-reliability.md` |
 | Skills rules: caveman, Context7, CodeGraph | `.opencode/docs/skills-settings-rules.md` |
 | Knowledge-awareness rules | `.opencode/docs/agent-knowledge-awareness.md` |
 | Agent roster and responsibilities | `AGENTS.md` |
-| App behavior, data model, flows | `.opencode/docs/SPEC.md` |
-| Visual tokens, components, layouts | `.opencode/docs/DESIGN.md` |
+| App behavior, data model, flows | `SPEC.md` |
+| Visual tokens, components, layouts | `DESIGN.md` |
 | Mobile accessibility checklist | `.opencode/skills/accessibility-mobile/SKILL.md` |
 | Spanish UI copy and microcopy | `.opencode/skills/ux-writing/SKILL.md` |
 | README delivery rules | `.opencode/skills/write-root-readme/SKILL.md` |
@@ -34,10 +36,10 @@ Canonical source-of-truth policy for this repo.
 
 | Agent | Additional reads |
 | --- | --- |
-| `orchestrator` | `.opencode/docs/SPEC.md`, `.opencode/docs/DESIGN.md` |
-| `mobile-dev` | `.opencode/docs/quality-gates.md`, `.opencode/docs/SPEC.md`, `.opencode/docs/DESIGN.md` |
-| `code-review` | `.opencode/docs/quality-gates.md`, `.opencode/docs/SPEC.md`, `.opencode/docs/DESIGN.md` |
-| `qa-engineer` | `.opencode/docs/quality-gates.md`, `.opencode/docs/SPEC.md` |
+| `orchestrator` | `SPEC.md`, `DESIGN.md` |
+| `mobile-dev` | `.opencode/docs/quality-gates.md`, `SPEC.md`, `DESIGN.md`, `.opencode/docs/stack-standards.md`, `.opencode/docs/performance-reliability.md` |
+| `code-review` | `.opencode/docs/quality-gates.md`, `SPEC.md`, `DESIGN.md`, `.opencode/docs/stack-standards.md`, `.opencode/docs/performance-reliability.md` |
+| `qa-engineer` | `.opencode/docs/quality-gates.md`, `SPEC.md` |
 | `release-manager` | `README.md` |
 
 Skills are loaded through the Skill tool. Agent files bind the skill they own; this table stays doc-only.

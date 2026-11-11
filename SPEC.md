@@ -1,17 +1,20 @@
 # SPEC — Tasks
 
 Behavior and architecture of the shipped app. §1–14 describe what the code
-does, not what it should do. §15 is a target contract for Parcial 2; it is not
-shipped. Every shipped statement cites the file that implements it.
+does, not what it should do. §15 tracks shipped Parcial 2 app features; README
+and demo delivery remain target. Every shipped statement cites the file that
+implements it.
 
 ## 1. Precedence
 
 1. The implementation (`src/`, `app.json`, `package.json`) is authoritative.
 2. `.opencode/docs/project-brief.md` records the assignments. Where the
    assignment and the code disagree, the code wins. The Parcial 1 exam was
-   already approved; Parcial 2 is not implemented or scored yet.
-3. §15 is a target contract for Parcial 2, not shipped behavior. Until an item
-   exists in `src/`, the current code wins.
+   already approved; Parcial 2 app features are implemented; README and demo
+   delivery remain target.
+3. §15 records Parcial 2 status: app features are shipped; README and demo
+   delivery remain target. Until an item exists in `src/`, the current code
+   wins.
 4. Stitch project `Minimalist Reminder Todo App` is a visual reference only. It
    never overrides behavior or tokens; see `DESIGN.md` for the conflict table.
 
@@ -30,8 +33,8 @@ In scope:
 Out of scope: password recovery, profile editing, per-user task isolation,
 sharing, recurring tasks, priorities, categories, and server-side validation.
 
-Parcial 2 target scope and status are in §15. That section is not shipped
-behavior.
+Parcial 2 status is in §15. App features are shipped; README and demo delivery
+are target.
 
 ## 3. Stack and runtime
 
@@ -43,9 +46,9 @@ behavior.
 - `expo-crypto` for task IDs (`generateId` → `randomUUID`).
 - `@expo-google-fonts/geist` for the typeface.
 - Jest 29 with `jest-expo` and React Native Testing Library.
-- Parcial 2 target additions (not installed yet): `expo-image-picker`,
-  `expo-location`, `expo-contacts/legacy`, `expo-calendar/legacy`,
-  `expo-file-system`, and `zustand`. See §15.1.
+- Parcial 2 additions (installed): `expo-image-picker`, `expo-location`,
+  `expo-contacts`, `expo-calendar`, `expo-file-system`, and `zustand`. See
+  §15.1.
 
 Sources: `package.json`, `app.json`, `src/utils/id.ts`, `src/constants/theme.ts`.
 
@@ -56,8 +59,10 @@ Layers, from outside in:
 | Layer | Responsibility | Location |
 | --- | --- | --- |
 | Routes | Screen composition and protected groups | `src/app/` |
-| Contexts | Auth session and task collections | `src/context/` |
-| Hooks | Form state, storage, task lookup, reminder helpers | `src/hooks/` |
+| Stores | Global task state, selectors, actions | `src/stores/` |
+| Services | AsyncStorage task adapter and device APIs | `src/services/` |
+| Context | Auth session only | `src/context/auth/` |
+| Hooks | Form state and reusable behavior | `src/hooks/` |
 | Components | Presentational UI and reusable primitives | `src/components/` |
 | Constants and utils | Tokens, routes, storage keys, dates, IDs | `src/constants/`, `src/utils/` |
 
@@ -71,8 +76,9 @@ SessionProvider
         └── RootNavigator (Stack)
 ```
 
-`TasksProvider` is mounted inside the `(tabs)` layout, so task state exists only
-while the authenticated area is mounted (`src/app/(tabs)/_layout.tsx`).
+Task state lives in `useTasksStore` (`src/stores/tasks/tasks-store.ts`).
+`useHydrateTasks` hydrates it when the authenticated tabs mount
+(`src/app/(tabs)/_layout.tsx`).
 
 ## 5. Routing and access control
 
@@ -143,13 +149,14 @@ Seed data:
 - Tasks: three examples, one complete, one with a reminder one week out
   (`src/context/tasks/data/tasks-seed.ts`).
 
-Seeding happens lazily: `useDB` writes the provided seed only when the key is
-missing or empty (`src/hooks/use-db.ts`). Stored data is never overwritten on
-startup. Invalid JSON parses to an empty array.
+Task seeding happens lazily: `readOrSeedTasks` writes `TASKS_DB` only when the
+key is missing or empty (`src/services/tasks-storage.ts`). Auth users still seed
+through `useDB` (`src/hooks/use-db.ts`). Stored data is never overwritten on
+startup. Invalid or non-array JSON parses to an empty array.
 
-All writes are JSON-stringified arrays. `useDB` adds an 800 ms delay to
-`createItem`, `updateItem`, `deleteItem`, and `itemExists` to simulate a network
-round trip (`src/hooks/use-db.ts`). UI loading states rely on this delay.
+Task writes are JSON-stringified arrays. `writeTasks` adds an 800 ms delay
+(`src/services/tasks-storage.ts`, `src/constants/time.ts`). Auth user writes
+still go through `useDB`. UI loading states rely on this delay.
 
 ## 7. Authentication
 
@@ -188,11 +195,11 @@ checks run.
 
 ## 8. Task lifecycle
 
-Context: `src/context/tasks/tasks-context.tsx`.
+Store: `src/stores/tasks/tasks-store.ts`.
 
 ### List
 
-Home reads `tasks` from `TasksProvider` and renders a `FlatList`. The list is
+Home reads `tasks` from `useTasksStore` and renders a `FlatList`. The list is
 not filtered or sorted; storage order is render order, so new tasks append at
 the bottom (`src/components/ui/home/home-tasks-list.tsx`).
 
@@ -202,19 +209,19 @@ copy inconsistency; the rest of the UI is Spanish.
 
 ### Create
 
-1. The form validates the title and reminder.
+1. The form validates the title and shared schedule when needed.
 2. `resolveTaskNotification` cancels any previous notification, schedules a new
    one when reminders are enabled, and returns `TaskNotification | null`
    (`src/hooks/task-form/utils/resolve-task-notification.ts`).
 3. `saveTask` calls `addTask` with `{ ...fields, isComplete: false, notification }`
    (`src/hooks/task-form/utils/save-task.ts`).
 4. `addTask` assigns `generateId()` when the task has no ID and appends it to
-   storage (`src/context/tasks/tasks-context.tsx`).
+   storage (`src/stores/tasks/tasks-store.ts`).
 5. The screen calls `router.back()`.
 
 ### Edit
 
-The same form loads the task by ID (`src/hooks/tasks/use-task-by-id.ts`) and
+The same form loads the task by ID (`src/stores/tasks/selectors.ts`) and
 prefills title, description, and the pending reminder. A reminder in the past is
 treated as disabled and replaced by the default 15-minute time reminder
 (`src/hooks/task-form/task-form-reducer.ts`). Saving merges the fields into the
@@ -222,11 +229,12 @@ existing task and replaces its notification.
 
 ### Complete / uncomplete
 
-The checkbox calls `updateTask({ ...task, isComplete: !task.isComplete })`
-(`src/hooks/tasks/use-task-actions.ts`). Completing a task cancels its pending
-notification and stores `notification: null`
-(`src/context/tasks/utils/get-notification-to-cancel.ts`,
-`src/context/tasks/tasks-context.tsx`). Uncompleting does not reschedule it.
+The checkbox calls `toggleComplete(task.id)`
+(`src/hooks/tasks/use-task-actions.ts`). The store action flips `isComplete`;
+completing cancels its pending notification and stores `notification: null`
+(`src/stores/tasks/tasks-store.ts`,
+`src/context/tasks/utils/get-notification-to-cancel.ts`). Uncompleting does not
+reschedule it.
 Completed tasks render with muted text and a filled `surface-variant` card.
 
 ### Delete
@@ -234,7 +242,7 @@ Completed tasks render with muted text and a filled `surface-variant` card.
 The delete icon calls `removeTask(id)` with no confirmation dialog
 (`src/hooks/tasks/use-task-actions.ts`). `removeTask` cancels the pending
 notification, then removes the task from storage
-(`src/context/tasks/tasks-context.tsx`).
+(`src/stores/tasks/tasks-store.ts`).
 
 Tasks are global: they are not scoped to the signed-in user. Any account sees
 the same `tasks` array. This is a known deviation from multi-user expectations,
@@ -319,8 +327,8 @@ Additional states:
 | --- | --- | --- |
 | Sign in | `src/app/index.tsx` | Brand title `Tasks`, subtitle, username, password with visibility toggle, submit, link to sign-up |
 | Sign up | `src/app/sign-up/index.tsx` | Same shell, username, password, confirmation, submit, link back |
-| Home | `src/app/(tabs)/index.tsx` | Header, `Mis tareas`, task list, floating add button |
-| Task form | `src/app/(tabs)/task-form/index.tsx` | `Nueva tarea` or `Editar tarea`, fields, reminder card, cancel/save |
+| Home | `src/app/(tabs)/index.tsx` | Header, `Mis tareas`, task list with photo count and attachment meta, floating add button |
+| Task form | `src/app/(tabs)/task-form/index.tsx` | `Nueva tarea` or `Editar tarea`, fields, photo/location/contact cards, combined schedule card, cancel/save |
 
 Shared layout shells:
 
@@ -339,17 +347,40 @@ in `package.json`.
 | File | Tests | Covers |
 | --- | --- | --- |
 | `__tests__/auth-form-reducer-test.ts` | 3 | Field updates, password visibility, error reset |
-| `__tests__/form-button-test.tsx` | 3 | Render, press, disabled behavior |
+| `__tests__/form-button-test.tsx` | 5 | Render, press, disabled, role, busy state |
 | `__tests__/generate-id-test.ts` | 1 | UUID shape |
 | `__tests__/validate-sign-up-form-test.ts` | 3 | Required fields and password mismatch |
-| `__tests__/validate-task-form-test.ts` | 3 | Title required, reminder validity |
+| `__tests__/validate-task-form-test.ts` | 4 | Title required, schedule validity |
+| `__tests__/tasks-storage-test.ts` | 9 | Parse, seed, and write task storage |
+| `__tests__/tasks-store-test.ts` | 11 | Hydrate, add, update, remove, multi-photo cleanup, toggle, clear notification |
+| `__tests__/permission-state-test.ts` | 4 | Granted, denied, blocked, undetermined |
+| `__tests__/reminder-date-test.ts` | 2 | Date identity, time offset |
+| `__tests__/media-service-test.ts` | 10 | Multi-pick, denied, cancelled, copy, errors, delete |
+| `__tests__/location-service-test.ts` | 5 | Denied, address, geocode fallback, error |
+| `__tests__/contacts-service-test.ts` | 5 | Denied, cancel, phone selection, error |
+| `__tests__/calendar-service-test.ts` | 11 | Permission, fallback, create, delete, request |
+| `__tests__/reminder-notifications-test.ts` | 3 | DATE/TIME triggers, denied permission |
+| `__tests__/task-form-attachments-test.ts` | 29 | Multi-photo, legacy prefill, reducer, fields, cleanup |
+| `__tests__/permission-notice-test.tsx` | 6 | Denied/blocked/error and hidden states |
+| `__tests__/photo-card-test.tsx` | 7 | Empty, multiple, per-photo remove, pending, denied |
+| `__tests__/location-card-test.tsx` | 5 | Empty, address, coords, pending, remove |
+| `__tests__/calendar-event-test.ts` | 3 | Date/time/disabled start and end |
+| `__tests__/contact-card-test.tsx` | 3 | Empty, filled, denied |
+| `__tests__/schedule-card-test.tsx` | 15 | Reminder switch, calendar states, hints, notice, disabled, completed |
+| `__tests__/resolve-calendar-attachment-test.ts` | 5 | Disabled, existing, create, denial, error |
+| `__tests__/use-task-form-calendar-test.ts` | 7 | Reminder on/off, failure save, cleanup, completed, alert order |
+| `__tests__/task-form-content-test.tsx` | 5 | Reminder toggle, permission retry, disabled |
+| `__tests__/use-schedule-permission-test.ts` | 4 | Granted, denied, blocked, error |
+| `__tests__/use-photo-attachment-test.ts` | 4 | Camera, gallery, retry, remove |
+| `__tests__/use-task-form-photo-cleanup-test.ts` | 2 | Cleanup after save, failure |
+| `__tests__/task-attachments-test.tsx` | 8 | Photo count, location, contact, calendar, completed |
+| `__tests__/format-contact-label-test.ts` | 2 | Name only, name + phone |
 
-Total: 5 files, 13 tests. Contexts, AsyncStorage, notifications, and date
-helpers have no automated coverage. Manual checks: `.opencode/docs/project-brief.md`
+Total: 29 files, 181 tests. Auth context has no automated coverage. Manual checks: `.opencode/docs/project-brief.md`
 §Manual QA.
 
-Parcial 2 target test additions are in §15.6; the counts above describe the
-shipped suite.
+Counts above describe the current suite. Remaining Parcial 2 target test
+additions are in §15.6.
 
 ## 13. Known gaps and deviations
 
@@ -358,7 +389,7 @@ Recorded, not hidden:
 | Item | Current behavior | Owner |
 | --- | --- | --- |
 | Empty-state copy | English `No tasks found.` while the rest is Spanish | `home-tasks-empty.tsx` |
-| Per-user data | Tasks are shared across all local accounts | `tasks-context.tsx` |
+| Per-user data | Tasks are shared across all local accounts | `tasks-store.ts` |
 | Delete confirmation | None; the icon deletes immediately | `task-actions.tsx` |
 | Credentials | Plaintext in AsyncStorage, no hashing | `auth-context.tsx` |
 | Notification permission | Task saves without a reminder if permission is denied | `resolve-task-notification.ts` |
@@ -375,30 +406,29 @@ current Parcial 1 implementation, not a restatement of the assignment.
 | Reusable components + StyleSheet | `src/components/ui/form/`, `src/components/ui/home/home-task/` |
 | Stack navigation + 4 screens | `src/app/_layout.tsx`, `src/app/`, `src/app/(tabs)/` |
 | Local auth + protected routes | `src/context/auth/`, `Stack.Protected` in `src/app/_layout.tsx` |
-| AsyncStorage persistence | `src/hooks/use-storage-state.ts`, `src/hooks/use-db.ts` |
+| AsyncStorage persistence | `src/services/tasks-storage.ts`, `src/hooks/use-storage-state.ts`, `src/hooks/use-db.ts` |
 | Local notification | `src/context/tasks/utils/notifications.ts`, `app.json` plugin |
 | Jest + RNTL | `__tests__/`, `package.json` `jest` block |
 
-Parcial 2 traceability is in §15.7. Its rows are targets; they are not evidence and not scored.
+Parcial 2 traceability is in §15.7. Rows marked ✅ are shipped; ⬜ rows are targets.
 
-## 15. Parcial 2 target (not implemented)
+## 15. Parcial 2 status
 
-Status: the requirements exist in `.opencode/docs/project-brief.md` §Parcial 2.
-The code in `src/` still implements Parcial 1 only. This section is the target
-contract for the next build; it is not evidence and it is not scored. `(target)`
-marks files that do not exist yet. Update this section to shipped behavior as
-each item lands and the exam is graded.
+Status: all Parcial 2 app features are shipped; README and demo delivery remain
+target. `(target)` marks files that do not exist yet. Implementation status is
+tracked in the project-brief §Parcial 2 acceptance checklist; scoring stays
+separate.
 
-### 15.1 Target stack additions
+### 15.1 Stack additions
 
-| Package | Use | Install |
+| Package | Use | Status |
 | --- | --- | --- |
-| `expo-image-picker` | Camera and gallery selection | `npx expo install expo-image-picker` |
-| `expo-location` | Foreground location and reverse geocoding | `npx expo install expo-location` |
-| `expo-contacts` | Contact picker | `npx expo install expo-contacts` |
-| `expo-calendar` | Device calendar event | `npx expo install expo-calendar` |
-| `expo-file-system` | Copy the picked image into app storage | `npx expo install expo-file-system` |
-| `zustand` | Global task state | `pnpm add zustand` |
+| `expo-image-picker` | Camera and gallery selection | installed |
+| `expo-location` | Foreground location and reverse geocoding | installed |
+| `expo-contacts` | Contact picker | installed |
+| `expo-calendar` | Device calendar event | installed |
+| `expo-file-system` | Copy the picked image into app storage | installed |
+| `zustand` | Global task state | installed |
 
 SDK 57 notes:
 
@@ -416,7 +446,8 @@ SDK 57 notes:
 - `expo-image-picker` plugin: `photosPermission`, `cameraPermission`,
   `microphonePermission: false`.
 - `expo-location` plugin: `locationWhenInUsePermission`.
-- `expo-contacts` plugin: `contactsPermission`; Android `READ_CONTACTS`.
+- `expo-contacts` plugin: `contactsPermission`; Android `READ_CONTACTS`, with
+  `WRITE_CONTACTS` blocked.
 - `expo-calendar` plugin: `calendarPermission`; Android `READ_CALENDAR` and
   `WRITE_CALENDAR`.
 - Add the plugins to `expo.plugins`; never edit generated `ios/` or `android/`.
@@ -446,9 +477,11 @@ Target UI states:
 | `blocked` | `status === "denied"` and `!canAskAgain` | Inline message + `Abrir ajustes` (`Linking.openSettings()`) |
 | `error` | Device call throws | Inline message, retry allowed |
 
-The form keeps one state per resource. A denied permission never blocks saving
-the task; the task saves without that attachment. The message is inline, not a
-modal.
+The form keeps one state per resource. Photo, location, and contact denials
+save the task without that attachment. When the reminder is on, calendar
+permission denial or event failure skips the calendar event but still saves the
+task and schedules the app notification. The user sees an inline notice and a
+post-save alert.
 
 Target files: `src/services/permissions.ts` (shared result types),
 `src/utils/permission-state.ts` (pure status mapping),
@@ -478,16 +511,18 @@ type Task = {
   description: string;
   isComplete?: boolean;
   notification: TaskNotification | null;
-  photoUri?: string | null;
+  photoUris?: string[];
+  photoUri?: string | null; // legacy single-photo field
   location?: TaskLocation | null;
   contact?: TaskContact | null;
   calendarEventId?: string | null;
 };
 ```
 
-- `photoUri` points to a file copied into the app document directory, not the
-  picker cache URI. Removing or replacing a photo best-effort deletes the old
-  file.
+- `photoUris` points to files copied into the app document directory, not the
+  picker cache URIs. Legacy `photoUri` is read as a one-item array and cleared on
+  save. Removing, replacing, or deleting a task best-effort deletes files no
+  longer referenced.
 - `location.address` is best effort from `Location.reverseGeocodeAsync`; the
   coordinates are always stored.
 - `contact` stores only the ID, display name, and first phone number.
@@ -496,10 +531,10 @@ type Task = {
 - The storage key stays `tasks` with the same bare-array JSON format. No
   migration is required.
 
-Target files: `src/stores/tasks/types.ts`,
-`src/services/tasks-storage.ts`.
+Current type: `src/context/tasks/types/Task.ts`. Target move:
+`src/stores/tasks/types.ts`. Storage: `src/services/tasks-storage.ts`.
 
-### 15.4 Target architecture
+### 15.4 Architecture
 
 Layers after the migration:
 
@@ -513,7 +548,7 @@ Layers after the migration:
 | Components | Presentational UI | `src/components/` |
 | Constants and utils | Tokens, keys, pure helpers | `src/constants/`, `src/utils/` |
 
-Task store (`src/stores/tasks/tasks-store.ts`, target):
+Task store (`src/stores/tasks/tasks-store.ts`, shipped):
 
 ```ts
 type TasksState = {
@@ -533,14 +568,15 @@ type TasksState = {
 - Actions write storage first, then update the store. The existing notification
   cancellation rules stay in the action.
 - Components use `useTasksStore` selectors. `useTaskById` becomes a selector.
-- `TasksProvider` is removed from `src/app/(tabs)/_layout.tsx`. A small
-  `TasksHydrator` (`src/components/tasks-hydrator.tsx`, target) calls
-  `hydrate()` once while the authenticated area mounts.
-- `useDB` is no longer used by tasks. Auth keeps `useStorageState`.
+- The authenticated tab layout calls `useHydrateTasks`
+  (`src/hooks/tasks/use-hydrate-tasks.ts`) and mounts the notification listener
+  (`src/app/(tabs)/_layout.tsx`).
+- `useDB` is no longer used by tasks. Auth still uses it for users alongside
+  `useStorageState`.
 - The store does not use `persist`; storage stays in the existing adapter to
   preserve the `tasks` key, seed behavior, and the 800 ms simulated delay.
-- No prop drilling: `HomeTasksList`, `TaskHeader`, `TaskBody`, and
-  `TaskFormContent` read the store directly.
+- No prop drilling: `HomeTasksList` and `TaskFormContent` read the store
+  directly. `TaskHeader` and `TaskBody` still receive props from `HomeTask`.
 
 Device results use one shape:
 
@@ -552,31 +588,34 @@ type DeviceResult<T> =
   | { status: "error"; message: string };
 ```
 
-Device services (target):
+Device services (shipped):
 
 | File | Contract |
 | --- | --- |
-| `src/services/media.ts` | `takePhoto()` / `pickPhoto()` return `{ status, uri? }`; request permission, launch the picker, copy the asset into the document directory |
-| `src/services/location.ts` | `getCurrentLocation()` returns `{ status, location? }`; request foreground permission, get position, reverse geocode |
-| `src/services/contacts.ts` | `pickContact()` returns `{ status, contact? }`; request permission, open the native picker |
-| `src/services/calendar.ts` | `createTaskEvent(task)` / `deleteTaskEvent(id)` return `{ status, eventId? }`; request permission, use the default calendar |
-| `src/services/permissions.ts` | Shared `DeviceResult<T>` and permission state types |
+| `src/services/media.ts` | `takePhoto()` returns `DeviceResult<{ uri: string }>`; `pickPhotos()` returns `DeviceResult<{ uris: string[] }>`; copy each asset into `task-photos` |
+| `src/services/location.ts` | `getCurrentLocation()` returns `DeviceResult<TaskLocation>`; request foreground permission, get position, reverse geocode with coordinate fallback |
+| `src/services/contacts.ts` | `pickContact()` returns `DeviceResult<TaskContact>`; request permission, open the native picker, keep first phone |
+| `src/services/calendar.ts` | `requestCalendarPermission()` returns `DeviceResult<true>`; `createTaskEvent(event)` returns `DeviceResult<{ eventId: string }>`; `deleteTaskEvent(id): Promise<void>`; default/first writable calendar |
+| `src/services/permissions.ts` | `DeviceResult<T>`, `PermissionLike`, `isPermissionGranted`, `openAppSettings` |
+| `src/utils/reminder-date.ts` | Shared `getReminderDate` for notifications and calendar starts |
 
 ### 15.5 Target task flows
 
 Create:
 
-1. The form validates the title and reminder as today.
-2. Photo, location, contact, and calendar are optional. Each action requests
-   permission on first use and stores the result in form state.
-3. `resolveTaskNotification` runs as today.
-4. When the calendar toggle is on, create the device event. The event start is
-   the resolved reminder date, or one hour from now when no reminder is set;
-   the end is one hour later. Title = task title, notes = description,
-   location = address. Use `getDefaultCalendarAsync`; if it fails, use the
-   first writable event calendar, otherwise return the device error.
-5. `addTask` writes the extended task. A denied device permission saves the
-   task without that attachment and shows the inline notice.
+1. The form validates the title and shared schedule when the reminder is on.
+2. Photo, location, and contact are wired in the form. Gallery can append
+   multiple photos; camera adds one per capture. The reminder switch uses one
+   shared date/time selection for both the app notification and the calendar
+   event. Enabling the reminder requests calendar permission.
+3. `resolveTaskNotification` runs when the reminder is on.
+4. When the reminder is on, create the device event from the shared schedule.
+   Event end is one hour after start. Title = task title, notes = description,
+   location = address. Use `getDefaultCalendarAsync`; if it fails, use the first
+   writable event calendar.
+5. `addTask` writes the extended task. Calendar permission denial or event
+   failure skips the event but still saves the task and schedules the
+   notification; the user sees the notice and a post-save alert.
 6. `router.back()` runs as today.
 
 Edit:
@@ -591,62 +630,74 @@ Edit:
 Complete / delete:
 
 - Completing a task cancels the notification as today. Attachments stay.
-- Deleting a task cancels the notification, best-effort deletes the photo file,
-  best-effort deletes the calendar event, then removes the task.
+- Deleting a task cancels the notification, removes the task, then best-effort
+  deletes all photo files and the calendar event.
 - Deleting a task with a denied calendar permission still removes the task; the
   event cleanup is skipped.
 
 Permission denial messages are listed in §15.8.
 
-### 15.6 Target tests
+### 15.6 Tests
 
-Keep the 13 shipped tests. Add at least:
-
-| File | Tests | Covers |
-| --- | --- | --- |
-| `__tests__/tasks-store-test.ts` | 3 | hydrate, add, remove/update actions |
-| `__tests__/permission-state-test.ts` | 3 | granted, denied with retry, blocked |
-| `__tests__/task-attachments-test.tsx` | 2 | card renders photo/location/contact; empty attachments |
-
-Mock `expo-image-picker`, `expo-location`, `expo-contacts/legacy`,
+All Parcial 2 target tests are shipped; keep the 181 current tests. Mock
+`expo-image-picker`, `expo-location`, `expo-contacts/legacy`,
 `expo-calendar/legacy`, `expo-file-system`, and AsyncStorage. Run `pnpm test`.
 
 ### 15.7 Target traceability
 
 | Parcial 2 requirement | Target evidence | Status |
 | --- | --- | --- |
-| Permission states and denied message | `src/services/permissions.ts`, `src/utils/permission-state.ts`, `src/components/ui/permissions/permission-notice.tsx` | ⏳ |
-| Camera / gallery photo | `src/services/media.ts`, task-form photo card, task-card thumbnail | ⏳ |
-| GPS location | `src/services/location.ts`, task-form location card, task-card meta | ⏳ |
-| Contact | `src/services/contacts.ts`, task-form contact card, task-card meta | ⏳ |
-| Calendar event | `src/services/calendar.ts`, task-form calendar card | ⏳ |
-| Zustand global state | `src/stores/tasks/` | ⏳ |
-| Tests | `__tests__/` additions | ⏳ |
-| README + demo | `README.md` | ⏳ `release-manager` |
+| Permission states and denied message | `src/services/permissions.ts`, `src/utils/permission-state.ts`, `src/components/ui/permissions/permission-notice.tsx` | ✅ implemented |
+| Camera / gallery photo | `src/services/media.ts`, `src/components/ui/task-form/photo-card.tsx`, `src/components/ui/home/home-task/task-attachments.tsx`; form is the detail view; list shows count, not image | ✅ implemented |
+| GPS location | `src/services/location.ts`, `src/components/ui/task-form/location-card.tsx`, `src/components/ui/home/home-task/task-attachments.tsx` | ✅ implemented |
+| Contact | `src/services/contacts.ts`, `src/components/ui/task-form/contact-card.tsx` | ✅ implemented |
+| Calendar event | `src/services/calendar.ts`, `src/components/ui/task-form/schedule-card.tsx` | ✅ implemented |
+| Zustand global state | `src/stores/tasks/`, `src/hooks/tasks/use-hydrate-tasks.ts` | ✅ implemented |
+| Tests | `__tests__/` additions | ✅ implemented |
+| README + demo | `README.md` | ⬜ pending |
 
-⏳ = not implemented and not scored. Do not mark a row ✅ before the exam is
-graded.
+All Parcial 2 app features, tests, and cleanup are shipped; README and demo
+delivery remain pending. Implementation status is tracked in the project-brief
+§Parcial 2 acceptance checklist. ⬜ = pending implementation; ✅ = implemented.
+Scoring stays separate.
 
 ### 15.8 Target copy
 
 | Context | String |
 | --- | --- |
-| Photo empty | `Sin foto` |
+| Schedule title | `Recordatorio` |
+| Photo card title | `Fotos` |
+| Photo empty | `Sin fotos` |
 | Photo actions | `Tomar foto`, `Elegir de galería` |
-| Photo remove | `Quitar foto` |
+| Photo remove | `Quitar foto N` |
+| Photo count | `1 foto`, `N fotos` |
+| Photo loading | `Cargando fotos` |
 | Location empty | `Sin ubicación` |
 | Location action | `Usar mi ubicación` |
 | Location loading | `Obteniendo ubicación...` |
+| Location remove | `Quitar ubicación` |
 | Contact empty | `Sin contacto` |
+| Contact remove | `Quitar contacto` |
 | Contact action | `Elegir contacto` |
-| Calendar off | `Sin evento` |
-| Calendar on | `Evento en el calendario` |
-| Calendar helper | `Se crea al guardar la tarea` |
-| Calendar created | `Evento creado` |
+| Calendar helper | `Se agregará al calendario al guardar` |
+| Calendar created | `Evento agregado` |
+| Calendar pending | `Verificando permiso...` |
+| Calendar not added | `No se agregará al calendario` |
+| Calendar alert title | `No se agregó al calendario` |
+| Calendar alert message (notification) | `La tarea se guardó con notificación, pero sin evento en el calendario.` |
+| Calendar alert message (no notification) | `La tarea se guardó sin evento en el calendario.` |
+| Calendar will remove | `Se quitará al guardar` |
+| Calendar idle | `Se pedirá permiso al guardar` |
+| Reminder + calendar hint | `La notificación se enviará y el evento se agregará al calendario {label}` |
+| Reminder-only hint | `La notificación se enviará {label}` |
 | Permission denied (retry) | `Permiso denegado. Podés volver a intentarlo.` |
 | Retry action | `Reintentar` |
 | Permission blocked | `Permiso denegado. Habilitalo en Ajustes.` |
 | Settings action | `Abrir ajustes` |
-| Device error | `No pudimos completar la acción. Intentá de nuevo.` |
+| Media error | `No pudimos usar la cámara o la galería. Intentá de nuevo.` |
+| Location error | `No pudimos obtener tu ubicación. Intentá de nuevo.` |
+| Contacts error | `No pudimos acceder a tus contactos. Intentá de nuevo.` |
+| Calendar error | `No pudimos acceder a tu calendario. Intentá de nuevo.` |
+| Calendar missing | `No encontramos un calendario editable. Creá uno en tu calendario e intentá de nuevo.` |
 
 Copy rules: Spanish rioplatense, `vos`, sentence case, no terminal period.

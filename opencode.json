@@ -101,7 +101,7 @@
     {
       "action": "external_directory",
       "resource": "*",
-      "effect": "allow"
+      "effect": "ask"
     },
     {
       "action": "read",
@@ -124,19 +124,12 @@
       "effect": "allow"
     }
   ],
-  "plugins": [
-    "@dietrichgebert/ponytail"
-  ],
+  "plugins": ["@dietrichgebert/ponytail"],
   "mcp": {
     "servers": {
       "codegraph": {
         "type": "local",
-        "command": [
-          "npx",
-          "@colbymchenry/codegraph",
-          "serve",
-          "--mcp"
-        ],
+        "command": ["npx", "@colbymchenry/codegraph", "serve", "--mcp"],
         "disabled": false
       },
       "context7": {
@@ -158,11 +151,6 @@
     }
   },
   "watcher": {
-    "ignore": [
-      "node_modules/**",
-      ".expo/**",
-      "dist/**",
-      "coverage/**"
-    ]
+    "ignore": ["node_modules/**", ".expo/**", "dist/**", "coverage/**"]
   }
 }

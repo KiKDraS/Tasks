@@ -1,8 +1,7 @@
+import { NETWORK_DELAY_MS } from "@/constants/time";
 import { useStorageState } from "@/hooks/use-storage-state";
 import { delay } from "@/utils/delay";
 import { useCallback, useEffect, useMemo } from "react";
-
-const NETWORK_DELAY_MS = 800;
 
 function parseStoredItems<T>(rawItems: string | null): T[] {
   if (rawItems === null || rawItems === "") {

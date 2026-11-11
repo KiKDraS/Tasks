@@ -10,8 +10,10 @@ visual states only; §12 is the Parcial 2 target. Behavior lives in `SPEC.md`.
    Where Stitch and the code disagree, the code wins. The conflict table is in
    §10.
 3. `README.md` and the app UI are Spanish; this document is English.
-4. §12 is a target UI for Parcial 2: not shipped and not scored. Where §12 and
-   the code disagree, the code wins until the feature lands.
+4. §12 tracks Parcial 2 UI status: all form and list attachment UI is shipped.
+   Implementation status is tracked in the project-brief §Parcial 2 acceptance
+   checklist; scoring stays separate. Where §12 and the code disagree, the code
+   wins until the feature lands.
 
 ## 2. Design intent
 
@@ -49,7 +51,7 @@ Rules of thumb:
 - Selected controls use `secondary-container` plus `on-secondary-container`.
 - Destructive affordances are the only place `error` appears.
 - Completed tasks switch from `surface` to `surface-variant` and their text to
-  `on-surface-variant` with a line-through
+  `secondary` with a line-through
   (`src/components/ui/home/home-task/task-text-styles.ts`).
 
 Navigation theme (`NavigationTheme`): light mode, primary `#091426`, background
@@ -166,15 +168,17 @@ Task form:
 | Component | File | Notes |
 | --- | --- | --- |
 | `TaskForm` | `src/components/ui/task-form/task-form.tsx` | Loading spinner or not-found message, then content |
-| `TaskFormContent` | `src/components/ui/task-form/task-form-content.tsx` | Two fields, reminder card, cancel/save row |
-| `ReminderCard` | `src/components/ui/task-form/reminder-card.tsx` | `surface-container`, radius 8, padding 16 |
-| `ReminderOptions` | `src/components/ui/task-form/reminder-options/index.tsx` | Header plus mode-dependent body |
-| `ReminderHeader` | `.../reminder-header.tsx` | Bell icon, `Recordatorio`, native switch |
+| `TaskFormContent` | `src/components/ui/task-form/task-form-content.tsx` | Two fields, attachment cards, schedule card, cancel/save row |
+| `ScheduleCard` | `src/components/ui/task-form/schedule-card.tsx` | `surface-container`, radius 8, padding 16 |
+| `ScheduleHeader` | `.../reminder-options/schedule-header.tsx` | Reminder switch, calendar status, notice |
+| `ScheduleToggleRow` | `.../schedule-toggle-row.tsx` | Label plus native switch |
+| `ReminderOptions` | `.../reminder-options/index.tsx` | Mode-dependent body; visible when the reminder is on |
 | `ReminderModeSelector` | `.../reminder-mode-selector.tsx` | `Tiempo` / `Fecha y hora` chips |
 | `ReminderTimeOptions` | `.../reminder-time-options.tsx` | Preset chips and custom time |
 | `ReminderCustomTime` | `.../reminder-custom-time.tsx` | Hours, minutes, seconds fields |
 | `ReminderDateOptions` | `.../reminder-date-options.tsx` | Date and time picker fields |
-| `ReminderPickerField` | `.../reminder-picker-field.tsx` | Filled field showing the formatted value |
+| `ReminderPickerField` | `.../reminder-picker-field.tsx` | Filled field showing the formatted value; the whole field opens the picker and announces its disabled state |
+| `ReminderIosPickerSheet` | `.../reminder-ios-picker-sheet.tsx` | iOS page sheet, 58 pt fields stay in the form; native date (`inline`) or time (`spinner`) picker, `Listo` closes |
 | `ReminderOptions` disabled | same | 50% opacity, no pointer events |
 
 Chrome:
@@ -185,7 +189,7 @@ Chrome:
 | `UserMenu` | `src/components/ui/header/user-menu.tsx` | Native menu, account row disabled, destructive sign-out |
 | `SplashScreenController` | `src/components/splash-screen-controller.tsx` | Splash is `#f7f9fb` with a 76 px icon |
 
-Parcial 2 target components are listed in §12.2; they are not shipped.
+Parcial 2 components are listed in §12.2; all form and list attachment components are shipped.
 
 ## 7. Screen layouts
 
@@ -240,8 +244,9 @@ ScrollView, 16 padding
   16 gap
   Título                           label + input
   Descripción                      label + multiline input (min 96)
-  ReminderCard
-    [bell] Recordatorio   [switch]
+  ScheduleCard
+    [bell] Recordatorio              [switch]
+    calendar status / notice
     Tiempo | Fecha y hora          two equal chips
     15m 30m 1h 2h                  wrap chips
     Personalizado
@@ -263,7 +268,7 @@ The edit variant changes the title, subtitle, and primary button to
 | Button disabled | 50% opacity, no press |
 | Chip selected | `secondary-container` fill, `on-secondary-container` label |
 | Chip unselected | `surface-variant` fill, `on-surface-variant` label |
-| Task complete | `surface-variant` fill, 1 px border, no shadow, title and body `on-surface-variant` + line-through |
+| Task complete | `surface-variant` fill, 1 px border, no shadow, title and body `secondary` + line-through |
 | Reminder sent | Badge disappears once `scheduledAt` is in the past |
 | Reminder imminent | Badge reads `Recordatorio activo` under one minute |
 | Empty list | `No tasks found.` in default body style, top-left of the list area |
@@ -344,7 +349,7 @@ Rejected or overridden by the implementation:
 | Task metadata | Course tag, priority, drag handle, due date | Title, description, optional reminder badge |
 | Delete | Confirmation modal | Immediate delete, no modal |
 | Bottom navigation | 4 text destinations | 2 icon-only tabs |
-| Reminder sheet | Bottom sheet with presets and notification preview | Inline card in the form, presets + custom time or native date/time picker |
+| Reminder sheet | Bottom sheet with presets and notification preview | Inline card in the form, presets + custom time; iOS opens a page sheet for Fecha/Hora, Android uses the native dialog |
 | Notification preview | Separate screen | No preview screen; hint line under the reminder card |
 | Logo | Checkmark glyph | App icon PNG |
 
@@ -383,57 +388,63 @@ specific labels and touch targets.
 
 These are recorded as current state, not as approved design.
 
-## 12. Parcial 2 target UI (not implemented)
+## 12. Parcial 2 UI status
 
-Status: target only; no component below exists yet and Parcial 2 is not scored.
-Use the tokens in §3–§5, the type scale in §4, and the primitives in §6. Do not
-add a new palette.
+Status: `PhotoCard`, `LocationCard`, `ContactCard`, `ScheduleCard`,
+`PermissionNotice`, and `TaskAttachments` are shipped. Implementation
+status is tracked in the project-brief §Parcial 2 acceptance checklist; scoring
+stays separate. Use the tokens in §3–§5, the type scale in §4, and the
+primitives in §6. Do not add a new palette.
 
 ### 12.1 Intent
 
 - Attachments are compact rows, not a second visual system.
 - One `surface-container` card per device resource, radius 8, padding 16,
   20 px internal gap. The reminder card keeps the same treatment.
-- Photo is the only visual element; location, contact, and calendar are text
-  rows with an icon.
+- Photo thumbnails appear only in the form; location, contact, and calendar are
+  text rows with an icon. The task list shows a photo count, not the image.
 - No map, no full-screen photo viewer, no new navigation destinations.
 
 ### 12.2 Task form order
 
-Add the device cards after `Descripción` and before `ReminderCard`:
+Add the device cards after `Descripción` and before `ScheduleCard`:
 
 ```text
-Foto
-  [thumbnail 64] Sin foto
+Fotos
+  [thumbnail 64] [thumbnail 64] ... / Sin fotos
   [Tomar foto] [Elegir de galería]
-  Quitar foto (only when set)
+  per-photo Quitar foto
 Ubicación
   [pin] Ubicación                 [Usar mi ubicación]
   Sin ubicación / address / coords
 Contacto
   [person] Contacto               [Elegir contacto]
   Sin contacto / name · phone
-Calendario
-  [calendar] Evento en el calendario   [switch]
-  Se crea al guardar la tarea
-  Evento creado (when set)
-Recordatorio (existing)
+Recordatorio
+  [bell] Recordatorio             [switch]
+  calendar status / notice
+  Tiempo | Fecha y hora
+  presets / custom / native picker
+  Fecha u Hora → iOS page sheet: native picker + Listo
+  hint
 ```
 
-Component names (target):
+Component names:
 
 | Component | File | Notes |
 | --- | --- | --- |
-| `PhotoCard` | `src/components/ui/task-form/photo-card.tsx` | 64 px thumbnail, two actions, remove |
-| `LocationCard` | `src/components/ui/task-form/location-card.tsx` | Icon, value, `Usar mi ubicación` |
-| `ContactCard` | `src/components/ui/task-form/contact-card.tsx` | Icon, name/phone, `Elegir contacto` |
-| `CalendarCard` | `src/components/ui/task-form/calendar-card.tsx` | Icon, switch, helper, event state |
-| `PermissionNotice` | `src/components/ui/permissions/permission-notice.tsx` | Inline message, retry or settings |
-| `TaskAttachments` | `src/components/ui/home/home-task/task-attachments.tsx` | Card thumbnail and meta row |
+| `PhotoCard` | `src/components/ui/task-form/photo-card.tsx` | Shipped. 64 px thumbnail grid, add, per-photo remove |
+| `LocationCard` | `src/components/ui/task-form/location-card.tsx` | Shipped. Icon, value, `Usar mi ubicación` |
+| `ContactCard` | `src/components/ui/task-form/contact-card.tsx` | Shipped. Icon, name/phone, `Elegir contacto` |
+| `ScheduleCard` | `src/components/ui/task-form/schedule-card.tsx` | Shipped. Reminder switch, shared schedule, hint |
+| `ScheduleHeader` | `src/components/ui/task-form/reminder-options/schedule-header.tsx` | Shipped. Reminder switch, calendar status, notice |
+| `ReminderIosPickerSheet` | `src/components/ui/task-form/reminder-options/reminder-ios-picker-sheet.tsx` | Shipped. Page sheet with header, native picker, `Listo`; hidden while the card is disabled |
+| `PermissionNotice` | `src/components/ui/permissions/permission-notice.tsx` | Shipped. Inline message, retry or settings |
+| `TaskAttachments` | `src/components/ui/home/home-task/task-attachments.tsx` | Shipped. Photo count and meta rows; no image |
 
 The cards reuse `ThemedText`, `HomeBadge`, and `AppTouchableOpacity`. Buttons
-inside cards use `label-md`; helper text uses `label-sm` and
-`on-surface-variant`.
+inside cards use `label-md`; helper text uses `label-sm` and `secondary` for
+contrast on `surface-container`.
 
 ### 12.3 Task card
 
@@ -442,14 +453,15 @@ TaskCard
   [checkbox] Title                  [edit] [delete]
   description
   TaskAttachments
-    [photo 56]  [pin] address
-                [person] name · phone
-                [calendar] Evento
+    [gallery] N fotos
+    [pin] address
+    [person] name · phone
+    [calendar] Evento
   reminder badge (existing)
 ```
 
-- Thumbnail 56×56, radius 6, `surface-variant` placeholder when empty.
-- Meta rows use `label-sm`, `on-surface-variant`, one line each with
+- Photo row is count-only; no thumbnail or image is rendered in the list.
+- Meta rows use `label-sm`, `secondary`, one line each with
   `numberOfLines={1}`.
 - Calendar indicator is a small icon plus `Evento`; no date duplication.
 - The card grows only when an attachment exists. Do not reserve empty space.
@@ -459,12 +471,12 @@ TaskCard
 
 | State | Treatment |
 | --- | --- |
-| Pending | Action disabled; `ActivityIndicator` in the card action; card stays at full opacity |
+| Pending | Action disabled; `ActivityIndicator` in the card value or action; card stays at full opacity |
 | Denied, can retry | `PermissionNotice` below the card value: `Permiso denegado. Podés volver a intentarlo.` + `Reintentar` |
 | Blocked | `PermissionNotice`: `Permiso denegado. Habilitalo en Ajustes.` + `Abrir ajustes` |
-| Granted, empty value | Normal empty copy (`Sin foto`, `Sin ubicación`, `Sin contacto`, `Sin evento`) |
+| Granted, empty value | Normal empty copy (`Sin fotos`, `Sin ubicación`, `Sin contacto`) |
 | Granted, value set | Value row plus remove or change action |
-| Device error | `PermissionNotice` with `No pudimos completar la acción. Intentá de nuevo.` |
+| Device error | `PermissionNotice` with the matching message from `SPEC.md` §15.8. |
 
 `PermissionNotice` uses `label-sm` and `error` for the message, and a
 `FormButton` `variant="surface"` for the action. It is not a modal.
@@ -476,11 +488,11 @@ Add these wrappers under `src/components/icons/`:
 | Component | iOS | Android | Size |
 | --- | --- | --- | --- |
 | `CameraIcon` | `camera` | `photo_camera` | 20 |
-| `GalleryIcon` | `photo.on.rectangle` | `photo_library` | 20 |
+| `GalleryIcon` | `photo.on.rectangle` | `photo_library` | 14 |
 | `LocationIcon` | `mappin.and.ellipse` | `location_on` | 20 |
 | `ContactIcon` | `person.crop.circle` | `person` | 20 |
 | `CalendarIcon` | `calendar` | `calendar_month` | 20 |
-| `CloseIcon` | `xmark` | `close` | 18 |
+| `CloseIcon` | `xmark` | `close` | 16 |
 
 Use `BaseIcon`; one icon per file. Existing `ReminderIcon` and
 `SchedulingIcon` keep their current sizes.
@@ -488,17 +500,16 @@ Use `BaseIcon`; one icon per file. Existing `ReminderIcon` and
 ### 12.6 Accessibility
 
 - Every icon-only action gets an `accessibilityLabel`: `Tomar foto`,
-  `Elegir de galería`, `Quitar foto`, `Usar mi ubicación`, `Elegir contacto`,
+  `Elegir de galería`, `Quitar foto N`, `Usar mi ubicación`, `Elegir contacto`,
   `Crear evento`.
 - Every action target is at least 44×44 (iOS) / 48×48 (Android); pad the icon
   wrappers, do not enlarge the glyph.
 - `PermissionNotice` uses `accessibilityLiveRegion="polite"` on Android and
   announces once on iOS when the state changes.
-- The photo thumbnail gets `accessibilityLabel="Foto de la tarea"`; decorative
-  icons use `accessibilityElementsHidden` on iOS and
-  `importantForAccessibility="no"` on Android.
-- Errors and permission notices are linked to the card value with
-  `accessibilityHint`; do not rely on color alone.
+- Form photo thumbnails are labelled (`Foto N de la tarea`) and each remove button
+  is labelled `Quitar foto N`; the list count row is labelled `N fotos`.
+- Errors and permission notices use the live region and iOS announcement;
+  do not rely on color alone.
 - Body text keeps the platform font scale. Fixed-height rows must not clip at
   large sizes; let the value wrap to two lines.
 

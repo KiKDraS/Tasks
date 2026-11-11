@@ -34,6 +34,19 @@ describe("validateTaskForm", () => {
     expect(isValid).toBe(false);
   });
 
+  test("ignores a stale reminder error when the reminder is off", () => {
+    const { isValid } = validateTaskForm(
+      buildFormState({
+        title: "Comprar leche",
+        reminderEnabled: false,
+        calendarEventId: "event-1",
+        reminderError: TASK_FORM_MESSAGES.invalidReminderTime,
+      }),
+    );
+
+    expect(isValid).toBe(true);
+  });
+
   test("accepts a complete form", () => {
     const { isValid } = validateTaskForm(
       buildFormState({ title: "Comprar leche" }),

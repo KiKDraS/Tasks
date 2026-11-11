@@ -1,13 +1,13 @@
 import { ThemedText } from "@/components/themed-text";
 import { Colors, Spacing } from "@/constants/theme";
-import { useTasks } from "@/context/tasks/tasks-context";
 import { useCurrentTime } from "@/hooks/use-current-time";
+import { useTasks } from "@/stores/tasks/selectors";
 import { FlatList, StyleSheet, View } from "react-native";
 import { HomeTask } from "./home-task";
 import { HomeTasksEmpty } from "./home-tasks-empty";
 
 export function HomeTasksList() {
-  const { tasks } = useTasks();
+  const tasks = useTasks();
   const now = useCurrentTime();
 
   return (

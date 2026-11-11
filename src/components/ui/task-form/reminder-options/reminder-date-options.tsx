@@ -2,7 +2,9 @@ import { Spacing } from "@/constants/theme";
 import { REMINDER_TYPES, ReminderType } from "@/context/tasks/types/Reminder";
 import { formatDate, formatTime } from "@/utils/date";
 import { DateTimePicker } from "@expo/ui/community/datetime-picker";
+import { useState } from "react";
 import { Platform, StyleSheet, View } from "react-native";
+import { ReminderIosPickerSheet } from "./reminder-ios-picker-sheet";
 import { ReminderPickerField } from "./reminder-picker-field";
 
 interface ReminderDateOptionsProps {
@@ -11,6 +13,7 @@ interface ReminderDateOptionsProps {
   onAndroidPickerChange: (picker: ReminderType | null) => void;
   onDateChange: (date: Date) => void;
   onTimeChange: (date: Date) => void;
+  disabled?: boolean;
 }
 
 type ReminderDateField = {
@@ -27,9 +30,15 @@ export function ReminderDateOptions({
   onAndroidPickerChange,
   onDateChange,
   onTimeChange,
+  disabled,
 }: Readonly<ReminderDateOptionsProps>) {
   const isIos = Platform.OS === "ios";
   const isAndroid = Platform.OS === "android";
+  const [iosPicker, setIosPicker] = useState<ReminderType | null>(null);
+
+  if (disabled && iosPicker !== null) {
+    setIosPicker(null);
+  }
 
   const fields: ReminderDateField[] = [
     {
@@ -47,6 +56,18 @@ export function ReminderDateOptions({
     },
   ];
 
+  const activeIosField = fields.find((field) => field.mode === iosPicker);
+
+  const handleFieldPress = (mode: ReminderType) => {
+    if (isAndroid) {
+      onAndroidPickerChange(mode);
+      return;
+    }
+    setIosPicker(mode);
+  };
+
+  const closeIosPicker = () => setIosPicker(null);
+
   return (
     <View style={styles.dateSection}>
       <View style={styles.dateRow}>
@@ -55,19 +76,9 @@ export function ReminderDateOptions({
             key={field.mode}
             label={field.label}
             value={field.value}
-            onPress={() => isAndroid && onAndroidPickerChange(field.mode)}
-          >
-            {isIos && (
-              <DateTimePicker
-                value={selectedDate}
-                mode={field.mode}
-                display="compact"
-                minimumDate={field.minimumDate}
-                onValueChange={(_, date) => date && field.onChange(date)}
-                style={styles.nativePickerOverlay}
-              />
-            )}
-          </ReminderPickerField>
+            onPress={() => handleFieldPress(field.mode)}
+            disabled={disabled}
+          />
         ))}
       </View>
 
@@ -84,6 +95,17 @@ export function ReminderDateOptions({
             />
           ) : null,
         )}
+
+      {isIos && !disabled && activeIosField && (
+        <ReminderIosPickerSheet
+          label={activeIosField.label}
+          mode={activeIosField.mode}
+          selectedDate={selectedDate}
+          minimumDate={activeIosField.minimumDate}
+          onChange={activeIosField.onChange}
+          onClose={closeIosPicker}
+        />
+      )}
     </View>
   );
 }
@@ -95,13 +117,5 @@ const styles = StyleSheet.create({
   dateRow: {
     flexDirection: "row",
     gap: Spacing["space-sm"],
-  },
-  nativePickerOverlay: {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    opacity: 0.011,
   },
 });

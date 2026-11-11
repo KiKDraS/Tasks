@@ -8,6 +8,15 @@ export const TASK_FORM_ACTION_TYPES = {
   SET_REMINDER: "SET_REMINDER",
   SET_TITLE_ERROR: "SET_TITLE_ERROR",
   SET_SUBMITTING: "SET_SUBMITTING",
+  ADD_PHOTOS: "ADD_PHOTOS",
+  REMOVE_PHOTO: "REMOVE_PHOTO",
+  SET_LOCATION: "SET_LOCATION",
+  SET_CONTACT: "SET_CONTACT",
+  SET_CONTACT_STATE: "SET_CONTACT_STATE",
+  SET_CALENDAR_EVENT: "SET_CALENDAR_EVENT",
+  SET_CALENDAR_STATE: "SET_CALENDAR_STATE",
+  SET_PHOTO_STATE: "SET_PHOTO_STATE",
+  SET_LOCATION_STATE: "SET_LOCATION_STATE",
 } as const satisfies Record<TaskFormAction["type"], TaskFormAction["type"]>;
 
 export const REMINDER_TIME_PRESETS = [
@@ -20,4 +29,6 @@ export const REMINDER_TIME_PRESETS = [
 export const TASK_FORM_MESSAGES = {
   titleRequired: "El título es obligatorio",
   invalidReminderTime: "Ingresá un tiempo válido",
+  saveFailureTitle: "No se pudo guardar la tarea",
+  saveFailureMessage: "Intentá de nuevo.",
 } as const;

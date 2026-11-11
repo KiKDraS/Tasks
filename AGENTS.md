@@ -1,6 +1,6 @@
 # Tasks
 
-Expo/React Native school project for ISTEA Parcial 1 + 2. Parcial 1 is shipped and approved; Parcial 2 is the target scope: device resources (camera, gallery, location, contacts, calendar) and Zustand global state.
+Expo/React Native school project for ISTEA Parcial 1 + 2. Parcial 1 is shipped and approved. Parcial 2 app features are shipped; README and demo delivery remain target.
 
 ## Project structure
 
@@ -14,7 +14,7 @@ src/
 │   ├── icons/    platform symbol wrappers
 │   └── ui/       feature-grouped components
 ├── constants/    STATIC CONFIG — tokens, routes, keys, time
-├── context/      REACT CONTEXT — provider-bound state (auth; legacy tasks)
+├── context/      REACT CONTEXT — auth session; task types/seed
 ├── stores/       GLOBAL STATE — Zustand stores, selectors, actions
 ├── services/     SERVICES — device APIs, storage adapters
 ├── hooks/        REUSABLE BEHAVIOR — stateful logic, no JSX
@@ -24,6 +24,8 @@ __tests__/        TESTS — one file per unit
 assets/images/    STATIC IMAGES — icon and test evidence
 .github/          GITHUB META — PR template
 .opencode/        AGENT META — agents, commands, docs, plugins, skills
+SPEC.md           APP BEHAVIOR — data model, flows, storage, tests
+DESIGN.md         VISUAL SYSTEM — tokens, components, layouts, states
 ```
 
 | Adding... | Destination | Rule |
@@ -43,14 +45,16 @@ assets/images/    STATIC IMAGES — icon and test evidence
 | A pure helper | `src/utils/` | No React, no Expo, no app state. |
 | A test | `__tests__/<unit>-test.ts(x)` | Jest + RNTL. Match the unit name. |
 | An agent definition | `.opencode/agents/<id>.md` | One role per file. Permissions and pointers only. |
-| A shared rule or spec | `.opencode/docs/` | Canonical source. Link it; do not copy it into an agent file. |
+| App behavior spec | `SPEC.md` | Data model, flows, routes, storage, tests. Root-level canonical source. |
+| Visual design spec | `DESIGN.md` | Tokens, components, layouts, visual states. Root-level canonical source. |
+| A shared rule | `.opencode/docs/` | Canonical rule. Link it; do not copy it into an agent file. |
 | A slash command | `.opencode/commands/<id>.md` | Commands call skills or print references. |
 | A skill | `.opencode/skills/<id>/SKILL.md` | One skill per directory; optional `references/` and `templates/`. |
 | A plugin | `.opencode/plugins/<id>.js` | OpenCode plugin API only. |
 | App or native config | `app.json` | Expo config and plugins. Never edit generated native folders. |
 | Native permission strings | `app.json` | Camera, gallery, location, contacts, calendar usage text. Build a new binary after changes. |
 | A dependency or script | `package.json` | Use `pnpm`; commit `pnpm-lock.yaml`. |
-| Delivery docs | `README.md` | Spanish, delivery-facing. Behavior → `.opencode/docs/SPEC.md`, visuals → `.opencode/docs/DESIGN.md`. |
+| Delivery docs | `README.md` | Spanish, delivery-facing. Behavior → `SPEC.md`, visuals → `DESIGN.md`. |
 | GitHub meta | `.github/` | PR and issue templates only. |
 
 Generated, never edited: `node_modules/`, `.expo/`, `dist/`, `ios/`, `android/`.
@@ -63,7 +67,7 @@ Authoritative roster. Each agent's behavior, permissions, and detailed instructi
 
 | Agent | Mode | Responsibility | Writes / owns | File |
 | --- | --- | --- | --- | --- |
-| `orchestrator` | primary | Intake, plan, delegate app code, own OpenCode and requirement docs, enforce gates, request approval | `AGENTS.md`, `opencode.json`, `.opencode/{docs,agents,commands,skills,plugins}/**` | `.opencode/agents/orchestrator.md` |
+| `orchestrator` | primary | Intake, plan, delegate app code, own OpenCode and requirement docs, enforce gates, request approval | `AGENTS.md`, `SPEC.md`, `DESIGN.md`, `opencode.json`, `.opencode/{docs,agents,commands,skills,plugins}/**` | `.opencode/agents/orchestrator.md` |
 | `mobile-dev` | subagent | Implement approved Expo/React Native changes | `src/**`, `assets/**`, `app.json`, `package.json`, `tsconfig.json`, `eslint.config.js` | `.opencode/agents/mobile-dev.md` |
 | `code-review` | subagent | Read-only audit of requirements, architecture, RN patterns, accessibility, tests, sync | No files | `.opencode/agents/code-review.md` |
 | `qa-engineer` | subagent | Maintain Jest/RNTL tests, run the suite, verify notifications | `__tests__/**` | `.opencode/agents/qa-engineer.md` |
@@ -80,10 +84,12 @@ Stage flow and gates: `.opencode/docs/pipeline.md`.
 | Agent stages, gates, git flow | `.opencode/docs/pipeline.md` |
 | Source-of-truth map and no-duplication policy | `.opencode/docs/directive-sync.md` |
 | Review and test checklist | `.opencode/docs/quality-gates.md` |
+| TypeScript, composition, component hygiene standards (mobile-dev + code-review) | `.opencode/docs/stack-standards.md` |
+| Cognitive difficulty and lookup performance (mobile-dev + code-review) | `.opencode/docs/performance-reliability.md` |
 | Skills rules: caveman, Context7, CodeGraph | `.opencode/docs/skills-settings-rules.md` |
 | Knowledge-awareness rules | `.opencode/docs/agent-knowledge-awareness.md` |
-| App behavior, data model, flows | `.opencode/docs/SPEC.md` |
-| Visual tokens, components, layouts | `.opencode/docs/DESIGN.md` |
+| App behavior, data model, flows | `SPEC.md` |
+| Visual tokens, components, layouts | `DESIGN.md` |
 | Mobile accessibility checklist | `.opencode/skills/accessibility-mobile/SKILL.md` |
 | Spanish UI copy and microcopy | `.opencode/skills/ux-writing/SKILL.md` |
 | README delivery rules | `.opencode/skills/write-root-readme/SKILL.md` |

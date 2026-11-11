@@ -3,7 +3,7 @@ import { StyleSheet } from "react-native";
 
 export const taskTextStyles = StyleSheet.create({
   completeText: {
-    color: Colors["on-surface-variant"],
+    color: Colors.secondary,
     textDecorationLine: "line-through",
   },
 });

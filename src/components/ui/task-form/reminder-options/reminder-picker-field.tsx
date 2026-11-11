@@ -1,28 +1,36 @@
 import { ThemedText } from "@/components/themed-text";
 import { AppTouchableOpacity } from "@/components/ui/app-touchable-opacity";
 import { Colors, Rounded, Spacing } from "@/constants/theme";
-import { PropsWithChildren } from "react";
 import { StyleSheet } from "react-native";
 
-interface ReminderPickerFieldProps extends PropsWithChildren {
+interface ReminderPickerFieldProps {
   label: string;
   value: string;
-  onPress?: () => void;
+  onPress: () => void;
+  disabled?: boolean;
 }
 
 export function ReminderPickerField({
   label,
   value,
   onPress,
-  children,
+  disabled,
 }: Readonly<ReminderPickerFieldProps>) {
   return (
-    <AppTouchableOpacity style={styles.field} onPress={onPress}>
+    <AppTouchableOpacity
+      style={styles.field}
+      onPress={onPress}
+      disabled={disabled}
+      accessibilityRole="button"
+      accessibilityLabel={label}
+      accessibilityValue={{ text: value }}
+      accessibilityHint={disabled ? undefined : "Abre el selector"}
+      accessibilityState={{ disabled }}
+    >
       <ThemedText type="label-sm" color="on-surface-variant">
         {label}
       </ThemedText>
       <ThemedText type="label-md">{value}</ThemedText>
-      {children}
     </AppTouchableOpacity>
   );
 }
@@ -30,7 +38,6 @@ export function ReminderPickerField({
 const styles = StyleSheet.create({
   field: {
     flex: 1,
-    position: "relative",
     overflow: "hidden",
     gap: Spacing["space-xs"],
     padding: Spacing["space-md"],
