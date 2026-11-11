@@ -36,18 +36,28 @@ export function ReminderOptions({
 
   return (
     <View
-      accessibilityElementsHidden={disabled}
-      importantForAccessibility={disabled ? "no-hide-descendants" : "auto"}
       pointerEvents={disabled ? "none" : "auto"}
       style={[styles.container, disabled && styles.disabled]}
     >
-      <ReminderModeSelector
-        reminder={reminder}
-        selectedDate={selectedDate}
-        onSelect={onSelect}
-      />
+      <View
+        accessibilityElementsHidden={disabled}
+        importantForAccessibility={disabled ? "no-hide-descendants" : "auto"}
+        pointerEvents={disabled ? "none" : "auto"}
+      >
+        <ReminderModeSelector
+          reminder={reminder}
+          selectedDate={selectedDate}
+          onSelect={onSelect}
+        />
+      </View>
       {reminder.type === REMINDER_TYPES.TIME ? (
-        <ReminderTimeOptions reminder={reminder} onSelect={onSelect} />
+        <View
+          accessibilityElementsHidden={disabled}
+          importantForAccessibility={disabled ? "no-hide-descendants" : "auto"}
+          pointerEvents={disabled ? "none" : "auto"}
+        >
+          <ReminderTimeOptions reminder={reminder} onSelect={onSelect} />
+        </View>
       ) : (
         <ReminderDateOptions
           selectedDate={selectedDate}
