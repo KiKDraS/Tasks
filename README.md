@@ -70,9 +70,11 @@ Estado actual: **42 suites, 263 tests, todos pasando** (`pnpm test`).
 
 ### Parcial 2
 
-- **Permisos con estados**: cada recurso informa concedido, denegado o pendiente.
-  Si se deniega, la pantalla muestra un mensaje claro con opción de reintentar; si
-  el permiso quedó bloqueado, ofrece **Abrir ajustes**.
+- **Permisos con estados**: fotos, ubicación y calendario informan concedido,
+  denegado o pendiente. Si se deniega, la pantalla muestra un mensaje claro con
+  opción de reintentar; si el permiso quedó bloqueado, ofrece **Abrir ajustes**.
+  Contactos usa una alerta del sistema con **Entendido** o **Abrir ajustes**, sin
+  reintento en pantalla.
 - **Cámara y galería**: fotos por tarea con `expo-image-picker`. La galería
   permite elegir varias imágenes y la cámara agrega una por captura. Las fotos se
   copian al almacenamiento de la app. El formulario es la vista de detalle; el
@@ -83,7 +85,9 @@ Estado actual: **42 suites, 263 tests, todos pasando** (`pnpm test`).
   de destino (el permiso de contactos sigue siendo obligatorio); compartir abre el
   share sheet del sistema con el resumen de la tarea. Cada envío exitoso se
   registra en `Task.shares` (método, nombre del destinatario, tipo de actividad de
-  iOS y fecha) y se muestra en **Historial de envíos**. No se guarda el ID ni el
+  iOS y fecha) y se muestra en **Historial de envíos** (en Android el share sheet
+  informa `sharedAction` aunque se cancele, así que un envío cancelado puede
+  quedar registrado; iOS respeta `dismissedAction`). No se guarda el ID ni el
   teléfono del contacto.
 - **Calendario**: con `expo-calendar` se crea un evento vinculado a la tarea
   cuando el recordatorio está activo. Si el permiso se deniega, la tarea se
