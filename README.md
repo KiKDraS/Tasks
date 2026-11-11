@@ -36,10 +36,10 @@ pnpm dlx expo run:android
 ```
 
 > **Development build obligatorio para las funciones del dispositivo.** Cámara,
-> galería, ubicación, contactos, calendario y notificaciones usan módulos nativos
-> con permisos propios. Expo Go no alcanza para probarlos ni para validar los
-> permisos: usá un development build, y un dispositivo físico para cámara y
-> notificaciones.
+> galería, ubicación, contactos, calendario y notificaciones usan módulos
+> nativos con permisos propios. Expo Go no alcanza para probarlos ni para
+> validar los permisos: usá un development build, y un dispositivo físico para
+> cámara y notificaciones.
 
 Usuario de prueba (seed): `Ana` / `1234`, o creá una cuenta desde el registro.
 
@@ -73,22 +73,22 @@ Estado actual: **42 suites, 266 tests, todos pasando** (`pnpm test`).
 - **Permisos con estados**: fotos, ubicación y calendario informan concedido,
   denegado o pendiente. Si se deniega, la pantalla muestra un mensaje claro con
   opción de reintentar; si el permiso quedó bloqueado, ofrece **Abrir ajustes**.
-  Contactos usa una alerta del sistema con **Entendido** o **Abrir ajustes**, sin
-  reintento en pantalla.
+  Contactos usa una alerta del sistema con **Entendido** o **Abrir ajustes**,
+  sin reintento en pantalla.
 - **Cámara y galería**: fotos por tarea con `expo-image-picker`. La galería
-  permite elegir varias imágenes y la cámara agrega una por captura. Las fotos se
-  copian al almacenamiento de la app. El formulario es la vista de detalle; el
-  listado muestra solo la cantidad de fotos.
-- **Ubicación GPS**: con `expo-location` se guardan las coordenadas de la tarea y
-  se muestran como dirección aproximada cuando el geocoding la devuelve.
-- **Compartir con contacto**: `expo-contacts` se usa solo para elegir el contacto
-  de destino (el permiso de contactos sigue siendo obligatorio); compartir abre el
-  share sheet del sistema con el resumen de la tarea. Cada envío exitoso se
-  registra en `Task.shares` (método, nombre del destinatario, tipo de actividad de
-  iOS y fecha) y se muestra en **Historial de envíos** (en Android el share sheet
-  informa `sharedAction` aunque se cancele, así que un envío cancelado puede
-  quedar registrado; iOS respeta `dismissedAction`). No se guarda el ID ni el
-  teléfono del contacto.
+  permite elegir varias imágenes y la cámara agrega una por captura. Las fotos
+  se copian al almacenamiento de la app. El formulario es la vista de detalle;
+  el listado muestra solo la cantidad de fotos.
+- **Ubicación GPS**: con `expo-location` se guardan las coordenadas de la tarea
+  y se muestran como dirección aproximada cuando el geocoding la devuelve.
+- **Compartir con contacto**: `expo-contacts` se usa solo para elegir el
+  contacto de destino (el permiso de contactos sigue siendo obligatorio);
+  compartir abre el share sheet del sistema con el resumen de la tarea. Cada
+  envío exitoso se registra en `Task.shares` (método, nombre del destinatario,
+  tipo de actividad de iOS y fecha) y se muestra en **Historial de envíos** (en
+  Android el share sheet informa `sharedAction` aunque se cancele, así que un
+  envío cancelado puede quedar registrado; iOS respeta `dismissedAction`). No se
+  guarda el ID ni el teléfono del contacto.
 - **Calendario**: con `expo-calendar` se crea un evento vinculado a la tarea
   cuando el recordatorio está activo. Si el permiso se deniega, la tarea se
   guarda igual, sin evento.
@@ -116,8 +116,17 @@ sistema visual está en `DESIGN.md`.
 
 ## Video DEMO
 
-<!-- TODO: reemplazar por el enlace de YouTube antes de la entrega -->
-[PENDIENTE: enlace al video DEMO en YouTube]
+**Parcial 1**
+
+[Ver demo](https://drive.google.com/file/d/1OuBmISsy38fhm2AnJwfgV8g34vFURhjJ/view?usp=sharing).
+
+**Parcial 2**
+
+[Ver demo](https://drive.google.com/file/d/1PmT3nKQjYynk_UvT3nwtk40TKuseDaLQ/view?usp=sharing).
+
+## Tests
+
+![Resultado de los tests](assets/images/test.png)
 
 ## Tecnologías
 
