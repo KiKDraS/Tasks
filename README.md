@@ -51,7 +51,7 @@ pnpm lint              # ESLint (expo lint)
 pnpm exec tsc --noEmit # TypeScript
 ```
 
-Estado actual: **29 suites, 181 tests, todos pasando** (`pnpm test`).
+Estado actual: **30 suites, 184 tests, todos pasando** (`pnpm test`).
 
 ## Funcionalidades implementadas
 
