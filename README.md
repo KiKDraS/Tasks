@@ -114,6 +114,10 @@ __tests__/        Jest + React Native Testing Library
 El comportamiento y el modelo de datos están especificados en `SPEC.md`. El
 sistema visual está en `DESIGN.md`.
 
+## Desarrollo con SDD
+
+Se utiliza el agente OpenCode con modelo DeepSeek para aplicar SDD mediante `SPEC.md`.
+
 ## Video DEMO
 
 **Parcial 1**
